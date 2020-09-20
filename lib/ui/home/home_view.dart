@@ -1,3 +1,4 @@
+import 'package:dgg/datamodels/session_info.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -10,6 +11,8 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeViewModel>.reactive(
       viewModelBuilder: () => HomeViewModel(),
+      onModelReady: (model) => model.initialize(),
+      fireOnModelReadyOnce: true,
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: Text("Home"),
@@ -17,10 +20,7 @@ class HomeView extends StatelessWidget {
         body: Center(
           child: Column(
             children: [
-              RaisedButton(
-                child: Text("Go to auth"),
-                onPressed: () => model.navigateToAuth(),
-              ),
+              _buildSessionWidget(model),
               RaisedButton(
                 child: Text("Go to chat"),
                 onPressed: () => model.navigateToChat(),
@@ -30,5 +30,24 @@ class HomeView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildSessionWidget(HomeViewModel model) {
+    SessionInfo sessionInfo = model.sessionInfo;
+    if (sessionInfo == null) {
+      //Loading
+      return CircularProgressIndicator();
+    } else if (sessionInfo is Unavailable) {
+      //Not signed or some kind of error
+      return RaisedButton(
+        child: Text("Sign in"),
+        onPressed: () => model.navigateToAuth(),
+      );
+    } else if (sessionInfo is Available) {
+      //User is signed in
+      return Text("Signed in as: ${sessionInfo.nick}");
+    } else {
+      return Text("Error");
+    }
   }
 }
