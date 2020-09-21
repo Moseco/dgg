@@ -13,7 +13,7 @@ class Available extends SessionInfo {
   final String country;
   final List<String> roles;
   final List<String> features;
-  final Map<String, String> subscription;
+  final Map<String, dynamic> subscription;
   final List<String> settings;
 
   const Available({
@@ -41,7 +41,7 @@ class Available extends SessionInfo {
       country: json['country'] as String,
       roles: json['roles']?.cast<String>(),
       features: json['features']?.cast<String>(),
-      subscription: json['subscription'] as Map<String, String>,
+      subscription: json['subscription'] as Map<String, dynamic>,
       settings: json['settings']?.cast<String>(),
     );
   }

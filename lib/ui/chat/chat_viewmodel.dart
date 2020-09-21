@@ -7,10 +7,14 @@ import 'package:dgg/services/dgg_api.dart';
 class ChatViewModel extends BaseViewModel {
   final _dggApi = locator<DggApi>();
 
+  bool get isAssetsLoaded => _dggApi.isAssetsLoaded;
+
   List<Message> get messages => _dggApi.messages;
   List<User> get users => _dggApi.users;
 
-  initialize() {
+  initialize() async {
+    await _dggApi.getFlairs();
+    notifyListeners();
     openChat();
   }
 

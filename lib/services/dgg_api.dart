@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dgg/datamodels/auth_info.dart';
+import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
@@ -17,11 +18,17 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
   static const String webSocketUrl = "wss://www.destiny.gg/ws";
+  static const String flaisrUrl = "https://cdn.destiny.gg/flairs/flairs.json";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
 
   AuthInfo _authInfo;
 
+  //Assets
+  bool get isAssetsLoaded => flairs != null;
+  Flairs flairs;
+
+  //For chat messages
   WebSocketChannel _channel;
   StreamSubscription _chatSubscription;
 
@@ -68,10 +75,13 @@ class DggApi {
         switch (key) {
           case "NAMES":
             _users = NamesMessage.fromJson(jsonString).users;
+            _messages.add(
+                StatusMessage(data: "Connected with ${_users.length} users"));
             break;
           case "MSG":
             _messages.add(UserMessage.fromJson(
               jsonString,
+              flairs,
             ));
             break;
           case "JOIN":
@@ -122,5 +132,15 @@ class DggApi {
   closeWebSocket() {
     _chatSubscription?.cancel();
     _channel?.sink?.close();
+  }
+
+  Future getFlairs() async {
+    final response = await http.get(flaisrUrl);
+
+    if (response.statusCode == 200) {
+      flairs = Flairs.fromJson(response.body);
+    } else {
+      flairs = Flairs([]);
+    }
   }
 }

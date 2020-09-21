@@ -17,6 +17,10 @@ class App extends StatelessWidget {
       initialRoute: Routes.homeView,
       onGenerateRoute: Router().onGenerateRoute,
       navigatorKey: locator<NavigationService>().navigatorKey,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Color(0xFF538CC6),
+      ),
     );
   }
 }

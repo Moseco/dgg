@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
 import 'chat_viewmodel.dart';
+import 'widgets/widgets.dart';
 
 class ChatView extends StatelessWidget {
   const ChatView({Key key}) : super(key: key);
@@ -16,34 +17,50 @@ class ChatView extends StatelessWidget {
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(),
         body: SafeArea(
-          child: _buildBody(model),
+          child:
+              model.isAssetsLoaded ? _buildChat(model) : _buildLoading(model),
         ),
       ),
     );
   }
 
-  Widget _buildBody(ChatViewModel model) {
+  Widget _buildLoading(ChatViewModel model) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text("Loading assets"),
+          ),
+          CircularProgressIndicator(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChat(ChatViewModel model) {
     return Column(
       children: [
         Expanded(
           child: ListView.builder(
             reverse: true,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: model.messages.length,
             itemBuilder: (context, index) {
               Message currentMessage =
                   model.messages[model.messages.length - index - 1];
 
               if (currentMessage is UserMessage) {
-                return Text(
-                    "${currentMessage.user.nick}: ${currentMessage.data}");
+                return ItemUserMessage(message: currentMessage);
               } else if (currentMessage is StatusMessage) {
-                return Text(currentMessage.data);
+                return ItemStatusMessage(message: currentMessage);
               } else {
                 return Text("OTHER");
               }
             },
           ),
-        )
+        ),
       ],
     );
   }

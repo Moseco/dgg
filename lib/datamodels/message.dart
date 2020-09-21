@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/user.dart';
 
 abstract class Message {
@@ -9,13 +10,15 @@ abstract class Message {
 class UserMessage extends Message {
   final User user;
   final String data;
+  final int color;
 
   const UserMessage({
     this.user,
     this.data,
+    this.color,
   });
 
-  static UserMessage fromJson(String jsonString) {
+  static UserMessage fromJson(String jsonString, Flairs flairs) {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     String data = json['data'] as String;
@@ -26,7 +29,19 @@ class UserMessage extends Message {
         features: features,
       ),
       data: data,
+      color: getColor(features, flairs),
     );
+  }
+
+  static int getColor(List<String> features, Flairs flairs) {
+    for (int i = 0; i < flairs.flairs.length; i++) {
+      for (int j = 0; j < features.length; j++) {
+        if (flairs.flairs[i].name == features[j]) {
+          return flairs.flairs[i].color;
+        }
+      }
+    }
+    return null;
   }
 }
 
