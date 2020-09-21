@@ -27,6 +27,7 @@ dependencies:
   http: ^0.12.2
   webview_flutter: ^0.3.22+1
   webview_cookie_manager: ^1.0.3
+  web_socket_channel: ^1.1.0
 
 dev_dependencies:
   flutter_test:
