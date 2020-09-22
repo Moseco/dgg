@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/datamodels/user_message_element.dart';
 
 abstract class Message {
   const Message();
@@ -11,14 +13,21 @@ class UserMessage extends Message {
   final User user;
   final String data;
   final int color;
+  final List<UserMessageElement> elements;
 
   const UserMessage({
     this.user,
     this.data,
     this.color,
+    this.elements,
   });
 
-  static UserMessage fromJson(String jsonString, Flairs flairs) {
+  static UserMessage fromJson(
+    String jsonString,
+    Flairs flairs,
+    Emotes emotes,
+    Function(String, Emotes) createElements,
+  ) {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     String data = json['data'] as String;
@@ -30,6 +39,7 @@ class UserMessage extends Message {
       ),
       data: data,
       color: getColor(features, flairs),
+      elements: createElements(data, emotes),
     );
   }
 

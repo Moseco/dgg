@@ -1,5 +1,12 @@
+import 'dart:io' show Platform;
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dgg/datamodels/message.dart';
+import 'package:dgg/datamodels/user_message_element.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ItemUserMessage extends StatelessWidget {
   final UserMessage message;
@@ -11,34 +18,107 @@ class ItemUserMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: RichText(
-        text: TextSpan(
-          children: <InlineSpan>[
-            TextSpan(
-              text: message.user.nick,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: message.color == null ? null : Color(message.color),
-              ),
-            ),
-            TextSpan(
-              text: ": ",
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            TextSpan(
-              text: message.data,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ],
+    return GestureDetector(
+      onLongPress: () => _onLongPress(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: RichText(
+          text: TextSpan(
+            children: getMessageTextSpans(context),
+          ),
         ),
       ),
     );
+  }
+
+  List<InlineSpan> getMessageTextSpans(BuildContext context) {
+    List<InlineSpan> textSpans = [
+      TextSpan(
+        text: message.user.nick,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: message.color == null ? null : Color(message.color),
+        ),
+      ),
+      TextSpan(
+        text: ": ",
+        style: TextStyle(
+          fontSize: 16,
+        ),
+      ),
+    ];
+
+    message.elements.forEach((element) {
+      if (element is UrlElement) {
+        textSpans.add(
+          TextSpan(
+            text: element.text,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.blue,
+            ),
+            recognizer: Platform.isAndroid
+                ? (TapGestureRecognizer()
+                  ..onTap = () => _openUrl(context, element.text))
+                : null,
+            //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+            //  Problem only happens on iOS so need different approach on Android/iOS
+            //  https://github.com/flutter/flutter/issues/51936
+          ),
+        );
+      } else if (element is EmoteElement) {
+        textSpans.add(
+          WidgetSpan(
+            child: CachedNetworkImage(
+              imageUrl: element.url,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+              height: 30,
+            ),
+          ),
+        );
+      } else {
+        textSpans.add(
+          TextSpan(
+            text: element.text,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        );
+      }
+    });
+
+    return textSpans;
+  }
+
+  _onLongPress(BuildContext context) {
+    //Copy message text to clipboard
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Message copied to clipboard"),
+      ),
+    );
+    Clipboard.setData(ClipboardData(text: message.data));
+  }
+
+  _openUrl(BuildContext context, String url) async {
+    String urlToOpen = url;
+    if (!url.startsWith("http")) {
+      urlToOpen = "http://" + url;
+    }
+
+    if (await canLaunch(urlToOpen)) {
+      launch(urlToOpen);
+    } else {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Could not open. Url copied to clipboard"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Clipboard.setData(ClipboardData(text: url));
+    }
   }
 }

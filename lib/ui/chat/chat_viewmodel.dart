@@ -14,6 +14,7 @@ class ChatViewModel extends BaseViewModel {
 
   initialize() async {
     await _dggApi.getFlairs();
+    await _dggApi.getEmotes();
     notifyListeners();
     openChat();
   }

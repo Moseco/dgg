@@ -28,6 +28,8 @@ dependencies:
   webview_flutter: ^0.3.22+1
   webview_cookie_manager: ^1.0.3
   web_socket_channel: ^1.1.0
+  cached_network_image: ^2.3.2+1
+  url_launcher: ^5.7.0
 
 dev_dependencies:
   flutter_test:

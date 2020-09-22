@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dgg/datamodels/auth_info.dart';
+import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -19,14 +21,18 @@ class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
   static const String webSocketUrl = "wss://www.destiny.gg/ws";
   static const String flaisrUrl = "https://cdn.destiny.gg/flairs/flairs.json";
+  static const String emotesUrl = "https://cdn.destiny.gg/emotes/emotes.json";
+  static const String emotesUrl2 = "https://polecat.me/api/dgg_emotes";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
+  final _userMessageElementsService = locator<UserMessageElementsService>();
 
   AuthInfo _authInfo;
 
   //Assets
-  bool get isAssetsLoaded => flairs != null;
+  bool get isAssetsLoaded => flairs != null && emotes != null;
   Flairs flairs;
+  Emotes emotes;
 
   //For chat messages
   WebSocketChannel _channel;
@@ -82,6 +88,8 @@ class DggApi {
             _messages.add(UserMessage.fromJson(
               jsonString,
               flairs,
+              emotes,
+              _userMessageElementsService.createMessageElements,
             ));
             break;
           case "JOIN":
@@ -141,6 +149,16 @@ class DggApi {
       flairs = Flairs.fromJson(response.body);
     } else {
       flairs = Flairs([]);
+    }
+  }
+
+  Future getEmotes() async {
+    final response = await http.get(emotesUrl2);
+
+    if (response.statusCode == 200) {
+      emotes = Emotes.fromJson(response.body);
+    } else {
+      emotes = Emotes();
     }
   }
 }

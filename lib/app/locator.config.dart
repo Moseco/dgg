@@ -12,6 +12,7 @@ import '../services/cookie_manager_service.dart';
 import '../services/dgg_api.dart';
 import '../services/shared_preferences_service.dart';
 import '../services/third_party_services_module.dart';
+import '../services/user_message_elements_service.dart';
 
 /// adds generated dependencies
 /// to the provided [GetIt] instance
@@ -28,6 +29,8 @@ GetIt $initGetIt(
   gh.lazySingleton<NavigationService>(
       () => thirdPartyServicesModule.navigationService);
   gh.lazySingleton<SharedPreferencesService>(() => SharedPreferencesService());
+  gh.lazySingleton<UserMessageElementsService>(
+      () => UserMessageElementsService());
   return get;
 }
 
