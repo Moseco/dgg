@@ -15,7 +15,9 @@ class ChatView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       onModelReady: (model) => model.initialize(),
       builder: (context, model, child) => Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: Text("Chat"),
+        ),
         body: SafeArea(
           child:
               model.isAssetsLoaded ? _buildChat(model) : _buildLoading(model),
@@ -55,6 +57,8 @@ class ChatView extends StatelessWidget {
                 return ItemUserMessage(message: currentMessage);
               } else if (currentMessage is StatusMessage) {
                 return ItemStatusMessage(message: currentMessage);
+              } else if (currentMessage is BroadcastMessage) {
+                return ItemBroadcastMessage(message: currentMessage);
               } else {
                 return Text("OTHER");
               }

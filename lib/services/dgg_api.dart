@@ -98,8 +98,11 @@ class DggApi {
           case "QUIT":
             _users.remove(QuitMessage.fromJson(jsonString).user);
             break;
-          // case "BROADCAST":
-          //   break;
+          case "BROADCAST":
+            BroadcastMessage broadcastMessage =
+                BroadcastMessage.fromJson(jsonString);
+            _messages.add(broadcastMessage);
+            break;
           // case "MUTE":
           //   break;
           // case "UNMUTE":

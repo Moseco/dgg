@@ -117,3 +117,17 @@ class QuitMessage extends Message {
     );
   }
 }
+
+class BroadcastMessage extends Message {
+  final String data;
+
+  const BroadcastMessage({this.data});
+
+  static BroadcastMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return BroadcastMessage(
+      data: json['data'] as String,
+    );
+  }
+}
