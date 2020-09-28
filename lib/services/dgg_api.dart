@@ -103,8 +103,21 @@ class DggApi {
                 BroadcastMessage.fromJson(jsonString);
             _messages.add(broadcastMessage);
             break;
-          // case "MUTE":
-          //   break;
+          case "MUTE":
+            MuteMessage muteMessage = MuteMessage.fromJson(jsonString);
+            //Go through up to previous 10 messages and censor messages from muted user
+            int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
+            for (int i = 1; i < lengthToCheck; i++) {
+              Message msg = _messages[_messages.length - i];
+              if (msg is UserMessage) {
+                if (msg.user.nick == muteMessage.data) {
+                  _messages[_messages.length - i] = msg.censor(true);
+                }
+              }
+            }
+            _messages
+                .add(StatusMessage(data: "${muteMessage.data} muted by Bot"));
+            break;
           // case "UNMUTE":
           //   break;
           // case "BAN":
@@ -163,5 +176,10 @@ class DggApi {
     } else {
       emotes = Emotes();
     }
+  }
+
+  uncensorMessage(int messageIndex) {
+    _messages[messageIndex] =
+        (_messages[messageIndex] as UserMessage).censor(false);
   }
 }

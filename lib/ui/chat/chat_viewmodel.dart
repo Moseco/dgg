@@ -23,6 +23,11 @@ class ChatViewModel extends BaseViewModel {
     _dggApi.openWebSocketConnection(() => notifyListeners());
   }
 
+  uncensorMessage(int messageIndex) {
+    _dggApi.uncensorMessage(messageIndex);
+    notifyListeners();
+  }
+
   @override
   dispose() {
     _dggApi.closeWebSocket();

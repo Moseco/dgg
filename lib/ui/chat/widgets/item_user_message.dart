@@ -3,35 +3,40 @@ import 'dart:io' show Platform;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
+import 'package:dgg/ui/chat/chat_viewmodel.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stacked/stacked.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ItemUserMessage extends StatelessWidget {
+class ItemUserMessage extends ViewModelWidget<ChatViewModel> {
   final UserMessage message;
+  final int messageIndex;
 
   const ItemUserMessage({
     Key key,
     this.message,
-  }) : super(key: key);
+    this.messageIndex,
+  }) : super(key: key, reactive: true);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ChatViewModel model) {
     return GestureDetector(
       onLongPress: () => _onLongPress(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: RichText(
           text: TextSpan(
-            children: getMessageTextSpans(context),
+            children: getMessageTextSpans(context, model),
           ),
         ),
       ),
     );
   }
 
-  List<InlineSpan> getMessageTextSpans(BuildContext context) {
+  List<InlineSpan> getMessageTextSpans(
+      BuildContext context, ChatViewModel model) {
     List<InlineSpan> textSpans = [
       TextSpan(
         text: message.user.nick,
@@ -49,47 +54,60 @@ class ItemUserMessage extends StatelessWidget {
       ),
     ];
 
-    message.elements.forEach((element) {
-      if (element is UrlElement) {
-        textSpans.add(
-          TextSpan(
-            text: element.text,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.blue,
-            ),
-            recognizer: Platform.isAndroid
-                ? (TapGestureRecognizer()
-                  ..onTap = () => _openUrl(context, element.text))
-                : null,
-            //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
-            //  Problem only happens on iOS so need different approach on Android/iOS
-            //  https://github.com/flutter/flutter/issues/51936
+    if (message.censored) {
+      textSpans.add(
+        TextSpan(
+          text: "<censored>",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.blue,
           ),
-        );
-      } else if (element is EmoteElement) {
-        textSpans.add(
-          WidgetSpan(
-            child: CachedNetworkImage(
-              imageUrl: element.url,
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Icon(Icons.error),
-              height: 30,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => model.uncensorMessage(messageIndex),
+        ),
+      );
+    } else {
+      message.elements.forEach((element) {
+        if (element is UrlElement) {
+          textSpans.add(
+            TextSpan(
+              text: element.text,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.blue,
+              ),
+              recognizer: Platform.isAndroid
+                  ? (TapGestureRecognizer()
+                    ..onTap = () => _openUrl(context, element.text))
+                  : null,
+              //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+              //  Problem only happens on iOS so need different approach on Android/iOS
+              //  https://github.com/flutter/flutter/issues/51936
             ),
-          ),
-        );
-      } else {
-        textSpans.add(
-          TextSpan(
-            text: element.text,
-            style: TextStyle(
-              fontSize: 16,
+          );
+        } else if (element is EmoteElement) {
+          textSpans.add(
+            WidgetSpan(
+              child: CachedNetworkImage(
+                imageUrl: element.url,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+                height: 30,
+              ),
             ),
-          ),
-        );
-      }
-    });
-
+          );
+        } else {
+          textSpans.add(
+            TextSpan(
+              text: element.text,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          );
+        }
+      });
+    }
     return textSpans;
   }
 

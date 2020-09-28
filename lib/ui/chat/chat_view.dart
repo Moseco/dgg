@@ -50,11 +50,14 @@ class ChatView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: model.messages.length,
             itemBuilder: (context, index) {
-              Message currentMessage =
-                  model.messages[model.messages.length - index - 1];
+              int messageIndex = model.messages.length - index - 1;
+              Message currentMessage = model.messages[messageIndex];
 
               if (currentMessage is UserMessage) {
-                return ItemUserMessage(message: currentMessage);
+                return ItemUserMessage(
+                  message: currentMessage,
+                  messageIndex: messageIndex,
+                );
               } else if (currentMessage is StatusMessage) {
                 return ItemStatusMessage(message: currentMessage);
               } else if (currentMessage is BroadcastMessage) {

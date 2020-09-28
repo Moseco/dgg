@@ -14,12 +14,14 @@ class UserMessage extends Message {
   final String data;
   final int color;
   final List<UserMessageElement> elements;
+  final bool censored;
 
   const UserMessage({
     this.user,
     this.data,
     this.color,
     this.elements,
+    this.censored = false,
   });
 
   static UserMessage fromJson(
@@ -52,6 +54,16 @@ class UserMessage extends Message {
       }
     }
     return null;
+  }
+
+  UserMessage censor(bool censor) {
+    return UserMessage(
+      user: this.user,
+      data: this.data,
+      color: this.color,
+      elements: this.elements,
+      censored: censor,
+    );
   }
 }
 
@@ -127,6 +139,20 @@ class BroadcastMessage extends Message {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     return BroadcastMessage(
+      data: json['data'] as String,
+    );
+  }
+}
+
+class MuteMessage extends Message {
+  final String data;
+
+  const MuteMessage({this.data});
+
+  static MuteMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return MuteMessage(
       data: json['data'] as String,
     );
   }
