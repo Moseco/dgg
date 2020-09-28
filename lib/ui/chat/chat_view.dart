@@ -17,6 +17,25 @@ class ChatView extends StatelessWidget {
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: Text("Chat"),
+          actions: model.isAssetsLoaded
+              ? <Widget>[
+                  PopupMenuButton<String>(
+                    onSelected: model.menuItemClick,
+                    itemBuilder: (BuildContext context) {
+                      return {
+                        'Disconnect',
+                        'Reconnect',
+                        "Refresh assets",
+                      }.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ]
+              : null,
         ),
         body: SafeArea(
           child:

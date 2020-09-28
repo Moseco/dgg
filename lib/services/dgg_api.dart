@@ -38,7 +38,7 @@ class DggApi {
   WebSocketChannel _channel;
   StreamSubscription _chatSubscription;
 
-  List<Message> _messages = [StatusMessage(data: "Connecting...")];
+  List<Message> _messages = List();
   List<Message> get messages => _messages;
   List<User> _users = List();
   List<User> get users => _users;
@@ -64,7 +64,9 @@ class DggApi {
     }
   }
 
-  openWebSocketConnection(Function notifyCallback) {
+  void openWebSocketConnection(Function notifyCallback) {
+    _messages.add(StatusMessage(data: "Connecting..."));
+    notifyCallback();
     _channel = IOWebSocketChannel.connect(
       webSocketUrl,
       headers: _authInfo != null
@@ -153,32 +155,58 @@ class DggApi {
     );
   }
 
-  closeWebSocket() {
-    _chatSubscription?.cancel();
-    _channel?.sink?.close();
+  Future<void> closeWebSocket() async {
+    await _chatSubscription?.cancel();
+    await _channel?.sink?.close();
   }
 
-  Future getFlairs() async {
-    final response = await http.get(flaisrUrl);
+  Future<void> disconnect() async {
+    await closeWebSocket();
+    _messages.add(StatusMessage(data: "Disconneced"));
+  }
 
-    if (response.statusCode == 200) {
-      flairs = Flairs.fromJson(response.body);
-    } else {
-      flairs = Flairs([]);
+  Future<void> reconnect(Function notifyCallback) async {
+    await closeWebSocket();
+    openWebSocketConnection(notifyCallback);
+  }
+
+  Future<void> getAssets() async {
+    await getFlairs();
+    await getEmotes();
+  }
+
+  Future<void> getFlairs() async {
+    if (flairs == null) {
+      final response = await http.get(flaisrUrl);
+
+      if (response.statusCode == 200) {
+        flairs = Flairs.fromJson(response.body);
+      } else {
+        flairs = Flairs([]);
+      }
     }
   }
 
-  Future getEmotes() async {
-    final response = await http.get(emotesUrl2);
+  Future<void> getEmotes() async {
+    if (emotes == null) {
+      final response = await http.get(emotesUrl2);
 
-    if (response.statusCode == 200) {
-      emotes = Emotes.fromJson(response.body);
-    } else {
-      emotes = Emotes();
+      if (response.statusCode == 200) {
+        emotes = Emotes.fromJson(response.body);
+      } else {
+        emotes = Emotes();
+      }
     }
   }
 
-  uncensorMessage(int messageIndex) {
+  Future<void> clearAssets() async {
+    await closeWebSocket();
+    _messages.add(StatusMessage(data: "Disconneced"));
+    flairs = null;
+    emotes = null;
+  }
+
+  void uncensorMessage(int messageIndex) {
     _messages[messageIndex] =
         (_messages[messageIndex] as UserMessage).censor(false);
   }

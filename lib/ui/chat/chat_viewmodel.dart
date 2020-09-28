@@ -12,24 +12,47 @@ class ChatViewModel extends BaseViewModel {
   List<Message> get messages => _dggApi.messages;
   List<User> get users => _dggApi.users;
 
-  initialize() async {
-    await _dggApi.getFlairs();
-    await _dggApi.getEmotes();
+  void initialize() async {
+    await _dggApi.getAssets();
     notifyListeners();
     openChat();
   }
 
-  openChat() {
+  void openChat() {
     _dggApi.openWebSocketConnection(() => notifyListeners());
   }
 
-  uncensorMessage(int messageIndex) {
+  void uncensorMessage(int messageIndex) {
     _dggApi.uncensorMessage(messageIndex);
     notifyListeners();
   }
 
+  void menuItemClick(String selected) async {
+    switch (selected) {
+      case "Disconnect":
+        await _dggApi.disconnect();
+        notifyListeners();
+        break;
+      case "Reconnect":
+        _dggApi.reconnect(() => notifyListeners());
+        break;
+      case "Refresh assets":
+        //First clear assets
+        await _dggApi.clearAssets();
+        notifyListeners();
+        //Fetch assets
+        await _dggApi.getAssets();
+        notifyListeners();
+        //Re-open chat
+        openChat();
+        break;
+      default:
+        print("ERROR: Invalid chat menu item");
+    }
+  }
+
   @override
-  dispose() {
+  void dispose() {
     _dggApi.closeWebSocket();
     super.dispose();
   }
