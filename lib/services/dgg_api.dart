@@ -141,7 +141,6 @@ class DggApi {
           //   break;
           default:
             print(data);
-            return null;
             break;
         }
         notifyCallback();

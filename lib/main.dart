@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import 'app/locator.dart';
-import 'app/router.gr.dart';
+import 'app/router.gr.dart' as AutoRouter;
 
 void main() {
   setupLocator();
@@ -14,8 +14,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DGG',
-      initialRoute: Routes.homeView,
-      onGenerateRoute: Router().onGenerateRoute,
+      initialRoute: AutoRouter.Routes.homeView,
+      onGenerateRoute: AutoRouter.Router().onGenerateRoute,
       navigatorKey: locator<NavigationService>().navigatorKey,
       theme: ThemeData(
         brightness: Brightness.dark,
