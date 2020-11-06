@@ -3,7 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 
+import '../setup/test_data.dart';
+
 void main() {
+  Emotes exampleEmotes = Emotes.fromJson(TestData.EMOTE_STRING);
+
   group('UserMessageElementsServiceTest', () {
     final _userMessageElementsService = UserMessageElementsService();
 
@@ -11,7 +15,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 0);
@@ -21,7 +25,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "Hello world! This is a test",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -33,7 +37,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "http://www.example.com",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -45,7 +49,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "http://www.example.com http://www.example.com/other",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 3);
@@ -61,7 +65,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "Hello http://www.example.com world",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 3);
@@ -77,7 +81,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "Hello world http://www.example.com other words http://www.example.com/other",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 4);
@@ -95,7 +99,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "Hello world http://www.example.com other words http://www.example.com/other ending words.",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 5);
@@ -115,7 +119,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "  Hello     multiple  space  https://example.com     ",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 3);
@@ -131,7 +135,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "example.com",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -143,7 +147,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is a... multiple thing test!!!",
-        Emotes(emoteMap: {}),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -155,10 +159,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "EMOTE",
-        Emotes(
-          emoteMap: {"EMOTE": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -170,10 +171,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "EMOTE2 EMOTE",
-        Emotes(
-          emoteMap: {"EMOTE": "", "EMOTE2": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b|\\bEMOTE2\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 3);
@@ -189,10 +187,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is a test with the emote EMOTE",
-        Emotes(
-          emoteMap: {"EMOTE": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 2);
@@ -206,10 +201,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is so goooooood",
-        Emotes(
-          emoteMap: {"oooo": ""},
-          emoteRegex: RegExp("\\boooo\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 1);
@@ -221,10 +213,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is a test with the emote EMOTE following text",
-        Emotes(
-          emoteMap: {"EMOTE": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 3);
@@ -240,10 +229,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is a EMOTE2 test with the emote EMOTE EMOTE and another emote following text",
-        Emotes(
-          emoteMap: {"EMOTE": "", "EMOTE2": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b|\\bEMOTE2\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 7);
@@ -267,10 +253,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is a EMOTE2 test with exmaple.com and the emotes EMOTE EMOTE and another emote following text",
-        Emotes(
-          emoteMap: {"EMOTE": "", "EMOTE2": ""},
-          emoteRegex: RegExp("\\bEMOTE\\b|\\bEMOTE2\\b"),
-        ),
+        exampleEmotes,
       );
 
       expect(elements.length, 9);
@@ -292,6 +275,18 @@ void main() {
       expect(elements[7].text, "EMOTE");
       expect(elements[8].runtimeType, TextElement);
       expect(elements[8].text, " and another emote following text");
+    });
+
+    test('Text with no emotes loaded', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "This is example text",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 1);
+      expect(elements[0].runtimeType, TextElement);
+      expect(elements[0].text, "This is example text");
     });
   });
 }

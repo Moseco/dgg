@@ -1,3 +1,5 @@
+import 'package:dgg/datamodels/emotes.dart';
+
 abstract class UserMessageElement {
   final String text;
 
@@ -17,10 +19,10 @@ class UrlElement extends UserMessageElement {
 }
 
 class EmoteElement extends UserMessageElement {
-  final String url;
+  final Emote emote;
 
   const EmoteElement(
     String text,
-    this.url,
+    this.emote,
   ) : super(text);
 }

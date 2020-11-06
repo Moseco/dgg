@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dgg/datamodels/auth_info.dart';
@@ -7,11 +8,12 @@ import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/datamodels/user_message_element.dart';
+import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -20,12 +22,16 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
   static const String webSocketUrl = "wss://www.destiny.gg/ws";
-  static const String flaisrUrl = "https://cdn.destiny.gg/flairs/flairs.json";
-  static const String emotesUrl = "https://cdn.destiny.gg/emotes/emotes.json";
-  static const String emotesUrl2 = "https://polecat.me/api/dgg_emotes";
+  static const String flaisrUrl =
+      "https://cdn.destiny.gg/2.19.0/flairs/flairs.json";
+  static const String emotesUrl =
+      "https://cdn.destiny.gg/2.19.0/emotes/emotes.json";
+  static const String emotesCssUrl =
+      "https://cdn.destiny.gg/2.19.0/emotes/emotes.css";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _userMessageElementsService = locator<UserMessageElementsService>();
+  final _imageService = locator<ImageService>();
 
   AuthInfo _authInfo;
 
@@ -87,12 +93,21 @@ class DggApi {
                 StatusMessage(data: "Connected with ${_users.length} users"));
             break;
           case "MSG":
-            _messages.add(UserMessage.fromJson(
+            UserMessage userMessage = UserMessage.fromJson(
               jsonString,
               flairs,
               emotes,
               _userMessageElementsService.createMessageElements,
-            ));
+            );
+            _messages.add(userMessage);
+            //for each emote, check if needs to be loaded
+            userMessage.elements.forEach((element) {
+              if (element is EmoteElement) {
+                if (!element.emote.loading && element.emote.image == null) {
+                  _loadEmote(element.emote, notifyCallback);
+                }
+              }
+            });
             break;
           case "JOIN":
             _users.add(JoinMessage.fromJson(jsonString).user);
@@ -188,12 +203,63 @@ class DggApi {
 
   Future<void> getEmotes() async {
     if (emotes == null) {
-      final response = await http.get(emotesUrl2);
+      final response = await http.get(emotesUrl);
 
       if (response.statusCode == 200) {
-        emotes = Emotes.fromJson(response.body);
+        Emotes emoteList = Emotes.fromJson(response.body);
+        await _getEmoteCss(emoteList);
       } else {
         emotes = Emotes();
+      }
+    }
+  }
+
+  Future<void> _getEmoteCss(Emotes emoteList) async {
+    final response = await http.get(emotesCssUrl);
+
+    if (response.statusCode == 200) {
+      parseCss(response.body, emoteList);
+      emotes = emoteList;
+    } else {
+      emotes = emoteList;
+    }
+  }
+
+  void parseCss(String source, Emotes emoteList) {
+    //Split css file by lines
+    List<String> lines = LineSplitter().convert(source);
+
+    //Regex to match the following: .emote.EMOTE {
+    RegExp emoteStart = RegExp(r'\.emote\.\w+ ?\{');
+
+    for (int i = 0; i < lines.length; i++) {
+      //Check if starts with emote
+      if (lines[i].startsWith(emoteStart)) {
+        //get emote name
+        String trimmed = lines[i].trim();
+        String emoteName = trimmed.substring(7, trimmed.indexOf('{')).trim();
+        //go through attributes
+        String currentLineTrimmed = lines[++i].trim();
+        while (!currentLineTrimmed.startsWith("}")) {
+          // //Check if body has animation attribute
+          if (currentLineTrimmed.startsWith("animation:")) {
+            emoteList.emoteMap[emoteName].animated = true;
+          } else if (currentLineTrimmed.startsWith("width:")) {
+            //Get width
+            int startIndex = currentLineTrimmed.indexOf(":");
+            int endIndex = currentLineTrimmed.indexOf("px");
+            int width = int.parse(
+                currentLineTrimmed.substring(startIndex + 1, endIndex).trim());
+
+            //Check if width is already found
+            //  If it has, keep the lower value
+            //  Otherwise, just store it
+            if ((emoteList.emoteMap[emoteName].width ?? 99999) > width) {
+              emoteList.emoteMap[emoteName].width = width;
+            }
+          }
+          currentLineTrimmed = lines[++i].trim();
+        }
       }
     }
   }
@@ -208,5 +274,15 @@ class DggApi {
   void uncensorMessage(int messageIndex) {
     _messages[messageIndex] =
         (_messages[messageIndex] as UserMessage).censor(false);
+  }
+
+  Future<void> _loadEmote(Emote emote, Function notifyCallback) async {
+    //TODO do some kind of caching
+    //Download emote
+    emote.loading = true;
+    emote.image = await _imageService.downloadAndProcessEmote(emote);
+    emote.loading = false;
+    //Update UI
+    notifyCallback();
   }
 }

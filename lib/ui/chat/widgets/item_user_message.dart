@@ -1,9 +1,9 @@
 import 'dart:io' show Platform;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/ui/chat/chat_viewmodel.dart';
+import 'package:dgg/ui/chat/widgets/emote_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,12 +88,7 @@ class ItemUserMessage extends ViewModelWidget<ChatViewModel> {
         } else if (element is EmoteElement) {
           textSpans.add(
             WidgetSpan(
-              child: CachedNetworkImage(
-                imageUrl: element.url,
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-                height: 30,
-              ),
+              child: EmoteWidget(emote: element.emote),
             ),
           );
         } else {

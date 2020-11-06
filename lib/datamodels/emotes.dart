@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
+
 class Emotes {
-  final Map<String, String> emoteMap;
+  final Map<String, Emote> emoteMap;
   final RegExp emoteRegex;
 
   const Emotes({
@@ -12,15 +14,14 @@ class Emotes {
   static Emotes fromJson(String jsonString) {
     List<dynamic> json = jsonDecode(jsonString);
 
-    Map<String, String> emoteMap = Map();
+    Map<String, Emote> emoteMap = Map();
     StringBuffer stringBuffer = StringBuffer();
 
     json.forEach((element) {
-      if (element['animated'] ?? false) {
-        emoteMap[element['prefix']] = element['image'][0]['fallback_url'];
-      } else {
-        emoteMap[element['prefix']] = element['image'][0]['url'];
-      }
+      emoteMap[element['prefix']] = Emote(
+        name: element['prefix'],
+        url: element['image'][0]['url'],
+      );
     });
 
     if (emoteMap.length > 0) {
@@ -42,4 +43,22 @@ class Emotes {
       emoteRegex: RegExp(stringBuffer.toString()),
     );
   }
+}
+
+class Emote {
+  final String name;
+  final String url;
+  bool animated;
+  int width;
+  bool loading;
+  Image image;
+
+  Emote({
+    this.name,
+    this.url,
+    this.animated = false,
+    this.width,
+    this.loading = false,
+    this.image,
+  });
 }

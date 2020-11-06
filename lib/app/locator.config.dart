@@ -10,6 +10,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 import '../services/cookie_manager_service.dart';
 import '../services/dgg_api.dart';
+import '../services/image_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../services/third_party_services_module.dart';
 import '../services/user_message_elements_service.dart';
@@ -26,6 +27,7 @@ GetIt $initGetIt(
   final thirdPartyServicesModule = _$ThirdPartyServicesModule();
   gh.lazySingleton<CookieManagerService>(() => CookieManagerService());
   gh.lazySingleton<DggApi>(() => DggApi());
+  gh.lazySingleton<ImageService>(() => ImageService());
   gh.lazySingleton<NavigationService>(
       () => thirdPartyServicesModule.navigationService);
   gh.lazySingleton<SharedPreferencesService>(() => SharedPreferencesService());
