@@ -10,16 +10,16 @@ class AuthViewModel extends BaseViewModel {
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _navigationService = locator<NavigationService>();
 
-  bool _isStarted = false;
-  bool get isStarted => _isStarted;
+  bool _isAuthStarted = false;
+  bool get isAuthStarted => _isAuthStarted;
 
-  startAuthentication() {
-    _isStarted = true;
+  void startAuthentication() {
+    _isAuthStarted = true;
     _cookieManagerService.clearCookies();
     notifyListeners();
   }
 
-  Future readCookies(String currentUrl) async {
+  Future<void> readCookies(String currentUrl) async {
     AuthInfo authInfo = await _cookieManagerService.readCookies(currentUrl);
 
     if (authInfo != null) {

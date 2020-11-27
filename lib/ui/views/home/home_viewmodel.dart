@@ -9,22 +9,24 @@ class HomeViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _dggApi = locator<DggApi>();
 
-  SessionInfo _sessionInfo;
-  SessionInfo get sessionInfo => _sessionInfo;
+  SessionInfo get sessionInfo => _dggApi.sessionInfo;
 
-  Future<void> initialize() async {
-    _sessionInfo = await _dggApi.getSessionInfo();
-    notifyListeners();
+  void initialize() {
+    _getSessionInfo();
   }
 
   Future<void> navigateToAuth() async {
     await _navigationService.navigateTo(Routes.authView);
-    _sessionInfo = null;
     notifyListeners();
-    initialize();
+    _getSessionInfo();
   }
 
-  Future<void> navigateToChat() async {
-    await _navigationService.navigateTo(Routes.chatView);
+  void navigateToChat() {
+    _navigationService.navigateTo(Routes.chatView);
+  }
+
+  Future<void> _getSessionInfo() async {
+    await _dggApi.getSessionInfo();
+    notifyListeners();
   }
 }

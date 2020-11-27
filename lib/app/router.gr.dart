@@ -9,7 +9,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../ui/screens.dart';
+import '../ui/views/screens.dart';
 
 class Routes {
   static const String homeView = '/';
@@ -22,7 +22,7 @@ class Routes {
   };
 }
 
-class Router extends RouterBase {
+class AutoRouter extends RouterBase {
   @override
   List<RouteDef> get routes => _routes;
   final _routes = <RouteDef>[

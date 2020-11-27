@@ -11,7 +11,7 @@ class CookieManagerService {
 
   final cookieManager = WebviewCookieManager();
 
-  clearCookies() async {
+  void clearCookies() async {
     cookieManager.clearCookies();
   }
 

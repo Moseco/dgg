@@ -2,8 +2,8 @@ import 'dart:io' show Platform;
 
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
-import 'package:dgg/ui/chat/chat_viewmodel.dart';
-import 'package:dgg/ui/chat/widgets/emote_widget.dart';
+import 'package:dgg/ui/views/chat/chat_viewmodel.dart';
+import 'package:dgg/ui/views/chat/widgets/emote_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

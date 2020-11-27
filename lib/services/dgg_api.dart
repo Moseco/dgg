@@ -33,7 +33,10 @@ class DggApi {
   final _userMessageElementsService = locator<UserMessageElementsService>();
   final _imageService = locator<ImageService>();
 
+  //Authentication information
   AuthInfo _authInfo;
+  SessionInfo _sessionInfo;
+  SessionInfo get sessionInfo => _sessionInfo;
 
   //Assets
   bool get isAssetsLoaded => flairs != null && emotes != null;
@@ -49,11 +52,13 @@ class DggApi {
   List<User> _users = List();
   List<User> get users => _users;
 
-  Future<SessionInfo> getSessionInfo() async {
+  Future<void> getSessionInfo() async {
+    _sessionInfo = null;
     _authInfo = await _sharedPreferencesService.getAuthInfo();
 
     if (_authInfo == null) {
-      return Unavailable();
+      _sessionInfo = Unavailable();
+      return;
     }
 
     final response = await http.get(
@@ -64,9 +69,9 @@ class DggApi {
     );
 
     if (response.statusCode == 200) {
-      return Available.fromJson(response.body);
+      _sessionInfo = Available.fromJson(response.body);
     } else {
-      return Unavailable(httpStatusCode: response.statusCode);
+      _sessionInfo = Unavailable(httpStatusCode: response.statusCode);
     }
   }
 
