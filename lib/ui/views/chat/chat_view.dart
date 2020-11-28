@@ -87,6 +87,7 @@ class ChatView extends StatelessWidget {
             },
           ),
         ),
+        ChatInput(model: model),
       ],
     );
   }

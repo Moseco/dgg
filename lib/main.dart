@@ -19,6 +19,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Color(0xFF538CC6),
+        accentColor: Color(0xFF538CC6),
       ),
     );
   }

@@ -17,6 +17,7 @@ import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 @lazySingleton
 class DggApi {
@@ -51,6 +52,8 @@ class DggApi {
   List<Message> get messages => _messages;
   List<User> _users = List();
   List<User> get users => _users;
+  bool _isChatConnected = false;
+  bool get isChatConnected => _isChatConnected;
 
   Future<void> getSessionInfo() async {
     _sessionInfo = null;
@@ -93,6 +96,7 @@ class DggApi {
 
         switch (key) {
           case "NAMES":
+            _isChatConnected = true;
             _users = NamesMessage.fromJson(jsonString).users;
             _messages.add(
                 StatusMessage(data: "Connected with ${_users.length} users"));
@@ -175,8 +179,9 @@ class DggApi {
   }
 
   Future<void> closeWebSocket() async {
+    _isChatConnected = false;
     await _chatSubscription?.cancel();
-    await _channel?.sink?.close();
+    await _channel?.sink?.close(status.goingAway);
   }
 
   Future<void> disconnect() async {
@@ -289,5 +294,13 @@ class DggApi {
     emote.loading = false;
     //Update UI
     notifyCallback();
+  }
+
+  void sendChatMessage(String message) {
+    try {
+      _channel.sink.add('MSG {"data": "$message"}');
+    } catch (_) {
+      print("Message failed to send");
+    }
   }
 }
