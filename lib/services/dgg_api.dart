@@ -172,14 +172,20 @@ class DggApi {
               }
             }
             _messages
-                .add(StatusMessage(data: "${muteMessage.data} muted by Bot"));
+                .add(StatusMessage(data: "${muteMessage.data} muted by ${muteMessage.nick}"));
             break;
           // case "UNMUTE":
           //   break;
-          // case "BAN":
-          //   break;
-          // case "UNBAN":
-          //   break;
+          case "BAN":
+            BanMessage banMessage = BanMessage.fromJson(jsonString);
+            _messages.add(StatusMessage(
+                data: "${banMessage.data} banned by ${banMessage.nick}"));
+            break;
+          case "UNBAN":
+            UnbanMessage unbanMessage = UnbanMessage.fromJson(jsonString);
+            _messages.add(StatusMessage(
+                data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
+            break;
           // case "REFRESH":
           //   break;
           // // Other possible types

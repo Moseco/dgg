@@ -62,7 +62,23 @@ void main() {
     test('Mute message', () {
       MuteMessage muteMessage = MuteMessage.fromJson(TestData.WS_MUTE_STRING);
 
+      expect(muteMessage.nick, "Bot");
       expect(muteMessage.data, "ExampleName");
+    });
+
+    test('Ban message', () {
+      BanMessage banMessage = BanMessage.fromJson(TestData.WS_BAN_STRING);
+
+      expect(banMessage.nick, "Bot");
+      expect(banMessage.data, "ExampleName");
+    });
+
+    test('Unban message', () {
+      UnbanMessage unbanMessage =
+          UnbanMessage.fromJson(TestData.WS_UNBAN_STRING);
+
+      expect(unbanMessage.nick, "Bot");
+      expect(unbanMessage.data, "ExampleName");
     });
   });
 }

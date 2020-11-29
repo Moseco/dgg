@@ -145,14 +145,57 @@ class BroadcastMessage extends Message {
 }
 
 class MuteMessage extends Message {
+  final String nick;
   final String data;
 
-  const MuteMessage({this.data});
+  const MuteMessage({
+    this.nick,
+    this.data,
+  });
 
   static MuteMessage fromJson(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     return MuteMessage(
+      nick: json['nick'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
+class BanMessage extends Message {
+  final String nick;
+  final String data;
+
+  const BanMessage({
+    this.nick,
+    this.data,
+  });
+
+  static BanMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return BanMessage(
+      nick: json['nick'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
+class UnbanMessage extends Message {
+  final String nick;
+  final String data;
+
+  const UnbanMessage({
+    this.nick,
+    this.data,
+  });
+
+  static UnbanMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return UnbanMessage(
+      nick: json['nick'] as String,
       data: json['data'] as String,
     );
   }
