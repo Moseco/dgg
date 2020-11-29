@@ -197,6 +197,10 @@ class DggApi {
             print(data);
             break;
         }
+        //When messages length grows to 300, shrink to 150
+        if (_messages.length > 300) {
+          _messages.removeRange(0, 150);
+        }
         notifyCallback();
       },
       onDone: () {
