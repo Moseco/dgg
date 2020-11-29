@@ -39,6 +39,18 @@ dev_dependencies:
   auto_route_generator: ^0.6.10
   injectable_generator: ^1.0.6
 
+  flutter_launcher_icons: ^0.8.1
+
+#TODO need to make iOS icons later
+#To run:
+#flutter pub run flutter_launcher_icons:main
+flutter_icons:
+  android: false
+  ios: false
+  image_path_android: "assets/images/dgg_icon.png"
+  adaptive_icon_background: "#1A1A1A"
+  adaptive_icon_foreground: "assets/images/dgg_icon.png"
+
 flutter:
   uses-material-design: true
 
