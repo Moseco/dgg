@@ -74,6 +74,7 @@ class ChatView extends StatelessWidget {
 
               if (currentMessage is UserMessage) {
                 return ItemUserMessage(
+                  model: model,
                   message: currentMessage,
                   messageIndex: messageIndex,
                 );
@@ -81,8 +82,13 @@ class ChatView extends StatelessWidget {
                 return ItemStatusMessage(message: currentMessage);
               } else if (currentMessage is BroadcastMessage) {
                 return ItemBroadcastMessage(message: currentMessage);
+              } else if (currentMessage is ComboMessage) {
+                return ItemComboMessage(message: currentMessage);
               } else {
-                return Text("OTHER");
+                return Text(
+                  "UNSUPPORTED MESSAGE TYPE",
+                  style: TextStyle(color: Colors.red),
+                );
               }
             },
           ),

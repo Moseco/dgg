@@ -7,36 +7,36 @@ import 'package:dgg/ui/views/chat/widgets/emote_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stacked/stacked.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ItemUserMessage extends ViewModelWidget<ChatViewModel> {
+class ItemUserMessage extends StatelessWidget {
+  final ChatViewModel model;
   final UserMessage message;
   final int messageIndex;
 
   const ItemUserMessage({
     Key key,
+    this.model,
     this.message,
     this.messageIndex,
-  }) : super(key: key, reactive: true);
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ChatViewModel model) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => _onLongPress(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: RichText(
           text: TextSpan(
-            children: getMessageTextSpans(context, model),
+            children: getMessageTextSpans(context),
           ),
         ),
       ),
     );
   }
 
-  List<InlineSpan> getMessageTextSpans(
-      BuildContext context, ChatViewModel model) {
+  List<InlineSpan> getMessageTextSpans(BuildContext context) {
     List<InlineSpan> textSpans = [
       TextSpan(
         text: message.user.nick,

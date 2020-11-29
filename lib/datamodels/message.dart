@@ -157,3 +157,20 @@ class MuteMessage extends Message {
     );
   }
 }
+
+class ComboMessage extends Message {
+  final int comboCount;
+  final Emote emote;
+
+  const ComboMessage({
+    this.comboCount = 2,
+    this.emote,
+  });
+
+  ComboMessage incrementCombo() {
+    return ComboMessage(
+      comboCount: comboCount + 1,
+      emote: emote,
+    );
+  }
+}

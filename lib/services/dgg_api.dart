@@ -108,7 +108,6 @@ class DggApi {
               emotes,
               _userMessageElementsService.createMessageElements,
             );
-            _messages.add(userMessage);
             //for each emote, check if needs to be loaded
             userMessage.elements.forEach((element) {
               if (element is EmoteElement) {
@@ -117,6 +116,37 @@ class DggApi {
                 }
               }
             });
+            //Check if new message is part of a combo
+            if (userMessage.elements.length == 1 &&
+                userMessage.elements[0] is EmoteElement) {
+              //Current message only has one emote in it
+              EmoteElement currentEmote = userMessage.elements[0];
+              Message recentMessage = _messages[_messages.length - 1];
+              if (recentMessage is ComboMessage) {
+                //Most recent is combo
+                if (recentMessage.emote.name == currentEmote.emote.name) {
+                  //Same emote, increment combo
+                  _messages[_messages.length - 1] =
+                      recentMessage.incrementCombo();
+                  break;
+                }
+              } else {
+                //Most recent is not combo
+                if (recentMessage is UserMessage &&
+                    recentMessage.elements.length == 1 &&
+                    recentMessage.elements[0] is EmoteElement &&
+                    (recentMessage.elements[0] as EmoteElement).emote.name ==
+                        currentEmote.emote.name) {
+                  //Most recent is UserMessage and only has the same emote
+                  //  Replace recent message with combo
+                  _messages[_messages.length - 1] =
+                      ComboMessage(emote: currentEmote.emote);
+                  break;
+                }
+              }
+            }
+            //Add message normally
+            _messages.add(userMessage);
             break;
           case "JOIN":
             _users.add(JoinMessage.fromJson(jsonString).user);
