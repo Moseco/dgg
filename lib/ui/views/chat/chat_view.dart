@@ -66,7 +66,6 @@ class ChatView extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             reverse: true,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount: model.messages.length,
             itemBuilder: (context, index) {
               int messageIndex = model.messages.length - index - 1;

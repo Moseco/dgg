@@ -38,6 +38,7 @@ class DggApi {
   AuthInfo _authInfo;
   SessionInfo _sessionInfo;
   SessionInfo get sessionInfo => _sessionInfo;
+  String _currentNick;
 
   //Assets
   bool get isAssetsLoaded => flairs != null && emotes != null;
@@ -73,6 +74,7 @@ class DggApi {
 
     if (response.statusCode == 200) {
       _sessionInfo = Available.fromJson(response.body);
+      _currentNick = (_sessionInfo as Available).nick;
     } else {
       _sessionInfo = Unavailable(httpStatusCode: response.statusCode);
     }
@@ -107,6 +109,7 @@ class DggApi {
               flairs,
               emotes,
               _userMessageElementsService.createMessageElements,
+              currentNick: _currentNick,
             );
             //for each emote, check if needs to be loaded
             userMessage.elements.forEach((element) {
@@ -171,8 +174,8 @@ class DggApi {
                 }
               }
             }
-            _messages
-                .add(StatusMessage(data: "${muteMessage.data} muted by ${muteMessage.nick}"));
+            _messages.add(StatusMessage(
+                data: "${muteMessage.data} muted by ${muteMessage.nick}"));
             break;
           // case "UNMUTE":
           //   break;
@@ -186,8 +189,10 @@ class DggApi {
             _messages.add(StatusMessage(
                 data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
             break;
-          // case "REFRESH":
-          //   break;
+          case "REFRESH":
+            _messages
+                .add(StatusMessage(data: "Being disconnected by server..."));
+            break;
           // // Other possible types
           // case "SUBONLY":
           //   break;
@@ -210,7 +215,8 @@ class DggApi {
         notifyCallback();
       },
       onDone: () {
-        print("STREAM REPORTED DONE");
+        _messages.add(StatusMessage(data: "Disconneced"));
+        _isChatConnected = false;
       },
       onError: (error) {
         print("STREAM REPORTED ERROR");

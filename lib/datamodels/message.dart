@@ -14,34 +14,47 @@ class UserMessage extends Message {
   final String data;
   final int color;
   final List<UserMessageElement> elements;
-  final bool censored;
+  final bool isCensored;
+  final bool isMentioned;
+  final bool isOwn;
 
   const UserMessage({
     this.user,
     this.data,
     this.color,
     this.elements,
-    this.censored = false,
+    this.isCensored = false,
+    this.isMentioned = false,
+    this.isOwn = false,
   });
 
   static UserMessage fromJson(
     String jsonString,
     Flairs flairs,
     Emotes emotes,
-    Function(String, Emotes) createElements,
-  ) {
+    Function(String, Emotes) createElements, {
+    String currentNick,
+  }) {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     String data = json['data'] as String;
     List<String> features = json['features'].cast<String>();
+    User user = User(
+      nick: json['nick'] as String,
+      features: features,
+    );
+
+    //Check if current user is mentioned in message
+    bool isMentioned = data.contains(RegExp("(\\@?)\\b$currentNick\\b"));
+    bool isOwn = user.nick == currentNick;
+
     return UserMessage(
-      user: User(
-        nick: json['nick'] as String,
-        features: features,
-      ),
+      user: user,
       data: data,
       color: getColor(features, flairs),
       elements: createElements(data, emotes),
+      isMentioned: isMentioned,
+      isOwn: isOwn,
     );
   }
 
@@ -62,7 +75,7 @@ class UserMessage extends Message {
       data: this.data,
       color: this.color,
       elements: this.elements,
-      censored: censor,
+      isCensored: censor,
     );
   }
 }

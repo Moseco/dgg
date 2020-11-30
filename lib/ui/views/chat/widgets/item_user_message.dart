@@ -25,8 +25,10 @@ class ItemUserMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => _onLongPress(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        color: _getBackgroundColor(),
         child: RichText(
           text: TextSpan(
             children: getMessageTextSpans(context),
@@ -34,6 +36,16 @@ class ItemUserMessage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getBackgroundColor() {
+    if (message.isMentioned) {
+      return Color(0xBF06263E);
+    } else if (message.isOwn) {
+      return Color(0x409e9e9e); //0x80151515
+    } else {
+      return null;
+    }
   }
 
   List<InlineSpan> getMessageTextSpans(BuildContext context) {
@@ -54,7 +66,7 @@ class ItemUserMessage extends StatelessWidget {
       ),
     ];
 
-    if (message.censored) {
+    if (message.isCensored) {
       textSpans.add(
         TextSpan(
           text: "<censored>",

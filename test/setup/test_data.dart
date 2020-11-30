@@ -17,6 +17,8 @@ class TestData {
       '{"nick":"Bot","features":["protected","bot"],"timestamp":1602119628328,"data":"ExampleName"}';
   static const String WS_UNBAN_STRING =
       '{"nick":"Bot","features":["protected","bot"],"timestamp":1602119995995,"data":"ExampleName"}';
+  static const String WS_REFRESH_STRING =
+      '{"nick":"ExampleName","features":[],"timestamp":1606624740677}';
 
   static const String EMOTE_STRING =
       '[{"prefix":"EMOTE","image":[{"url":"example.com/EMOTE"}]},{"prefix":"EMOTE2","image":[{"url":"example.com/EMOTE2"}]},{"prefix":"oooo","image":[{"url":"example.com/oooo"}]}]';

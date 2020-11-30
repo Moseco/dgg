@@ -12,7 +12,7 @@ class ItemBroadcastMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: RichText(
         text: TextSpan(
           text: message.data,
