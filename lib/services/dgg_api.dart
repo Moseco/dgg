@@ -23,12 +23,11 @@ import 'package:web_socket_channel/status.dart' as status;
 class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
   static const String webSocketUrl = "wss://www.destiny.gg/ws";
-  static const String flaisrUrl =
-      "https://cdn.destiny.gg/2.19.0/flairs/flairs.json";
-  static const String emotesUrl =
-      "https://cdn.destiny.gg/2.19.0/emotes/emotes.json";
-  static const String emotesCssUrl =
-      "https://cdn.destiny.gg/2.19.0/emotes/emotes.css";
+  static const String chatUrl = "https://www.destiny.gg/embed/chat";
+  static const String cdnBaseUrl = "https://cdn.destiny.gg";
+  static const String flairsPath = "/flairs/flairs.json";
+  static const String emotesPath = "/emotes/emotes.json";
+  static const String emotesCssPath = "/emotes/emotes.css";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _userMessageElementsService = locator<UserMessageElementsService>();
@@ -41,6 +40,7 @@ class DggApi {
   String _currentNick;
 
   //Assets
+  String _dggCacheKey;
   bool get isAssetsLoaded => flairs != null && emotes != null;
   Flairs flairs;
   Emotes emotes;
@@ -241,13 +241,35 @@ class DggApi {
   }
 
   Future<void> getAssets() async {
-    await getFlairs();
-    await getEmotes();
+    //First get cache key
+    if (_dggCacheKey == null) {
+      final response = await http.get(chatUrl);
+
+      if (response.statusCode == 200) {
+        int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
+        int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
+        _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
+      }
+    }
+
+    String flairsUrl = cdnBaseUrl + flairsPath;
+    String emotesUrl = cdnBaseUrl + emotesPath;
+    String emotesCssUrl = cdnBaseUrl + emotesCssPath;
+
+    if (_dggCacheKey != null) {
+      flairsUrl = flairsUrl + "?_=" + _dggCacheKey;
+      emotesUrl = emotesUrl + "?_=" + _dggCacheKey;
+      emotesCssUrl = emotesCssUrl + "?_=" + _dggCacheKey;
+    }
+
+    //Get assets based on url
+    await getFlairs(flairsUrl);
+    await getEmotes(emotesUrl, emotesCssUrl);
   }
 
-  Future<void> getFlairs() async {
+  Future<void> getFlairs(String flairsUrl) async {
     if (flairs == null) {
-      final response = await http.get(flaisrUrl);
+      final response = await http.get(flairsUrl);
 
       if (response.statusCode == 200) {
         flairs = Flairs.fromJson(response.body);
@@ -257,20 +279,20 @@ class DggApi {
     }
   }
 
-  Future<void> getEmotes() async {
+  Future<void> getEmotes(String emotesUrl, String emotesCssUrl) async {
     if (emotes == null) {
       final response = await http.get(emotesUrl);
 
       if (response.statusCode == 200) {
         Emotes emoteList = Emotes.fromJson(response.body);
-        await _getEmoteCss(emoteList);
+        await _getEmoteCss(emotesCssUrl, emoteList);
       } else {
         emotes = Emotes();
       }
     }
   }
 
-  Future<void> _getEmoteCss(Emotes emoteList) async {
+  Future<void> _getEmoteCss(String emotesCssUrl, Emotes emoteList) async {
     final response = await http.get(emotesCssUrl);
 
     if (response.statusCode == 200) {
