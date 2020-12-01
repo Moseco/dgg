@@ -22,7 +22,7 @@ import 'package:web_socket_channel/status.dart' as status;
 @lazySingleton
 class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
-  static const String webSocketUrl = "wss://www.destiny.gg/ws";
+  static const String webSocketUrl = "wss://chat.destiny.gg/ws";
   static const String chatUrl = "https://www.destiny.gg/embed/chat";
   static const String cdnBaseUrl = "https://cdn.destiny.gg";
   static const String flairsPath = "/flairs/flairs.json";
