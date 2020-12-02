@@ -5,8 +5,21 @@ import 'package:stacked/stacked.dart';
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
-class ChatView extends StatelessWidget {
+class ChatView extends StatefulWidget {
   const ChatView({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _ChatViewState();
+}
+
+class _ChatViewState extends State<ChatView> {
+  ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,36 +77,79 @@ class ChatView extends StatelessWidget {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            reverse: true,
-            itemCount: model.messages.length,
-            itemBuilder: (context, index) {
-              int messageIndex = model.messages.length - index - 1;
-              Message currentMessage = model.messages[messageIndex];
-
-              if (currentMessage is UserMessage) {
-                return ItemUserMessage(
-                  model: model,
-                  message: currentMessage,
-                  messageIndex: messageIndex,
-                );
-              } else if (currentMessage is StatusMessage) {
-                return ItemStatusMessage(message: currentMessage);
-              } else if (currentMessage is BroadcastMessage) {
-                return ItemBroadcastMessage(message: currentMessage);
-              } else if (currentMessage is ComboMessage) {
-                return ItemComboMessage(message: currentMessage);
-              } else {
-                return Text(
-                  "UNSUPPORTED MESSAGE TYPE",
-                  style: TextStyle(color: Colors.red),
-                );
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scrollNotification) {
+              if (scrollNotification is ScrollEndNotification) {
+                if (_scrollController.offset <=
+                        _scrollController.position.minScrollExtent &&
+                    !_scrollController.position.outOfRange) {
+                  model.toggleChat(true);
+                } else {
+                  model.toggleChat(false);
+                }
               }
+              return true;
             },
+            child: ListView.builder(
+              reverse: true,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              controller: _scrollController,
+              itemCount: model.messages.length,
+              itemBuilder: (context, index) {
+                int messageIndex = model.messages.length - index - 1;
+                Message currentMessage = model.messages[messageIndex];
+
+                if (currentMessage is UserMessage) {
+                  return ItemUserMessage(
+                    model: model,
+                    message: currentMessage,
+                    messageIndex: messageIndex,
+                  );
+                } else if (currentMessage is StatusMessage) {
+                  return ItemStatusMessage(message: currentMessage);
+                } else if (currentMessage is BroadcastMessage) {
+                  return ItemBroadcastMessage(message: currentMessage);
+                } else if (currentMessage is ComboMessage) {
+                  return ItemComboMessage(message: currentMessage);
+                } else {
+                  return Text(
+                    "UNSUPPORTED MESSAGE TYPE",
+                    style: TextStyle(color: Colors.red),
+                  );
+                }
+              },
+            ),
           ),
         ),
+        model.isListAtBottom ? Container() : _buildResumeChat(),
         ChatInput(model: model),
       ],
     );
+  }
+
+  Widget _buildResumeChat() {
+    return InkWell(
+      onTap: () => _scrollController.animateTo(
+        0.0,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        color: Colors.red,
+        child: Center(
+          child: Text(
+            "Chat paused, tap here to resume",
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

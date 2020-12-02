@@ -15,18 +15,23 @@ class ChatViewModel extends BaseViewModel {
   List<Message> get messages => _dggApi.messages;
   List<User> get users => _dggApi.users;
 
-  String draft = '';
-  List<String> suggestions = [];
-  String previousLastWord = '';
+  String _draft = '';
+  String get draft => _draft;
+  List<String> _suggestions = [];
+  List<String> get suggestions => _suggestions;
+  String _previousLastWord = '';
+
+  bool _isListAtBottom = true;
+  bool get isListAtBottom => _isListAtBottom;
 
   void initialize() async {
     await _dggApi.getAssets();
     notifyListeners();
-    openChat();
+    _openChat();
   }
 
-  void openChat() {
-    _dggApi.openWebSocketConnection(() => notifyListeners());
+  void _openChat() {
+    _dggApi.openWebSocketConnection(_updateChat);
   }
 
   void uncensorMessage(int messageIndex) {
@@ -51,7 +56,7 @@ class ChatViewModel extends BaseViewModel {
         await _dggApi.getAssets();
         notifyListeners();
         //Re-open chat
-        openChat();
+        _openChat();
         break;
       default:
         print("ERROR: Invalid chat menu item");
@@ -59,12 +64,12 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void updateChatDraft(String value) {
-    draft = value;
+    _draft = value;
     _updateSuggestions();
   }
 
   bool sendChatMessage() {
-    String draftTrim = draft.trim();
+    String draftTrim = _draft.trim();
     if (draftTrim.isNotEmpty && isChatConnected) {
       _dggApi.sendChatMessage(draftTrim);
       updateChatDraft('');
@@ -76,14 +81,14 @@ class ChatViewModel extends BaseViewModel {
 
   String completeSuggestion(int suggestionIndex) {
     String newDraft;
-    int lastWhiteSpace = draft.lastIndexOf(RegExp(r'\s'));
+    int lastWhiteSpace = _draft.lastIndexOf(RegExp(r'\s'));
     if (lastWhiteSpace == -1) {
       //No whitespace, replace whole thing with suggestion
-      newDraft = suggestions[suggestionIndex] + ' ';
+      newDraft = _suggestions[suggestionIndex] + ' ';
     } else {
       //At least one whitespace, replace last word with suggestion
-      newDraft = draft.substring(0, lastWhiteSpace + 1) +
-          suggestions[suggestionIndex] +
+      newDraft = _draft.substring(0, lastWhiteSpace + 1) +
+          _suggestions[suggestionIndex] +
           ' ';
     }
 
@@ -94,26 +99,26 @@ class ChatViewModel extends BaseViewModel {
   void _updateSuggestions() {
     String lastWord;
     //Find last occurance of whitespace
-    int lastWhiteSpace = draft.lastIndexOf(RegExp(r'\s'));
+    int lastWhiteSpace = _draft.lastIndexOf(RegExp(r'\s'));
     if (lastWhiteSpace != -1) {
       //Draft contains at least one whitespace
-      lastWord = draft.substring(lastWhiteSpace + 1);
+      lastWord = _draft.substring(lastWhiteSpace + 1);
     } else {
       //No whitespace in draft
-      lastWord = draft;
+      lastWord = _draft;
     }
 
     List<String> newSuggestions = [];
 
     //If last word is not empty then generate autocomplete suggestions
     if (lastWord.isNotEmpty) {
-      if (lastWord.startsWith(previousLastWord) &&
-          previousLastWord.isNotEmpty) {
+      if (lastWord.startsWith(_previousLastWord) &&
+          _previousLastWord.isNotEmpty) {
         //Continued typing of previous last word
         //  Base new suggestions on current suggestion list
         RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
 
-        suggestions.forEach((element) {
+        _suggestions.forEach((element) {
           if (element.startsWith(lastWordRegex)) {
             newSuggestions.add(element);
           }
@@ -140,9 +145,24 @@ class ChatViewModel extends BaseViewModel {
       }
     }
 
-    suggestions = newSuggestions;
-    previousLastWord = lastWord;
+    _suggestions = newSuggestions;
+    _previousLastWord = lastWord;
     notifyListeners();
+  }
+
+  void _updateChat() {
+    if (_isListAtBottom) {
+      notifyListeners();
+    }
+  }
+
+  void toggleChat(bool isListAtBottom) {
+    if (_isListAtBottom != isListAtBottom) {
+      _isListAtBottom = isListAtBottom;
+      notifyListeners();
+    } else {
+      _isListAtBottom = isListAtBottom;
+    }
   }
 
   @override

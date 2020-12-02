@@ -49,9 +49,9 @@ class DggApi {
   WebSocketChannel _channel;
   StreamSubscription _chatSubscription;
 
-  List<Message> _messages = List();
+  List<Message> _messages = [];
   List<Message> get messages => _messages;
-  List<User> _users = List();
+  List<User> _users = [];
   List<User> get users => _users;
   bool _isChatConnected = false;
   bool get isChatConnected => _isChatConnected;
