@@ -11,6 +11,7 @@ import 'package:stacked_services/stacked_services.dart';
 import '../services/cookie_manager_service.dart';
 import '../services/dgg_api.dart';
 import '../services/image_service.dart';
+import '../services/remote_config_service.dart';
 import '../services/shared_preferences_service.dart';
 import '../services/third_party_services_module.dart';
 import '../services/user_message_elements_service.dart';
@@ -30,7 +31,10 @@ GetIt $initGetIt(
   gh.lazySingleton<ImageService>(() => ImageService());
   gh.lazySingleton<NavigationService>(
       () => thirdPartyServicesModule.navigationService);
+  gh.lazySingleton<RemoteConfigService>(() => RemoteConfigService());
   gh.lazySingleton<SharedPreferencesService>(() => SharedPreferencesService());
+  gh.lazySingleton<SnackbarService>(
+      () => thirdPartyServicesModule.snackbarService);
   gh.lazySingleton<UserMessageElementsService>(
       () => UserMessageElementsService());
   return get;
@@ -39,4 +43,6 @@ GetIt $initGetIt(
 class _$ThirdPartyServicesModule extends ThirdPartyServicesModule {
   @override
   NavigationService get navigationService => NavigationService();
+  @override
+  SnackbarService get snackbarService => SnackbarService();
 }

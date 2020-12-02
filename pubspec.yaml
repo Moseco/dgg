@@ -25,6 +25,7 @@ dependencies:
   #TODO still need to do iOS setup
   #firebase
   firebase_core: ^0.5.2+1
+  firebase_remote_config: ^0.4.2
 
   #other
   shared_preferences: ^0.5.10

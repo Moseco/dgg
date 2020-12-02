@@ -70,7 +70,20 @@ class HomeView extends StatelessWidget {
           ),
           children: [
             _buildSessionWidget(model),
-            _buildChatButton(context, model),
+            _buildLargeButton(
+              "Open chat",
+              Icons.chat,
+              () => model.navigateToChat(),
+              Theme.of(context).primaryColor,
+            ),
+            model.appDownloadUrl != null
+                ? _buildLargeButton(
+                    "Download app update",
+                    Icons.cloud_download,
+                    () => model.openAppDownloadUrl(),
+                    Colors.red,
+                  )
+                : Container(),
           ],
         ),
       ),
@@ -101,11 +114,16 @@ class HomeView extends StatelessWidget {
     }
   }
 
-  Widget _buildChatButton(BuildContext context, HomeViewModel model) {
+  Widget _buildLargeButton(
+    String text,
+    IconData icon,
+    Function function,
+    Color backgroundColor,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
       child: RaisedButton(
-        color: Theme.of(context).primaryColor,
+        color: backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -114,19 +132,17 @@ class HomeView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.chat,
-              ),
+              Icon(icon),
               Container(height: 4),
               Text(
-                "Open chat",
+                text,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
             ],
           ),
         ),
-        onPressed: () => model.navigateToChat(),
+        onPressed: function,
       ),
     );
   }
