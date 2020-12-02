@@ -55,7 +55,7 @@ class _ChatInputState extends State<ChatInput> {
   }
 
   Widget _buildSuggestionList(BuildContext context) {
-    if (widget.model.suggestions.length == 0) {
+    if (widget.model.draft.isEmpty) {
       return Container();
     } else {
       return Container(
