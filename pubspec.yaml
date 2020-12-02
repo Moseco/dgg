@@ -30,6 +30,7 @@ dependencies:
   web_socket_channel: ^1.1.0
   url_launcher: ^5.7.0
   image: ^2.1.18
+  flutter_staggered_animations: ^0.1.2
 
 dev_dependencies:
   flutter_test:
