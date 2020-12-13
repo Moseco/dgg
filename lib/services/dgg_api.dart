@@ -22,6 +22,7 @@ import 'package:web_socket_channel/status.dart' as status;
 @lazySingleton
 class DggApi {
   static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
+  static const String userInfoUrl = "https://www.destiny.gg/api/userinfo";
   static const String webSocketUrl = "wss://chat.destiny.gg/ws";
   static const String chatUrl = "https://www.destiny.gg/embed/chat";
   static const String cdnBaseUrl = "https://cdn.destiny.gg";
@@ -61,20 +62,33 @@ class DggApi {
     _authInfo = await _sharedPreferencesService.getAuthInfo();
 
     if (_authInfo == null) {
-      _sessionInfo = Unavailable();
+      _sessionInfo = Unauthenticated();
       return;
     }
 
+    String urlToUse;
+    if (_authInfo.loginKey != null) {
+      urlToUse = "$userInfoUrl?token=${_authInfo.loginKey}";
+    } else {
+      urlToUse = sessionInfoUrl;
+    }
+
     final response = await http.get(
-      sessionInfoUrl,
-      headers: _authInfo != null
+      urlToUse,
+      headers: _authInfo.sid != null
           ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
           : null,
     );
 
     if (response.statusCode == 200) {
-      _sessionInfo = Available.fromJson(response.body);
-      _currentNick = (_sessionInfo as Available).nick;
+      if (response.body.startsWith('{"error"')) {
+        //Token is not valid, or some other error
+        _sessionInfo = Unavailable();
+      } else {
+        //token or sid is valid
+        _sessionInfo = Available.fromJson(response.body);
+        _currentNick = (_sessionInfo as Available).nick;
+      }
     } else {
       _sessionInfo = Unavailable(httpStatusCode: response.statusCode);
     }
@@ -85,7 +99,7 @@ class DggApi {
     notifyCallback();
     _channel = IOWebSocketChannel.connect(
       webSocketUrl,
-      headers: _authInfo != null
+      headers: _sessionInfo is Available
           ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
           : null,
     );

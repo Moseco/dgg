@@ -52,3 +52,5 @@ class Unavailable extends SessionInfo {
 
   const Unavailable({this.httpStatusCode});
 }
+
+class Unauthenticated extends SessionInfo {}

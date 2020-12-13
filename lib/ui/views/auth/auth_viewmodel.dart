@@ -1,5 +1,6 @@
 import 'package:dgg/services/crypto_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
@@ -10,17 +11,31 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
 class AuthViewModel extends BaseViewModel {
+  static const int AUTH_METHOD_WEBVIEW = 0;
+  static const int AUTH_METHOD_LOGIN_KEY = 1;
+
   final _cookieManagerService = locator<CookieManagerService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _navigationService = locator<NavigationService>();
   final _cryptoService = locator<CryptoService>();
 
+  int _authMethod;
+  int get authMethod => _authMethod;
+  bool get isAuthMethodSelected => _authMethod != null;
+
   bool _isAuthStarted = false;
   bool get isAuthStarted => _isAuthStarted;
 
+  bool _isSavingAuth = false;
+  bool get isSavingAuth => _isSavingAuth;
+
   void startAuthentication() {
     _isAuthStarted = true;
-    _cookieManagerService.clearCookies();
+    if (_authMethod == AUTH_METHOD_WEBVIEW) {
+      _cookieManagerService.clearCookies();
+    } else {
+      launch("https://www.destiny.gg/profile/developer");
+    }
     notifyListeners();
   }
 
@@ -31,6 +46,27 @@ class AuthViewModel extends BaseViewModel {
       await _sharedPreferencesService.storeAuthInfo(authInfo);
       _navigationService.back();
     }
+  }
+
+  void setAuthMethod(int method) {
+    _authMethod = method;
+    notifyListeners();
+  }
+
+  Future<void> getKeyFromClipboard() async {
+    _isSavingAuth = true;
+    notifyListeners();
+    ClipboardData data = await Clipboard.getData('text/plain');
+    String loginKey = data.text;
+    
+    if (loginKey != null) {
+      await _sharedPreferencesService
+          .storeAuthInfo(AuthInfo(loginKey: loginKey));
+      _navigationService.back();
+    } else {
+      _isSavingAuth = false;
+    }
+    notifyListeners();
   }
 
   Future<void> startTokenAuth() async {

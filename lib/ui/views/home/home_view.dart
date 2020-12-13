@@ -26,7 +26,7 @@ class HomeView extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(32),
                     child: Image.asset(
-                      "assets/dgg_logo.png",
+                      "assets/images/dgg_logo.png",
                       width: MediaQuery.of(context).size.width * 0.75,
                     ),
                   ),
@@ -93,8 +93,8 @@ class HomeView extends StatelessWidget {
   Widget _buildSessionWidget(HomeViewModel model) {
     SessionInfo sessionInfo = model.sessionInfo;
 
-    if (sessionInfo is Unavailable) {
-      //Not signed or some kind of error
+    if (sessionInfo is Unauthenticated) {
+      //Not signed in
       return OutlineButton(
         borderSide: BorderSide(color: Colors.white),
         shape: RoundedRectangleBorder(
@@ -102,6 +102,28 @@ class HomeView extends StatelessWidget {
         ),
         child: Text("Sign in"),
         onPressed: () => model.navigateToAuth(),
+      );
+    } else if (sessionInfo is Unavailable) {
+      //Signed in, but some kind of error when connecting to destiny.gg
+      return Column(
+        children: [
+          OutlineButton(
+            borderSide: BorderSide(color: Colors.white),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text("Sign in"),
+            onPressed: () => model.navigateToAuth(),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Authentication failed.\nDestiny.gg could be down.\nOr you need to try signing in again.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       );
     } else if (sessionInfo is Available) {
       //User is signed in

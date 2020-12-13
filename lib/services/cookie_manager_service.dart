@@ -11,8 +11,8 @@ class CookieManagerService {
 
   final cookieManager = WebviewCookieManager();
 
-  void clearCookies() async {
-    cookieManager.clearCookies();
+  Future<void> clearCookies() async {
+    return cookieManager.clearCookies();
   }
 
   Future<AuthInfo> readCookies(String currentUrl) async {
@@ -30,7 +30,10 @@ class CookieManagerService {
       }
 
       if (sid != null) {
-        return AuthInfo(sid, rememberMe);
+        return AuthInfo(
+          sid: sid,
+          rememberMe: rememberMe,
+        );
       } else {
         return null;
       }

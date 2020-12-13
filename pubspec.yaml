@@ -65,5 +65,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/dgg_icon.png
-    - assets/dgg_logo.png
+    - assets/images/dgg_icon.png
+    - assets/images/dgg_logo.png
+    - assets/images/login_key.png

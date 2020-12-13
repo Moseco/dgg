@@ -36,7 +36,7 @@ class _DelayedWidgetState extends State<DelayedWidget>
 
     Future.delayed(
       Duration(milliseconds: widget.delayMilliseconds),
-      () => _animationController.forward(),
+      () => mounted ? _animationController.forward() : null,
     );
   }
 
