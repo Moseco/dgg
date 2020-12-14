@@ -46,3 +46,6 @@ app.*.map.json
 #Firebase files
 GoogleService-Info.plist
 google-services.json
+
+#Android release key
+key.jks
