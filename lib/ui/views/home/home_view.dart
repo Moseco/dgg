@@ -76,6 +76,12 @@ class HomeView extends StatelessWidget {
               () => model.navigateToChat(),
               Theme.of(context).primaryColor,
             ),
+            _buildLargeButton(
+              "Open settings",
+              Icons.settings,
+              () => model.navigateToSettings(),
+              Colors.grey[700],
+            ),
             model.appDownloadUrl != null
                 ? _buildLargeButton(
                     "Download app update",

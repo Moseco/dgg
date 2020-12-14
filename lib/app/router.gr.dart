@@ -15,10 +15,12 @@ class Routes {
   static const String homeView = '/';
   static const String authView = '/auth-view';
   static const String chatView = '/chat-view';
+  static const String settingsView = '/settings-view';
   static const all = <String>{
     homeView,
     authView,
     chatView,
+    settingsView,
   };
 }
 
@@ -29,6 +31,7 @@ class AutoRouter extends RouterBase {
     RouteDef(Routes.homeView, page: HomeView),
     RouteDef(Routes.authView, page: AuthView),
     RouteDef(Routes.chatView, page: ChatView),
+    RouteDef(Routes.settingsView, page: SettingsView),
   ];
   @override
   Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
@@ -48,6 +51,12 @@ class AutoRouter extends RouterBase {
     ChatView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => const ChatView(),
+        settings: data,
+      );
+    },
+    SettingsView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => const SettingsView(),
         settings: data,
       );
     },

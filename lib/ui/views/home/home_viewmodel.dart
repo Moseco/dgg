@@ -33,6 +33,11 @@ class HomeViewModel extends BaseViewModel {
     _navigationService.navigateTo(Routes.chatView);
   }
 
+  Future<void> navigateToSettings() async {
+    await _navigationService.navigateTo(Routes.settingsView);
+    notifyListeners();
+  }
+
   Future<void> _getSessionInfo() async {
     await _dggApi.getSessionInfo();
     notifyListeners();

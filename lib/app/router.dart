@@ -7,5 +7,6 @@ import 'package:dgg/ui/views/screens.dart';
   MaterialRoute(page: HomeView, initial: true),
   MaterialRoute(page: AuthView),
   MaterialRoute(page: ChatView),
+  MaterialRoute(page: SettingsView),
 ])
 class $AutoRouter {}

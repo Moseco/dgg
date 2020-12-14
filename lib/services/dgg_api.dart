@@ -385,4 +385,11 @@ class DggApi {
       print("Message failed to send");
     }
   }
+
+  void signOut() {
+    _authInfo = null;
+    _sessionInfo = Unauthenticated();
+    _currentNick = null;
+    _sharedPreferencesService.clearAuthInfo();
+  }
 }
