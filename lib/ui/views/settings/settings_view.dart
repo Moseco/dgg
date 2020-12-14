@@ -47,6 +47,18 @@ class SettingsView extends StatelessWidget {
                     ],
             ),
             SettingsSection(
+              title: 'Analytics',
+              tiles: [
+                SettingsTile.switchTile(
+                  title: 'Send crash reports',
+                  leading: Icon(Icons.analytics),
+                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchValue: model.isCrashlyticsCollectionEnabled,
+                  onToggle: model.toggleCrashlyticsCollection,
+                ),
+              ],
+            ),
+            SettingsSection(
               title: 'Misc',
               tiles: [
                 SettingsTile(
