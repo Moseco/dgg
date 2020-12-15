@@ -34,7 +34,7 @@ class AuthView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                "Sign in on destiny.gg",
+                "Sign in with destiny.gg",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 32),
               ),
@@ -115,7 +115,7 @@ class AuthView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "This page will let you sign into destiny.gg and use your account in this app. On the sign in page, make sure to select the \'remember me\' option to stay signed in, then sign in normally.\nTo get started press the button below.",
+                    "This page will let you sign into your destiny.gg account and use it in this app. On the sign in page, make sure to select the \'remember me\' option to stay signed in, then sign in normally.\nTo get started press the button below.",
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -163,14 +163,14 @@ class AuthView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "This page will explain how to create a login key on destiny.gg and let you use it to use your account in this app.",
+                    "This page will explain how to create a login key on destiny.gg and let you use it in this app. The screenshot below shows the correct page.",
                     textAlign: TextAlign.center,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "•Step 1: Press the \'Start\' button below to go to the correct destiny.gg page. If you are not signed in already, then sign in.\n\n•Step 2: Expand the \'Connections\' drop down. If you do not have an item called \'DGG Login Key\' then press the button \'Add login key\'.\n\n•Step 3: Press the \'show\' button next to \'DGG Login Key\', copy the text that appears and return to this app.\n\n•Step 4: Press the button below to automatically grab the login key from your clipboard.",
+                    "•Step 1: Press the start button below to go to the correct destiny.gg page. If you are not signed in already, then sign in.\n\n•Step 2: Expand the \'Connections\' drop down. If you do not have an item called \'DGG Login Key\' then press the button \'Add login key\'.\n\n•Step 3: Press the \'show\' button next to \'DGG Login Key\', copy the text that appears and return to this app.\n\n•Step 4: With the login key in your clipboard, press the button below to automatically grab the login key from your clipboard.",
                   ),
                 ),
                 !model.isAuthStarted

@@ -97,6 +97,7 @@ class _ChatInputState extends State<ChatInput> {
       minLines: 1,
       maxLines: 3,
       onChanged: widget.model.updateChatDraft,
+      textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         hintText: 'Type a message...',
