@@ -49,6 +49,20 @@ class SettingsView extends StatelessWidget {
                     ],
             ),
             SettingsSection(
+              title: 'Chat',
+              tiles: [
+                SettingsTile.switchTile(
+                  title: 'Wakelock',
+                  subtitle: 'Prevent screen from turning off while in chat',
+                  subtitleMaxLines: 2,
+                  leading: Icon(Icons.lightbulb),
+                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchValue: model.isWakelockEnabled,
+                  onToggle: model.toggleWakelockEnabled,
+                ),
+              ],
+            ),
+            SettingsSection(
               title: 'Analytics',
               tiles: [
                 SettingsTile.switchTile(

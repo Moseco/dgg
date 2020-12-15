@@ -1,12 +1,15 @@
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/dgg_api.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ChatViewModel extends BaseViewModel {
   final _dggApi = locator<DggApi>();
+  final _sharedPreferencesService = locator<SharedPreferencesService>();
 
   bool get isAssetsLoaded => _dggApi.isAssetsLoaded;
   bool get isSignedIn => _dggApi.sessionInfo is Available;
@@ -24,7 +27,13 @@ class ChatViewModel extends BaseViewModel {
   bool _isListAtBottom = true;
   bool get isListAtBottom => _isListAtBottom;
 
-  void initialize() async {
+  bool _wakelockEnabled;
+
+  Future<void> initialize() async {
+    _wakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
+    if (_wakelockEnabled) {
+      Wakelock.enable();
+    }
     await _dggApi.getAssets();
     notifyListeners();
     _openChat();
@@ -167,6 +176,9 @@ class ChatViewModel extends BaseViewModel {
 
   @override
   void dispose() {
+    if (_wakelockEnabled) {
+      Wakelock.disable();
+    }
     _dggApi.closeWebSocket();
     super.dispose();
   }

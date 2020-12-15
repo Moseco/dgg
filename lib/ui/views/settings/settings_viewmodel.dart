@@ -19,9 +19,12 @@ class SettingsViewModel extends BaseViewModel {
       FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
   bool _isAnalyticsEnabled = false;
   bool get isAnalyticsEnabled => _isAnalyticsEnabled;
+  bool _isWakelockEnabled = false;
+  bool get isWakelockEnabled => _isWakelockEnabled;
 
   Future<void> initialize() async {
     _isAnalyticsEnabled = await _sharedPreferencesService.getAnalyticsEnabled();
+    _isWakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
     notifyListeners();
   }
 
@@ -55,6 +58,12 @@ class SettingsViewModel extends BaseViewModel {
     FirebaseAnalytics().setAnalyticsCollectionEnabled(value);
     _sharedPreferencesService.setAnalyticsEnabled(value);
     _isAnalyticsEnabled = value;
+    notifyListeners();
+  }
+
+  Future<void> toggleWakelockEnabled(bool value) async {
+    _sharedPreferencesService.setWakelockEnabled(value);
+    _isWakelockEnabled = value;
     notifyListeners();
   }
 }

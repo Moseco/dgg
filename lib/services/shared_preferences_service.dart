@@ -8,6 +8,7 @@ class SharedPreferencesService {
   static const String KEY_REMEMBER_ME = "KEY_REMEMBER_ME";
   static const String KEY_LOGIN_KEY = "KEY_LOGIN_KEY";
   static const String KEY_ANALYTICS_ENABLED = "KEY_ANALYTICS_ENABLED";
+  static const String KEY_WAKELOCK_ENABLED = "KEY_WAKELOCK_ENABLED";
 
   SharedPreferences _sharedPreferences;
 
@@ -66,5 +67,21 @@ class SharedPreferencesService {
     }
 
     return _sharedPreferences.setBool(KEY_ANALYTICS_ENABLED, value);
+  }
+
+  Future<bool> getWakelockEnabled() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.getBool(KEY_WAKELOCK_ENABLED) ?? true;
+  }
+
+  Future<void> setWakelockEnabled(bool value) async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.setBool(KEY_WAKELOCK_ENABLED, value);
   }
 }
