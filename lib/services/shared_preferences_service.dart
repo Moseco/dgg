@@ -4,9 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class SharedPreferencesService {
-  static const KEY_SID = "KEY_SID";
-  static const KEY_REMEMBER_ME = "KEY_REMEMBER_ME";
-  static const KEY_LOGIN_KEY = "KEY_LOGIN_KEY";
+  static const String KEY_SID = "KEY_SID";
+  static const String KEY_REMEMBER_ME = "KEY_REMEMBER_ME";
+  static const String KEY_LOGIN_KEY = "KEY_LOGIN_KEY";
+  static const String KEY_ANALYTICS_ENABLED = "KEY_ANALYTICS_ENABLED";
 
   SharedPreferences _sharedPreferences;
 
@@ -49,5 +50,21 @@ class SharedPreferencesService {
     _sharedPreferences.remove(KEY_SID);
     _sharedPreferences.remove(KEY_REMEMBER_ME);
     _sharedPreferences.remove(KEY_LOGIN_KEY);
+  }
+
+  Future<bool> getAnalyticsEnabled() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.getBool(KEY_ANALYTICS_ENABLED) ?? true;
+  }
+
+  Future<void> setAnalyticsEnabled(bool value) async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.setBool(KEY_ANALYTICS_ENABLED, value);
   }
 }

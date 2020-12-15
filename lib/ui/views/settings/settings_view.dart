@@ -11,6 +11,8 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<SettingsViewModel>.reactive(
       viewModelBuilder: () => SettingsViewModel(),
+      onModelReady: (model) => model.initialize(),
+      fireOnModelReadyOnce: true,
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: Text("Settings"),
@@ -51,10 +53,17 @@ class SettingsView extends StatelessWidget {
               tiles: [
                 SettingsTile.switchTile(
                   title: 'Send crash reports',
-                  leading: Icon(Icons.analytics),
+                  leading: Icon(Icons.bug_report),
                   switchActiveColor: Theme.of(context).primaryColor,
                   switchValue: model.isCrashlyticsCollectionEnabled,
                   onToggle: model.toggleCrashlyticsCollection,
+                ),
+                SettingsTile.switchTile(
+                  title: 'Analytics collection',
+                  leading: Icon(Icons.analytics),
+                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchValue: model.isAnalyticsEnabled,
+                  onToggle: model.toggleAnalyticsCollection,
                 ),
               ],
             ),
