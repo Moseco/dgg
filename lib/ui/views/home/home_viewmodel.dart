@@ -48,7 +48,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> _checkForAppUpdate() async {
     String newestVersion = await _remoteConfigService.getAppNewestVersion();
-    if (double.parse(newestVersion) > 0.1) {
+    if (double.parse(newestVersion) > 0.2) {
       //There is a newer version, prompt user
       _appDownloadUrl = await _remoteConfigService.getAppDownloadUrl();
       notifyListeners();
