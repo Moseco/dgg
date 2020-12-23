@@ -9,6 +9,7 @@ class SharedPreferencesService {
   static const String KEY_LOGIN_KEY = "KEY_LOGIN_KEY";
   static const String KEY_ANALYTICS_ENABLED = "KEY_ANALYTICS_ENABLED";
   static const String KEY_WAKELOCK_ENABLED = "KEY_WAKELOCK_ENABLED";
+  static const String KEY_ONBOARDING = "KEY_ONBOARDING";
 
   SharedPreferences _sharedPreferences;
 
@@ -83,5 +84,21 @@ class SharedPreferencesService {
     }
 
     return _sharedPreferences.setBool(KEY_WAKELOCK_ENABLED, value);
+  }
+
+  Future<bool> getOnboarding() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.getBool(KEY_ONBOARDING) ?? false;
+  }
+
+  Future<void> setOnboarding() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    return _sharedPreferences.setBool(KEY_ONBOARDING, true);
   }
 }
