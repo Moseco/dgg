@@ -7,6 +7,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:stacked_themes/stacked_themes.dart';
 
 import '../services/cookie_manager_service.dart';
 import '../services/crypto_service.dart';
@@ -37,6 +38,7 @@ GetIt $initGetIt(
   gh.lazySingleton<SharedPreferencesService>(() => SharedPreferencesService());
   gh.lazySingleton<SnackbarService>(
       () => thirdPartyServicesModule.snackbarService);
+  gh.lazySingleton<ThemeService>(() => thirdPartyServicesModule.themeService);
   gh.lazySingleton<UserMessageElementsService>(
       () => UserMessageElementsService());
   return get;

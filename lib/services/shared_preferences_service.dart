@@ -101,4 +101,14 @@ class SharedPreferencesService {
 
     return _sharedPreferences.setBool(KEY_ONBOARDING, true);
   }
+
+  Future<int> getThemeIndex() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
+    //This will potentially break in the future
+    //The key is taken from stacked_themes source code
+    return _sharedPreferences.getInt("user_key") ?? 0;
+  }
 }

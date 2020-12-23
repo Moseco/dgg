@@ -45,6 +45,7 @@ dependencies:
   settings_ui: ^0.5.0
   wakelock: ^0.2.1+1
   introduction_screen: ^1.0.9
+  stacked_themes: ^0.2.2+2
 
 dev_dependencies:
   flutter_test:

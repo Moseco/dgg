@@ -18,7 +18,7 @@ class SettingsView extends StatelessWidget {
           title: Text("Settings"),
         ),
         body: SettingsList(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           sections: [
             SettingsSection(
               title: 'Account',
@@ -47,6 +47,19 @@ class SettingsView extends StatelessWidget {
                         onPressed: (BuildContext context) => model.back(),
                       ),
                     ],
+            ),
+            SettingsSection(
+              title: 'General',
+              tiles: [
+                SettingsTile(
+                  title: 'Theme',
+                  subtitle: 'Select app theme',
+                  subtitleMaxLines: 1,
+                  leading: Icon(Icons.color_lens),
+                  onPressed: (BuildContext context) =>
+                      _showThemeDialog(context, model),
+                ),
+              ],
             ),
             SettingsSection(
               title: 'Chat',
@@ -99,6 +112,47 @@ class SettingsView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context, SettingsViewModel model) {
+    showDialog(
+      context: context,
+      builder: (BuildContext c) => AlertDialog(
+        title: Text("Select app theme"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              RadioListTile<int>(
+                title: Text("Default"),
+                value: 0,
+                groupValue: model.themeIndex,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int value) {
+                  model.setTheme(value);
+                  Navigator.of(c).pop();
+                },
+              ),
+              RadioListTile<int>(
+                title: Text("True black"),
+                value: 1,
+                groupValue: model.themeIndex,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int value) {
+                  model.setTheme(value);
+                  Navigator.of(c).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          FlatButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(c).pop(),
+          )
+        ],
       ),
     );
   }

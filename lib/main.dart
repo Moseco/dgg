@@ -3,6 +3,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:stacked_themes/stacked_themes.dart';
 
 import 'app/locator.dart';
 import 'app/router.gr.dart';
@@ -16,20 +17,32 @@ Future<void> main() async {
     // Temporarily toggle this to true if you want to test crash reporting in your app.
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
   }
+  await ThemeManager.initialise();
   runApp(App());
 }
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DGG',
-      onGenerateRoute: AutoRouter().onGenerateRoute,
-      navigatorKey: locator<NavigationService>().navigatorKey,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Color(0xFF538CC6),
-        accentColor: Color(0xFF538CC6),
+    return ThemeBuilder(
+      themes: [
+        ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: Color(0xFF538CC6),
+          accentColor: Color(0xFF538CC6),
+        ),
+        ThemeData(
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: Colors.black,
+          primaryColor: Color(0xFF538CC6),
+          accentColor: Color(0xFF538CC6),
+        ),
+      ],
+      builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(
+        title: 'DGG',
+        onGenerateRoute: AutoRouter().onGenerateRoute,
+        navigatorKey: locator<NavigationService>().navigatorKey,
+        theme: regularTheme,
       ),
     );
   }
