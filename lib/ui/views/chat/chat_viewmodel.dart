@@ -15,7 +15,8 @@ class ChatViewModel extends BaseViewModel {
   bool get isSignedIn => _dggApi.sessionInfo is Available;
   bool get isChatConnected => _dggApi.isChatConnected;
 
-  List<Message> get messages => _dggApi.messages;
+  List<Message> get messages =>
+      _isListAtBottom ? _dggApi.messages : _pausedMessages;
   List<User> get users => _dggApi.users;
 
   String _draft = '';
@@ -26,6 +27,7 @@ class ChatViewModel extends BaseViewModel {
 
   bool _isListAtBottom = true;
   bool get isListAtBottom => _isListAtBottom;
+  List<Message> _pausedMessages = [];
 
   bool _wakelockEnabled;
 
@@ -43,8 +45,8 @@ class ChatViewModel extends BaseViewModel {
     _dggApi.openWebSocketConnection(_updateChat);
   }
 
-  void uncensorMessage(int messageIndex) {
-    _dggApi.uncensorMessage(messageIndex);
+  void uncensorMessage(UserMessage message) {
+    message.isCensored = false;
     notifyListeners();
   }
 
@@ -167,6 +169,9 @@ class ChatViewModel extends BaseViewModel {
 
   void toggleChat(bool isListAtBottom) {
     if (_isListAtBottom != isListAtBottom) {
+      if (!isListAtBottom) {
+        _pausedMessages = List.from(messages);
+      }
       _isListAtBottom = isListAtBottom;
       notifyListeners();
     } else {

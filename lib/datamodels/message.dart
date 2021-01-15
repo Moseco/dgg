@@ -14,18 +14,18 @@ class UserMessage extends Message {
   final String data;
   final int color;
   final List<UserMessageElement> elements;
-  final bool isCensored;
   final bool isMentioned;
   final bool isOwn;
+  bool isCensored;
 
-  const UserMessage({
+  UserMessage({
     this.user,
     this.data,
     this.color,
     this.elements,
-    this.isCensored = false,
     this.isMentioned = false,
     this.isOwn = false,
+    this.isCensored = false,
   });
 
   static UserMessage fromJson(
@@ -67,16 +67,6 @@ class UserMessage extends Message {
       }
     }
     return null;
-  }
-
-  UserMessage censor(bool censor) {
-    return UserMessage(
-      user: this.user,
-      data: this.data,
-      color: this.color,
-      elements: this.elements,
-      isCensored: censor,
-    );
   }
 }
 

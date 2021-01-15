@@ -103,7 +103,6 @@ class _ChatViewState extends State<ChatView> {
                   return ItemUserMessage(
                     model: model,
                     message: currentMessage,
-                    messageIndex: messageIndex,
                   );
                 } else if (currentMessage is StatusMessage) {
                   return ItemStatusMessage(message: currentMessage);

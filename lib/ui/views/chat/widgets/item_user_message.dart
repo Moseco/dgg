@@ -12,13 +12,11 @@ import 'package:url_launcher/url_launcher.dart';
 class ItemUserMessage extends StatelessWidget {
   final ChatViewModel model;
   final UserMessage message;
-  final int messageIndex;
 
   const ItemUserMessage({
     Key key,
     this.model,
     this.message,
-    this.messageIndex,
   }) : super(key: key);
 
   @override
@@ -75,7 +73,7 @@ class ItemUserMessage extends StatelessWidget {
             color: Colors.blue,
           ),
           recognizer: TapGestureRecognizer()
-            ..onTap = () => model.uncensorMessage(messageIndex),
+            ..onTap = () => model.uncensorMessage(message),
         ),
       );
     } else {

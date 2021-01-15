@@ -184,7 +184,7 @@ class DggApi {
               Message msg = _messages[_messages.length - i];
               if (msg is UserMessage) {
                 if (msg.user.nick == muteMessage.data) {
-                  _messages[_messages.length - i] = msg.censor(true);
+                  msg.isCensored = true;
                 }
               }
             }
@@ -361,11 +361,6 @@ class DggApi {
     _messages.add(StatusMessage(data: "Disconneced"));
     flairs = null;
     emotes = null;
-  }
-
-  void uncensorMessage(int messageIndex) {
-    _messages[messageIndex] =
-        (_messages[messageIndex] as UserMessage).censor(false);
   }
 
   Future<void> _loadEmote(Emote emote, Function notifyCallback) async {
