@@ -39,7 +39,7 @@ class App extends StatelessWidget {
         ),
       ],
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(
-        title: 'DGG',
+        title: 'Dgg',
         onGenerateRoute: AutoRouter().onGenerateRoute,
         navigatorKey: locator<NavigationService>().navigatorKey,
         theme: regularTheme,
