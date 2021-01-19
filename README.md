@@ -1,16 +1,23 @@
-# dgg
+# Unofficial Dgg chat app
 
-A new Flutter project.
+This is an unofficial Dgg chat app built with [Flutter](https://flutter.dev/docs).
 
-## Getting Started
+You can install it from the Play Store by clicking [here](https://play.google.com/store/apps/details?id=dev.moseco.dgg).
 
-This project is a starting point for a Flutter application.
+Currently only Android is confirmed to be working, so some setup might be required to get an iOS build working.
 
-A few resources to get you started if this is your first Flutter project:
+## Feature support
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- [x] Sign in
+- [x] View chat messages
+- [x] Send chat message while signed in
+- [x] Basic emotes
+- [ ] Context sensitive  emotes (e.g. sword direction)
+- [ ] Animated emotes 
+- [ ] Polls
+- [ ] Private messages
+- [ ] Probably more?
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Building
+
+This project uses Firebase for analytics and remote changes. To get a build working you will either need to [create a Firebase project on your own](https://firebase.google.com/docs/flutter/setup?platform=android) or remove the Firebase related code manually. The easiest way to do this is to remove the Firebase packages from the pubspec.yaml file (currently firebase_core, firebase_remote_config, firebase_crashlytics, firebase_analytics) and delete any code that the editor now doesn't recognize.
