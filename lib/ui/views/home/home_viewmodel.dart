@@ -1,7 +1,7 @@
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/app/router.gr.dart';
 import 'package:dgg/datamodels/session_info.dart';
-import 'package:dgg/services/dgg_api.dart';
+import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
@@ -10,12 +10,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 class HomeViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
-  final _dggApi = locator<DggApi>();
+  final _dggService = locator<DggService>();
   final _remoteConfigService = locator<RemoteConfigService>();
   final _snackbarService = locator<SnackbarService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
 
-  SessionInfo get sessionInfo => _dggApi.sessionInfo;
+  SessionInfo get sessionInfo => _dggService.sessionInfo;
 
   String _appDownloadUrl;
   String get appDownloadUrl => _appDownloadUrl;
@@ -42,7 +42,7 @@ class HomeViewModel extends BaseViewModel {
   }
 
   Future<void> _getSessionInfo() async {
-    await _dggApi.getSessionInfo();
+    await _dggService.getSessionInfo();
     notifyListeners();
   }
 

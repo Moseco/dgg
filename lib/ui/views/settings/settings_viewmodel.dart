@@ -1,6 +1,6 @@
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/datamodels/session_info.dart';
-import 'package:dgg/services/dgg_api.dart';
+import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -11,12 +11,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SettingsViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
-  final _dggApi = locator<DggApi>();
+  final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _themeService = locator<ThemeService>();
 
-  bool get isSignedIn => _dggApi.sessionInfo is Available;
-  String get username => (_dggApi.sessionInfo as Available).nick;
+  bool get isSignedIn => _dggService.sessionInfo is Available;
+  String get username => (_dggService.sessionInfo as Available).nick;
   bool get isCrashlyticsCollectionEnabled =>
       FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
   bool _isAnalyticsEnabled = false;
@@ -40,7 +40,7 @@ class SettingsViewModel extends BaseViewModel {
   }
 
   void signOut() {
-    _dggApi.signOut();
+    _dggService.signOut();
     notifyListeners();
   }
 

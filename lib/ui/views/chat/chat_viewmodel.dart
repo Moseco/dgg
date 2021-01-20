@@ -4,20 +4,20 @@ import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
-import 'package:dgg/services/dgg_api.dart';
+import 'package:dgg/services/dgg_service.dart';
 import 'package:wakelock/wakelock.dart';
 
 class ChatViewModel extends BaseViewModel {
-  final _dggApi = locator<DggApi>();
+  final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
 
-  bool get isAssetsLoaded => _dggApi.isAssetsLoaded;
-  bool get isSignedIn => _dggApi.sessionInfo is Available;
-  bool get isChatConnected => _dggApi.isChatConnected;
+  bool get isAssetsLoaded => _dggService.isAssetsLoaded;
+  bool get isSignedIn => _dggService.sessionInfo is Available;
+  bool get isChatConnected => _dggService.isChatConnected;
 
   List<Message> get messages =>
-      _isListAtBottom ? _dggApi.messages : _pausedMessages;
-  List<User> get users => _dggApi.users;
+      _isListAtBottom ? _dggService.messages : _pausedMessages;
+  List<User> get users => _dggService.users;
 
   String _draft = '';
   String get draft => _draft;
@@ -36,13 +36,13 @@ class ChatViewModel extends BaseViewModel {
     if (_wakelockEnabled) {
       Wakelock.enable();
     }
-    await _dggApi.getAssets();
+    await _dggService.getAssets();
     notifyListeners();
     _openChat();
   }
 
   void _openChat() {
-    _dggApi.openWebSocketConnection(_updateChat);
+    _dggService.openWebSocketConnection(_updateChat);
   }
 
   void uncensorMessage(UserMessage message) {
@@ -53,18 +53,18 @@ class ChatViewModel extends BaseViewModel {
   void menuItemClick(String selected) async {
     switch (selected) {
       case "Disconnect":
-        await _dggApi.disconnect();
+        await _dggService.disconnect();
         notifyListeners();
         break;
       case "Reconnect":
-        _dggApi.reconnect(() => notifyListeners());
+        _dggService.reconnect(() => notifyListeners());
         break;
       case "Refresh assets":
         //First clear assets
-        await _dggApi.clearAssets();
+        await _dggService.clearAssets();
         notifyListeners();
         //Fetch assets
-        await _dggApi.getAssets();
+        await _dggService.getAssets();
         notifyListeners();
         //Re-open chat
         _openChat();
@@ -82,7 +82,7 @@ class ChatViewModel extends BaseViewModel {
   bool sendChatMessage() {
     String draftTrim = _draft.trim();
     if (draftTrim.isNotEmpty && isChatConnected) {
-      _dggApi.sendChatMessage(draftTrim);
+      _dggService.sendChatMessage(draftTrim);
       updateChatDraft('');
       return true;
     } else {
@@ -141,14 +141,14 @@ class ChatViewModel extends BaseViewModel {
         RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
 
         //check emotes
-        _dggApi.emotes.emoteMap.forEach((k, v) {
+        _dggService.emotes.emoteMap.forEach((k, v) {
           if (k.startsWith(lastWordRegex)) {
             newSuggestions.add(k);
           }
         });
 
         //check user names
-        _dggApi.users.forEach((user) {
+        _dggService.users.forEach((user) {
           if (user.nick.startsWith(lastWordRegex)) {
             newSuggestions.add(user.nick);
           }
@@ -184,7 +184,7 @@ class ChatViewModel extends BaseViewModel {
     if (_wakelockEnabled) {
       Wakelock.disable();
     }
-    _dggApi.closeWebSocket();
+    _dggService.closeWebSocket();
     super.dispose();
   }
 }
