@@ -12,10 +12,14 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [x] View chat messages
 - [x] Send chat message while signed in
 - [x] Basic emotes
+- [x] Twitch stream embed
+- [x] Change Twitch stream embed channel
 - [ ] Context sensitive  emotes (e.g. sword direction)
 - [ ] Animated emotes 
 - [ ] Polls
 - [ ] Private messages
+- [ ] Chat text color changes (e.g. '>' causes green text for subs)
+- [ ] Allow clicking on "#twitch/channel" to open stream embed on that channel
 - [ ] Probably more?
 
 ## Building
