@@ -1,15 +1,23 @@
+import 'dart:convert';
+
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:http/http.dart' as http;
+import 'package:webview_flutter/webview_flutter.dart';
 
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
+  final _remoteConfigService = locator<RemoteConfigService>();
+
+  WebViewController webViewController;
 
   bool get isAssetsLoaded => _dggService.isAssetsLoaded;
   bool get isSignedIn => _dggService.sessionInfo is Available;
@@ -31,11 +39,21 @@ class ChatViewModel extends BaseViewModel {
 
   bool _wakelockEnabled;
 
+  String get twitchUrlBase =>
+      'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&channel=';
+  String _currentStreamChannel = 'destiny';
+  String get currentStreamChannel => _currentStreamChannel;
+  bool _showStreamPrompt = false;
+  bool get showStreamPrompt => _showStreamPrompt;
+  bool _showStreamEmbed = false;
+  bool get showStreamEmbed => _showStreamEmbed;
+
   Future<void> initialize() async {
     _wakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
     if (_wakelockEnabled) {
       Wakelock.enable();
     }
+    _getStreamStatus();
     await _dggService.getAssets();
     notifyListeners();
     _openChat();
@@ -50,16 +68,16 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void menuItemClick(String selected) async {
+  Future<void> menuItemClick(int selected) async {
     switch (selected) {
-      case "Disconnect":
+      case 0:
         await _dggService.disconnect();
         notifyListeners();
         break;
-      case "Reconnect":
+      case 1:
         _dggService.reconnect(() => notifyListeners());
         break;
-      case "Refresh assets":
+      case 2:
         //First clear assets
         await _dggService.clearAssets();
         notifyListeners();
@@ -176,6 +194,52 @@ class ChatViewModel extends BaseViewModel {
       notifyListeners();
     } else {
       _isListAtBottom = isListAtBottom;
+    }
+  }
+
+  Future<void> _getStreamStatus() async {
+    String twitchClientId = await _remoteConfigService.getTwitchClientId();
+
+    if (twitchClientId != null && twitchClientId.isNotEmpty) {
+      //Twitch api to check status of a channel
+      //  Hardcoded to Destiny's stream
+      final response = await http.get(
+        'https://api.twitch.tv/kraken/streams/18074328',
+        headers: {
+          'Accept': 'application/vnd.twitchtv.v5+json',
+          'Client-ID': twitchClientId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> json = jsonDecode(response.body);
+
+        if (json['stream'] != null) {
+          //Stream is online
+          _showStreamPrompt = true;
+          notifyListeners();
+        }
+      }
+    }
+  }
+
+  void setShowStreamEmbed(bool value) {
+    _showStreamPrompt = false;
+    _showStreamEmbed = value;
+    notifyListeners();
+  }
+
+  void setStreamChannel(List<String> channel) {
+    if (channel != null && channel[0].trim().isNotEmpty) {
+      //Set new channel name
+      _currentStreamChannel = channel[0].trim();
+      if (_showStreamEmbed) {
+        //Embed already shown, use controller to load new stream
+        webViewController.loadUrl(twitchUrlBase + _currentStreamChannel);
+      } else {
+        //Embed not shown, show embed
+        setShowStreamEmbed(true);
+      }
     }
   }
 

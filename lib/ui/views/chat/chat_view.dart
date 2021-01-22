@@ -1,6 +1,8 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
@@ -32,19 +34,25 @@ class _ChatViewState extends State<ChatView> {
           title: Text("Chat"),
           actions: model.isAssetsLoaded
               ? <Widget>[
-                  PopupMenuButton<String>(
-                    onSelected: model.menuItemClick,
+                  IconButton(
+                    icon: model.showStreamEmbed
+                        ? Icon(Icons.desktop_access_disabled)
+                        : Icon(Icons.desktop_windows),
+                    onPressed: () =>
+                        model.setShowStreamEmbed(!model.showStreamEmbed),
+                  ),
+                  PopupMenuButton<int>(
+                    onSelected: (int selected) => selected == 3
+                        ? showStreamSelectDialog(model)
+                        : model.menuItemClick(selected),
                     itemBuilder: (BuildContext context) {
-                      return {
-                        'Disconnect',
-                        'Reconnect',
-                        "Refresh assets",
-                      }.map((String choice) {
-                        return PopupMenuItem<String>(
-                          value: choice,
-                          child: Text(choice),
-                        );
-                      }).toList();
+                      return [
+                        PopupMenuItem<int>(value: 0, child: Text('Disconnect')),
+                        PopupMenuItem<int>(value: 1, child: Text('Reconnect')),
+                        PopupMenuItem<int>(
+                            value: 2, child: Text('Refresh assets')),
+                        PopupMenuItem<int>(value: 3, child: Text('Set stream')),
+                      ];
                     },
                   ),
                 ]
@@ -52,7 +60,7 @@ class _ChatViewState extends State<ChatView> {
         ),
         body: SafeArea(
           child:
-              model.isAssetsLoaded ? _buildChat(model) : _buildLoading(model),
+              model.isAssetsLoaded ? _buildLoaded(model) : _buildLoading(model),
         ),
       ),
     );
@@ -71,6 +79,63 @@ class _ChatViewState extends State<ChatView> {
         ],
       ),
     );
+  }
+
+  Widget _buildLoaded(ChatViewModel model) {
+    return Column(
+      children: [
+        _buildStreamEmbed(model),
+        Expanded(child: _buildChat(model)),
+      ],
+    );
+  }
+
+  Widget _buildStreamEmbed(ChatViewModel model) {
+    if (model.showStreamPrompt) {
+      return Container(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Text("Destiny is live. Show the stream?"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: RaisedButton(
+                    child: Text("Yes"),
+                    onPressed: () => model.setShowStreamEmbed(true),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: RaisedButton(
+                    child: Text("No"),
+                    onPressed: () => model.setShowStreamEmbed(false),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      if (model.showStreamEmbed) {
+        return Container(
+          height: 9 / 16 * MediaQuery.of(context).size.width,
+          child: WebView(
+            initialUrl: model.twitchUrlBase + model.currentStreamChannel,
+            javascriptMode: JavascriptMode.unrestricted,
+            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+            onWebViewCreated: (WebViewController webViewController) {
+              model.webViewController = webViewController;
+            },
+          ),
+        );
+      } else {
+        return Container();
+      }
+    }
   }
 
   Widget _buildChat(ChatViewModel model) {
@@ -144,6 +209,20 @@ class _ChatViewState extends State<ChatView> {
         ),
       ),
     );
+  }
+
+  Future<void> showStreamSelectDialog(ChatViewModel model) async {
+    //Show dialog and get result
+    final result = await showTextInputDialog(
+      context: context,
+      title: "Open Twitch stream",
+      message: "Enter the name of the Twitch stream you want to open",
+      textFields: const [
+        DialogTextField(hintText: "Channel name"),
+      ],
+    );
+
+    model.setStreamChannel(result);
   }
 
   @override
