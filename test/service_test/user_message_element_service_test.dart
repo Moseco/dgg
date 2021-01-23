@@ -288,5 +288,70 @@ void main() {
       expect(elements[0].runtimeType, TextElement);
       expect(elements[0].text, "This is example text");
     });
+
+    test('Only stream embed', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "#twitch/name",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 1);
+      expect(elements[0].runtimeType, EmbedUrlElement);
+      expect(elements[0].text, "#twitch/name");
+      expect((elements[0] as EmbedUrlElement).channel, "name");
+    });
+
+    test('Stream embed and text', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "Watching #twitch/name now",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 3);
+      expect(elements[0].runtimeType, TextElement);
+      expect(elements[0].text, "Watching ");
+      expect(elements[1].runtimeType, EmbedUrlElement);
+      expect(elements[1].text, "#twitch/name");
+      expect((elements[1] as EmbedUrlElement).channel, "name");
+      expect(elements[2].runtimeType, TextElement);
+      expect(elements[2].text, " now");
+    });
+
+    test('Invalid embed', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "#twitc/name",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 1);
+      expect(elements[0].runtimeType, TextElement);
+    });
+
+    test('Invalid embed 2', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "#twitch",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 1);
+      expect(elements[0].runtimeType, TextElement);
+    });
+
+    test('Stream embed with period', () {
+      List<UserMessageElement> elements =
+          _userMessageElementsService.createMessageElements(
+        "#twitch/name.",
+        Emotes(emoteMap: {}),
+      );
+
+      expect(elements.length, 2);
+      expect(elements[0].runtimeType, EmbedUrlElement);
+      expect(elements[0].text, "#twitch/name");
+      expect((elements[0] as EmbedUrlElement).channel, "name");
+    });
   });
 }

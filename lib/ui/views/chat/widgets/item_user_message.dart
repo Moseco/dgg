@@ -101,6 +101,23 @@ class ItemUserMessage extends StatelessWidget {
               child: EmoteWidget(emote: element.emote),
             ),
           );
+        } else if (element is EmbedUrlElement) {
+          textSpans.add(
+            TextSpan(
+              text: element.text,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.blue,
+              ),
+              recognizer: Platform.isAndroid
+                  ? (TapGestureRecognizer()
+                    ..onTap = () => model.setStreamChannel([element.channel]))
+                  : null,
+              //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+              //  Problem only happens on iOS so need different approach on Android/iOS
+              //  https://github.com/flutter/flutter/issues/51936
+            ),
+          );
         } else {
           textSpans.add(
             TextSpan(

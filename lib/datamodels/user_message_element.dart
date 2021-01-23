@@ -26,3 +26,11 @@ class EmoteElement extends UserMessageElement {
     this.emote,
   ) : super(text);
 }
+
+class EmbedUrlElement extends UserMessageElement {
+  final String channel;
+  const EmbedUrlElement(
+    String text,
+    this.channel,
+  ) : super(text);
+}
