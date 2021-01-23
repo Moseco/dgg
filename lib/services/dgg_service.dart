@@ -7,8 +7,6 @@ import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
-import 'package:dgg/datamodels/user.dart';
-import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:injectable/injectable.dart';
@@ -39,6 +37,7 @@ class DggService {
   SessionInfo _sessionInfo;
   SessionInfo get sessionInfo => _sessionInfo;
   String _currentNick;
+  bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
   String _dggCacheKey;
@@ -46,16 +45,8 @@ class DggService {
   Flairs flairs;
   Emotes emotes;
 
-  //For chat messages
-  WebSocketChannel _channel;
-  StreamSubscription _chatSubscription;
-
-  List<Message> _messages = [];
-  List<Message> get messages => _messages;
-  List<User> _users = [];
-  List<User> get users => _users;
-  bool _isChatConnected = false;
-  bool get isChatConnected => _isChatConnected;
+  //Dgg chat websocket
+  WebSocketChannel _webSocketChannel;
 
   Future<void> getSessionInfo() async {
     _sessionInfo = null;
@@ -94,164 +85,70 @@ class DggService {
     }
   }
 
-  void openWebSocketConnection(Function notifyCallback) {
-    _messages.add(StatusMessage(data: "Connecting..."));
-    notifyCallback();
-    _channel = IOWebSocketChannel.connect(
+  WebSocketChannel openWebSocketConnection() {
+    _webSocketChannel = IOWebSocketChannel.connect(
       webSocketUrl,
       headers: _sessionInfo is Available
           ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
           : null,
     );
-    _chatSubscription = _channel.stream.listen(
-      (data) {
-        String dataString = data.toString();
-        int spaceIndex = dataString.indexOf(' ');
-        String key = dataString.substring(0, spaceIndex);
-        String jsonString = dataString.substring(spaceIndex + 1);
 
-        switch (key) {
-          case "NAMES":
-            _isChatConnected = true;
-            _users = NamesMessage.fromJson(jsonString).users;
-            _messages.add(
-                StatusMessage(data: "Connected with ${_users.length} users"));
-            break;
-          case "MSG":
-            UserMessage userMessage = UserMessage.fromJson(
-              jsonString,
-              flairs,
-              emotes,
-              _userMessageElementsService.createMessageElements,
-              currentNick: _currentNick,
-            );
-            //for each emote, check if needs to be loaded
-            userMessage.elements.forEach((element) {
-              if (element is EmoteElement) {
-                if (!element.emote.loading && element.emote.image == null) {
-                  _loadEmote(element.emote, notifyCallback);
-                }
-              }
-            });
-            //Check if new message is part of a combo
-            if (userMessage.elements.length == 1 &&
-                userMessage.elements[0] is EmoteElement) {
-              //Current message only has one emote in it
-              EmoteElement currentEmote = userMessage.elements[0];
-              Message recentMessage = _messages[_messages.length - 1];
-              if (recentMessage is ComboMessage) {
-                //Most recent is combo
-                if (recentMessage.emote.name == currentEmote.emote.name) {
-                  //Same emote, increment combo
-                  _messages[_messages.length - 1] =
-                      recentMessage.incrementCombo();
-                  break;
-                }
-              } else {
-                //Most recent is not combo
-                if (recentMessage is UserMessage &&
-                    recentMessage.elements.length == 1 &&
-                    recentMessage.elements[0] is EmoteElement &&
-                    (recentMessage.elements[0] as EmoteElement).emote.name ==
-                        currentEmote.emote.name) {
-                  //Most recent is UserMessage and only has the same emote
-                  //  Replace recent message with combo
-                  _messages[_messages.length - 1] =
-                      ComboMessage(emote: currentEmote.emote);
-                  break;
-                }
-              }
-            }
-            //Add message normally
-            _messages.add(userMessage);
-            break;
-          case "JOIN":
-            _users.add(JoinMessage.fromJson(jsonString).user);
-            break;
-          case "QUIT":
-            _users.remove(QuitMessage.fromJson(jsonString).user);
-            break;
-          case "BROADCAST":
-            BroadcastMessage broadcastMessage =
-                BroadcastMessage.fromJson(jsonString);
-            _messages.add(broadcastMessage);
-            break;
-          case "MUTE":
-            MuteMessage muteMessage = MuteMessage.fromJson(jsonString);
-            //Go through up to previous 10 messages and censor messages from muted user
-            int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
-            for (int i = 1; i < lengthToCheck; i++) {
-              Message msg = _messages[_messages.length - i];
-              if (msg is UserMessage) {
-                if (msg.user.nick == muteMessage.data) {
-                  msg.isCensored = true;
-                }
-              }
-            }
-            _messages.add(StatusMessage(
-                data: "${muteMessage.data} muted by ${muteMessage.nick}"));
-            break;
-          // case "UNMUTE":
-          //   break;
-          case "BAN":
-            BanMessage banMessage = BanMessage.fromJson(jsonString);
-            _messages.add(StatusMessage(
-                data: "${banMessage.data} banned by ${banMessage.nick}"));
-            break;
-          case "UNBAN":
-            UnbanMessage unbanMessage = UnbanMessage.fromJson(jsonString);
-            _messages.add(StatusMessage(
-                data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
-            break;
-          case "REFRESH":
-            _messages
-                .add(StatusMessage(data: "Being disconnected by server..."));
-            break;
-          // // Other possible types
-          // case "SUBONLY":
-          //   break;
-          // case "PING":
-          //   break;
-          // case "PONG":
-          //   break;
-          // case "PRIVMSG":
-          //   break;
-          // case "ERR":
-          //   break;
-          default:
-            print(data);
-            break;
-        }
-        //When messages length grows to 300, shrink to 150
-        if (_messages.length > 300) {
-          _messages.removeRange(0, 150);
-        }
-        notifyCallback();
-      },
-      onDone: () {
-        _messages.add(StatusMessage(data: "Disconneced"));
-        _isChatConnected = false;
-      },
-      onError: (error) {
-        print("STREAM REPORTED ERROR");
-      },
-    );
+    return _webSocketChannel;
   }
 
-  Future<void> closeWebSocket() async {
-    _isChatConnected = false;
-    await _chatSubscription?.cancel();
-    await _channel?.sink?.close(status.goingAway);
+  Future<void> closeWebSocketConnection() async {
+    await _webSocketChannel?.sink?.close(status.goingAway);
+    _webSocketChannel = null;
   }
 
-  Future<void> disconnect() async {
-    await closeWebSocket();
-    _messages.add(StatusMessage(data: "Disconneced"));
-  }
+  Message parseWebSocketData(String data) {
+    String dataString = data.toString();
+    int spaceIndex = dataString.indexOf(' ');
+    String key = dataString.substring(0, spaceIndex);
+    String jsonString = dataString.substring(spaceIndex + 1);
 
-  Future<void> reconnect(Function notifyCallback) async {
-    await closeWebSocket();
-    openWebSocketConnection(notifyCallback);
+    switch (key) {
+      case "NAMES":
+        return NamesMessage.fromJson(jsonString);
+      case "MSG":
+        return UserMessage.fromJson(
+          jsonString,
+          flairs,
+          emotes,
+          _userMessageElementsService.createMessageElements,
+          currentNick: _currentNick,
+        );
+      case "JOIN":
+        return JoinMessage.fromJson(jsonString);
+      case "QUIT":
+        return QuitMessage.fromJson(jsonString);
+      case "BROADCAST":
+        return BroadcastMessage.fromJson(jsonString);
+      case "MUTE":
+        return MuteMessage.fromJson(jsonString);
+      // case "UNMUTE":
+      //   break;
+      case "BAN":
+        return BanMessage.fromJson(jsonString);
+      case "UNBAN":
+        return UnbanMessage.fromJson(jsonString);
+      case "REFRESH":
+        return StatusMessage(data: "Being disconnected by server...");
+      // // Other possible types
+      // case "SUBONLY":
+      //   break;
+      // case "PING":
+      //   break;
+      // case "PONG":
+      //   break;
+      // case "PRIVMSG":
+      //   break;
+      // case "ERR":
+      //   break;
+      default:
+        print(data);
+        return null;
+    }
   }
 
   Future<void> getAssets() async {
@@ -357,25 +254,21 @@ class DggService {
   }
 
   Future<void> clearAssets() async {
-    await closeWebSocket();
-    _messages.add(StatusMessage(data: "Disconneced"));
+    await closeWebSocketConnection();
     flairs = null;
     emotes = null;
   }
 
-  Future<void> _loadEmote(Emote emote, Function notifyCallback) async {
+  Future<void> loadEmote(Emote emote) async {
     //TODO do some kind of caching
-    //Download emote
     emote.loading = true;
     emote.image = await _imageService.downloadAndProcessEmote(emote);
     emote.loading = false;
-    //Update UI
-    notifyCallback();
   }
 
   void sendChatMessage(String message) {
     try {
-      _channel.sink.add('MSG {"data": "$message"}');
+      _webSocketChannel.sink.add('MSG {"data": "$message"}');
     } catch (_) {
       print("Message failed to send");
     }

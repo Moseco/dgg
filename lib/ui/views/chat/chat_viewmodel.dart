@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/message.dart';
-import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/user.dart';
+import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
@@ -20,22 +22,23 @@ class ChatViewModel extends BaseViewModel {
   WebViewController webViewController;
 
   bool get isAssetsLoaded => _dggService.isAssetsLoaded;
-  bool get isSignedIn => _dggService.sessionInfo is Available;
-  bool get isChatConnected => _dggService.isChatConnected;
+  bool get isSignedIn => _dggService.isSignedIn;
 
-  List<Message> get messages =>
-      _isListAtBottom ? _dggService.messages : _pausedMessages;
-  List<User> get users => _dggService.users;
+  StreamSubscription _chatSubscription;
+  List<Message> _messages = [];
+  List<Message> get messages => _isListAtBottom ? _messages : _pausedMessages;
+  List<User> _users = [];
+  bool _isChatConnected = false;
+  bool get isChatConnected => _isChatConnected;
+  bool _isListAtBottom = true;
+  bool get isListAtBottom => _isListAtBottom;
+  List<Message> _pausedMessages = [];
 
   String _draft = '';
   String get draft => _draft;
   List<String> _suggestions = [];
   List<String> get suggestions => _suggestions;
   String _previousLastWord = '';
-
-  bool _isListAtBottom = true;
-  bool get isListAtBottom => _isListAtBottom;
-  List<Message> _pausedMessages = [];
 
   bool _wakelockEnabled;
 
@@ -56,11 +59,136 @@ class ChatViewModel extends BaseViewModel {
     _getStreamStatus();
     await _dggService.getAssets();
     notifyListeners();
-    _openChat();
+    _connectChat();
   }
 
-  void _openChat() {
-    _dggService.openWebSocketConnection(_updateChat);
+  void _connectChat() {
+    _messages.add(StatusMessage(data: "Connecting..."));
+    notifyListeners();
+    _chatSubscription = _dggService.openWebSocketConnection().stream.listen(
+      (data) {
+        Message currentMessage = _dggService.parseWebSocketData(data);
+
+        switch (currentMessage.runtimeType) {
+          case NamesMessage:
+            _isChatConnected = true;
+            _users = (currentMessage as NamesMessage).users;
+            _messages.add(
+                StatusMessage(data: "Connected with ${_users.length} users"));
+            break;
+          case UserMessage:
+            UserMessage userMessage = currentMessage;
+            //for each emote, check if needs to be loaded
+            userMessage.elements.forEach((element) {
+              if (element is EmoteElement) {
+                if (!element.emote.loading && element.emote.image == null) {
+                  _loadEmote(element.emote);
+                }
+              }
+            });
+            //Check if new message is part of a combo
+            if (userMessage.elements.length == 1 &&
+                userMessage.elements[0] is EmoteElement) {
+              //Current message only has one emote in it
+              EmoteElement currentEmote = userMessage.elements[0];
+              Message recentMessage = _messages[_messages.length - 1];
+              if (recentMessage is ComboMessage) {
+                //Most recent is combo
+                if (recentMessage.emote.name == currentEmote.emote.name) {
+                  //Same emote, increment combo
+                  _messages[_messages.length - 1] =
+                      recentMessage.incrementCombo();
+                  break;
+                }
+              } else {
+                //Most recent is not combo
+                if (recentMessage is UserMessage &&
+                    recentMessage.elements.length == 1 &&
+                    recentMessage.elements[0] is EmoteElement &&
+                    (recentMessage.elements[0] as EmoteElement).emote.name ==
+                        currentEmote.emote.name) {
+                  //Most recent is UserMessage and only has the same emote
+                  //  Replace recent message with combo
+                  _messages[_messages.length - 1] =
+                      ComboMessage(emote: currentEmote.emote);
+                  break;
+                }
+              }
+            }
+            //Add message normally
+            _messages.add(userMessage);
+            break;
+          case JoinMessage:
+            _users.add((currentMessage as JoinMessage).user);
+            break;
+          case QuitMessage:
+            _users.remove((currentMessage as QuitMessage).user);
+            break;
+          case BroadcastMessage:
+            _messages.add(currentMessage);
+            break;
+          case MuteMessage:
+            //Go through up to previous 10 messages and censor messages from muted user
+            MuteMessage muteMessage = currentMessage;
+            int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
+            for (int i = 1; i < lengthToCheck; i++) {
+              Message msg = _messages[_messages.length - i];
+              if (msg is UserMessage) {
+                if (msg.user.nick == muteMessage.data) {
+                  msg.isCensored = true;
+                }
+              }
+            }
+            _messages.add(StatusMessage(
+                data: "${muteMessage.data} muted by ${muteMessage.nick}"));
+            break;
+          case BanMessage:
+            BanMessage banMessage = currentMessage;
+            _messages.add(StatusMessage(
+                data: "${banMessage.data} banned by ${banMessage.nick}"));
+            break;
+          case UnbanMessage:
+            BanMessage unbanMessage = currentMessage;
+            _messages.add(StatusMessage(
+                data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
+            break;
+          case StatusMessage:
+            _messages.add(currentMessage);
+            break;
+          default:
+            break;
+        }
+
+        //When messages length grows to 300, shrink to 150
+        if (_messages.length > 300) {
+          _messages.removeRange(0, 150);
+        }
+
+        notifyListeners();
+      },
+      onDone: () {
+        _messages.add(StatusMessage(data: "Disconneced"));
+        _isChatConnected = false;
+        notifyListeners();
+      },
+      onError: (error) {
+        print("STREAM REPORTED ERROR");
+      },
+    );
+  }
+
+  Future<void> _disconnectChat() async {
+    _isChatConnected = false;
+    _messages.add(StatusMessage(data: "Disconneced"));
+    notifyListeners();
+    _chatSubscription?.cancel();
+    _chatSubscription = null;
+    await _dggService.closeWebSocketConnection();
+  }
+
+  Future<void> _loadEmote(Emote emote) async {
+    await _dggService.loadEmote(emote);
+    notifyListeners();
   }
 
   void uncensorMessage(UserMessage message) {
@@ -71,21 +199,25 @@ class ChatViewModel extends BaseViewModel {
   Future<void> menuItemClick(int selected) async {
     switch (selected) {
       case 0:
-        await _dggService.disconnect();
-        notifyListeners();
+        //Disconnect
+        _disconnectChat();
         break;
       case 1:
-        _dggService.reconnect(() => notifyListeners());
+        //Reconnect
+        await _disconnectChat();
+        _connectChat();
         break;
       case 2:
-        //First clear assets
+        //Refresh assets
+        //First disconnect from chat
+        await _disconnectChat();
+        //Then clear assets
         await _dggService.clearAssets();
-        notifyListeners();
-        //Fetch assets
+        //Finally fetch assets
         await _dggService.getAssets();
         notifyListeners();
         //Re-open chat
-        _openChat();
+        _connectChat();
         break;
       default:
         print("ERROR: Invalid chat menu item");
@@ -166,7 +298,7 @@ class ChatViewModel extends BaseViewModel {
         });
 
         //check user names
-        _dggService.users.forEach((user) {
+        _users.forEach((user) {
           if (user.nick.startsWith(lastWordRegex)) {
             newSuggestions.add(user.nick);
           }
@@ -177,12 +309,6 @@ class ChatViewModel extends BaseViewModel {
     _suggestions = newSuggestions;
     _previousLastWord = lastWord;
     notifyListeners();
-  }
-
-  void _updateChat() {
-    if (_isListAtBottom) {
-      notifyListeners();
-    }
   }
 
   void toggleChat(bool isListAtBottom) {
@@ -248,7 +374,8 @@ class ChatViewModel extends BaseViewModel {
     if (_wakelockEnabled) {
       Wakelock.disable();
     }
-    _dggService.closeWebSocket();
+    _chatSubscription?.cancel();
+    _dggService.closeWebSocketConnection();
     super.dispose();
   }
 }
