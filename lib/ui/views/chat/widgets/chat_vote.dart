@@ -70,6 +70,7 @@ class ChatVote extends StatelessWidget {
             ),
             ListView.builder(
               shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               itemCount: model.currentVote.options.length,
               itemBuilder: (context, index) {
                 double percent =

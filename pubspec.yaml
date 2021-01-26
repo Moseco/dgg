@@ -48,6 +48,7 @@ dependencies:
   stacked_themes: ^0.2.2+2
   adaptive_dialog: ^0.9.3
   percent_indicator: ^2.1.9
+  extended_nested_scroll_view: ^2.0.1
 
 dev_dependencies:
   flutter_test:
