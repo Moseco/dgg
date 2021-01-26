@@ -58,7 +58,7 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
     ClipboardData data = await Clipboard.getData('text/plain');
     String loginKey = data.text;
-    
+
     if (loginKey != null) {
       await _sharedPreferencesService
           .storeAuthInfo(AuthInfo(loginKey: loginKey));
@@ -66,6 +66,11 @@ class AuthViewModel extends BaseViewModel {
     } else {
       _isSavingAuth = false;
     }
+    notifyListeners();
+  }
+
+  void goBackToInstructions() {
+    _isAuthStarted = false;
     notifyListeners();
   }
 

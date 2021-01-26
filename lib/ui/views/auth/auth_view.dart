@@ -12,14 +12,27 @@ class AuthView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<AuthViewModel>.reactive(
       viewModelBuilder: () => AuthViewModel(),
-      builder: (context, model, child) => Scaffold(
-        appBar: AppBar(
-          title: Text("Sign in"),
-        ),
-        body: SafeArea(
-          child: model.isAuthMethodSelected
-              ? _buildAuthMethod(context, model)
-              : _buildInstructions(context, model),
+      builder: (context, model, child) => WillPopScope(
+        onWillPop: () async {
+          if (model.isAuthStarted) {
+            model.goBackToInstructions();
+            return false;
+          } else if (model.isAuthMethodSelected) {
+            model.setAuthMethod(null);
+            return false;
+          } else {
+            return true;
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Sign in"),
+          ),
+          body: SafeArea(
+            child: model.isAuthMethodSelected
+                ? _buildAuthMethod(context, model)
+                : _buildInstructions(context, model),
+          ),
         ),
       ),
     );
@@ -117,6 +130,14 @@ class AuthView extends StatelessWidget {
                   child: Text(
                     "This page will let you sign into your destiny.gg account and use it in this app. On the sign in page, make sure to select the \'remember me\' option to stay signed in, then sign in normally.\nTo get started press the button below.",
                     textAlign: TextAlign.center,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    "Warning: Signing in with Google might not work because Google has disabled WebView login. Use a different login option or go back and use the login key method",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red),
                   ),
                 ),
                 RaisedButton(
