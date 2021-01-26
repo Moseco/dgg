@@ -146,7 +146,8 @@ class ChatViewModel extends BaseViewModel {
             if (_currentVote != null && _currentVote.time > voteTimePassed) {
               String temp =
                   userMessage.data.replaceFirst(DggVote.voteValidRegex, '');
-              if (temp.isEmpty) {
+              //Check if message is a vote and restrict length to prevent max int error
+              if (temp.isEmpty && userMessage.data.length < 3) {
                 int vote = int.parse(userMessage.data);
                 if (vote > 0 && vote <= _currentVote.options.length) {
                   _currentVote.castVote(
