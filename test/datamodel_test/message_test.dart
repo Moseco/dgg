@@ -66,6 +66,14 @@ void main() {
       expect(muteMessage.data, "ExampleName");
     });
 
+    test('Unmute message', () {
+      UnmuteMessage unmuteMessage =
+          UnmuteMessage.fromJson(TestData.WS_UNMUTE_STRING);
+
+      expect(unmuteMessage.nick, "Bot");
+      expect(unmuteMessage.data, "ExampleName");
+    });
+
     test('Ban message', () {
       BanMessage banMessage = BanMessage.fromJson(TestData.WS_BAN_STRING);
 
@@ -79,6 +87,13 @@ void main() {
 
       expect(unbanMessage.nick, "Bot");
       expect(unbanMessage.data, "ExampleName");
+    });
+
+    test('Error message dusplicate', () {
+      ErrorMessage errorMessage =
+          ErrorMessage.fromJson(TestData.WS_ERR_DUPLICATE_STRING);
+
+      expect(errorMessage.description, "duplicate");
     });
   });
 }

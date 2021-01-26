@@ -93,9 +93,11 @@ class NamesMessage extends Message {
 
 class StatusMessage extends Message {
   final String data;
+  final bool isError;
 
   const StatusMessage({
     this.data,
+    this.isError = false,
   });
 }
 
@@ -166,6 +168,25 @@ class MuteMessage extends Message {
   }
 }
 
+class UnmuteMessage extends Message {
+  final String nick;
+  final String data;
+
+  const UnmuteMessage({
+    this.nick,
+    this.data,
+  });
+
+  static UnmuteMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return UnmuteMessage(
+      nick: json['nick'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
 class BanMessage extends Message {
   final String nick;
   final String data;
@@ -217,6 +238,41 @@ class ComboMessage extends Message {
     return ComboMessage(
       comboCount: comboCount + 1,
       emote: emote,
+    );
+  }
+}
+
+class SubOnlyMessage extends Message {
+  final String nick;
+  final String data;
+
+  const SubOnlyMessage({
+    this.nick,
+    this.data,
+  });
+
+  static SubOnlyMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return SubOnlyMessage(
+      nick: json['nick'] as String,
+      data: json['data'] as String,
+    );
+  }
+}
+
+class ErrorMessage extends Message {
+  final String description;
+
+  const ErrorMessage({
+    this.description,
+  });
+
+  static ErrorMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return ErrorMessage(
+      description: json['description'] as String,
     );
   }
 }

@@ -20,6 +20,7 @@ class ItemStatusMessage extends StatelessWidget {
               child: Icon(
                 Icons.info_outline,
                 size: 20,
+                color: message.isError ? Colors.red : null,
               ),
             ),
             TextSpan(
@@ -27,6 +28,7 @@ class ItemStatusMessage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: message.isError ? Colors.red : null,
               ),
             ),
           ],

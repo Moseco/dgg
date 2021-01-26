@@ -126,24 +126,24 @@ class DggService {
         return BroadcastMessage.fromJson(jsonString);
       case "MUTE":
         return MuteMessage.fromJson(jsonString);
-      // case "UNMUTE":
-      //   break;
+      case "UNMUTE":
+        return UnmuteMessage.fromJson(jsonString);
       case "BAN":
         return BanMessage.fromJson(jsonString);
       case "UNBAN":
         return UnbanMessage.fromJson(jsonString);
       case "REFRESH":
         return StatusMessage(data: "Being disconnected by server...");
+      case "SUBONLY":
+        return SubOnlyMessage.fromJson(jsonString);
+      case "ERR":
+        return ErrorMessage.fromJson(jsonString);
       // // Other possible types
-      // case "SUBONLY":
-      //   break;
       // case "PING":
       //   break;
       // case "PONG":
       //   break;
       // case "PRIVMSG":
-      //   break;
-      // case "ERR":
       //   break;
       default:
         print(data);

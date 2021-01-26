@@ -182,18 +182,52 @@ class ChatViewModel extends BaseViewModel {
             _messages.add(StatusMessage(
                 data: "${muteMessage.data} muted by ${muteMessage.nick}"));
             break;
+          case UnmuteMessage:
+            UnmuteMessage unmuteMessage = currentMessage;
+            _messages.add(StatusMessage(
+                data:
+                    "${unmuteMessage.data} unmuted by ${unmuteMessage.nick}"));
+            break;
           case BanMessage:
             BanMessage banMessage = currentMessage;
             _messages.add(StatusMessage(
                 data: "${banMessage.data} banned by ${banMessage.nick}"));
             break;
           case UnbanMessage:
-            BanMessage unbanMessage = currentMessage;
+            UnbanMessage unbanMessage = currentMessage;
             _messages.add(StatusMessage(
                 data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
             break;
           case StatusMessage:
             _messages.add(currentMessage);
+            break;
+          case SubOnlyMessage:
+            SubOnlyMessage subOnlyMessage = currentMessage;
+            String subMode =
+                subOnlyMessage.data == 'on' ? 'enabled' : 'disabled';
+            _messages.add(StatusMessage(
+                data:
+                    "Subscriber only mode $subMode by ${subOnlyMessage.nick}"));
+            break;
+          case ErrorMessage:
+            ErrorMessage errorMessage = currentMessage;
+            if (errorMessage.description == "banned") {
+              _messages.add(StatusMessage(
+                data:
+                    "You have been banned! Check your profile on destiny.gg for more information.",
+                isError: true,
+              ));
+            } else if (errorMessage.description == "muted") {
+              _messages.add(StatusMessage(
+                data: "You are temporarily muted!",
+                isError: true,
+              ));
+            } else {
+              _messages.add(StatusMessage(
+                data: errorMessage.description,
+                isError: true,
+              ));
+            }
             break;
           default:
             break;
