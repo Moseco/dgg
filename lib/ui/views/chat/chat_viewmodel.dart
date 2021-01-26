@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dgg/datamodels/dgg_vote.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user.dart';
@@ -50,6 +51,13 @@ class ChatViewModel extends BaseViewModel {
   bool get showStreamPrompt => _showStreamPrompt;
   bool _showStreamEmbed = false;
   bool get showStreamEmbed => _showStreamEmbed;
+
+  DggVote _currentVote;
+  DggVote get currentVote => _currentVote;
+  Timer _voteTimer;
+  int get voteTimePassed => _voteTimer.tick;
+  bool _isVoteCollapsed = false;
+  bool get isVoteCollapsed => _isVoteCollapsed;
 
   Future<void> initialize() async {
     _wakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
@@ -115,6 +123,38 @@ class ChatViewModel extends BaseViewModel {
                 }
               }
             }
+            //Check if message is starting a vote
+            if (userMessage.data.startsWith(DggVote.voteStartRegex)) {
+              if (_dggService.hasVotePermission(userMessage.user.features)) {
+                DggVote dggVote = DggVote.fromString(userMessage.data);
+                if (dggVote != null) {
+                  _currentVote = dggVote;
+                  _voteTimer?.cancel();
+                  _voteTimer =
+                      Timer.periodic(Duration(seconds: 1), handleVoteTimer);
+                }
+              }
+            }
+            //Check if message is stoping a vote
+            if (userMessage.data.startsWith(DggVote.voteStopRegex)) {
+              if (_dggService.hasVotePermission(userMessage.user.features)) {
+                _currentVote = null;
+                _voteTimer?.cancel();
+              }
+            }
+            //Check if message is a vote
+            if (_currentVote != null && _currentVote.time > voteTimePassed) {
+              String temp =
+                  userMessage.data.replaceFirst(DggVote.voteValidRegex, '');
+              if (temp.isEmpty) {
+                int vote = int.parse(userMessage.data);
+                if (vote > 0 && vote <= _currentVote.options.length) {
+                  _currentVote.castVote(
+                      userMessage.user.nick, vote, userMessage.user.features);
+                }
+              }
+            }
+
             //Add message normally
             _messages.add(userMessage);
             break;
@@ -369,6 +409,19 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
+  void handleVoteTimer(Timer timer) {
+    if (timer.tick > _currentVote.time + 5) {
+      timer.cancel();
+      _currentVote = null;
+    }
+    notifyListeners();
+  }
+
+  void toggleVoteCollapse() {
+    _isVoteCollapsed = !_isVoteCollapsed;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     if (_wakelockEnabled) {
@@ -376,6 +429,7 @@ class ChatViewModel extends BaseViewModel {
     }
     _chatSubscription?.cancel();
     _dggService.closeWebSocketConnection();
+    _voteTimer?.cancel();
     super.dispose();
   }
 }

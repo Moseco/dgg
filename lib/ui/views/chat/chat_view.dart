@@ -85,6 +85,7 @@ class _ChatViewState extends State<ChatView> {
     return Column(
       children: [
         _buildStreamEmbed(model),
+        model.currentVote == null ? Container() : ChatVote(model: model),
         Expanded(child: _buildChat(model)),
       ],
     );

@@ -274,6 +274,17 @@ class DggService {
     }
   }
 
+  bool hasVotePermission(List<String> features) {
+    for (int i = 0; i < features.length; i++) {
+      if (features[i] == 'admin' ||
+          features[i] == 'bot' ||
+          features[i] == 'moderator') {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void signOut() {
     _authInfo = null;
     _sessionInfo = Unauthenticated();
