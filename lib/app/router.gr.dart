@@ -12,15 +12,13 @@ import 'package:flutter/material.dart';
 import '../ui/views/screens.dart';
 
 class Routes {
-  static const String homeView = '/';
+  static const String chatView = '/';
   static const String authView = '/auth-view';
-  static const String chatView = '/chat-view';
   static const String settingsView = '/settings-view';
   static const String onboardingView = '/onboarding-view';
   static const all = <String>{
-    homeView,
-    authView,
     chatView,
+    authView,
     settingsView,
     onboardingView,
   };
@@ -30,30 +28,23 @@ class AutoRouter extends RouterBase {
   @override
   List<RouteDef> get routes => _routes;
   final _routes = <RouteDef>[
-    RouteDef(Routes.homeView, page: HomeView),
-    RouteDef(Routes.authView, page: AuthView),
     RouteDef(Routes.chatView, page: ChatView),
+    RouteDef(Routes.authView, page: AuthView),
     RouteDef(Routes.settingsView, page: SettingsView),
     RouteDef(Routes.onboardingView, page: OnboardingView),
   ];
   @override
   Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
   final _pagesMap = <Type, AutoRouteFactory>{
-    HomeView: (data) {
+    ChatView: (data) {
       return MaterialPageRoute<dynamic>(
-        builder: (context) => const HomeView(),
+        builder: (context) => const ChatView(),
         settings: data,
       );
     },
     AuthView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => const AuthView(),
-        settings: data,
-      );
-    },
-    ChatView: (data) {
-      return MaterialPageRoute<dynamic>(
-        builder: (context) => const ChatView(),
         settings: data,
       );
     },

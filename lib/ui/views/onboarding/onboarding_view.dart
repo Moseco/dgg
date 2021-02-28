@@ -37,6 +37,19 @@ class OnboardingView extends StatelessWidget {
               ),
               footer: _buildAnalyticsSwitches(context, model),
             ),
+            PageViewModel(
+              title: model.isSignedIn ? "You are ready to go!" : "Final Thing",
+              body: model.isSignedIn
+                  ? ""
+                  : "To send messages in chat you must sign in, if you want to you can do that now. If not, you can always do it later in the settings.",
+              image: Center(
+                child: Icon(
+                  Icons.account_circle,
+                  size: 200,
+                ),
+              ),
+              footer: _buildSigninButton(context, model),
+            ),
           ],
           dotsDecorator: DotsDecorator(
             activeColor: Theme.of(context).primaryColor,
@@ -94,5 +107,23 @@ class OnboardingView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildSigninButton(BuildContext context, OnboardingViewModel model) {
+    if (model.isSignedIn) {
+      return Text(
+        "Signed in as: ${model.nickname}",
+        textAlign: TextAlign.center,
+      );
+    } else {
+      return RaisedButton(
+        color: Theme.of(context).primaryColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text("Sign in"),
+        onPressed: () => model.navigateToAuth(),
+      );
+    }
   }
 }

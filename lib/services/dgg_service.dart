@@ -50,7 +50,7 @@ class DggService {
 
   Future<void> getSessionInfo() async {
     _sessionInfo = null;
-    _authInfo = await _sharedPreferencesService.getAuthInfo();
+    _authInfo = _sharedPreferencesService.getAuthInfo();
 
     if (_authInfo == null) {
       _sessionInfo = Unauthenticated();

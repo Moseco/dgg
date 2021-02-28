@@ -12,18 +12,10 @@ class AuthView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<AuthViewModel>.reactive(
       viewModelBuilder: () => AuthViewModel(),
+      fireOnModelReadyOnce: true,
+      onModelReady: (model) => model.initialize(),
       builder: (context, model, child) => WillPopScope(
-        onWillPop: () async {
-          if (model.isAuthStarted) {
-            model.goBackToInstructions();
-            return false;
-          } else if (model.isAuthMethodSelected) {
-            model.setAuthMethod(null);
-            return false;
-          } else {
-            return true;
-          }
-        },
+        onWillPop: model.handleOnWillPop,
         child: Scaffold(
           appBar: AppBar(
             title: Text("Sign in"),
@@ -91,14 +83,51 @@ class AuthView extends StatelessWidget {
   }
 
   Widget _buildAuthMethod(BuildContext context, AuthViewModel model) {
-    if (model.authMethod == AuthViewModel.AUTH_METHOD_WEBVIEW) {
-      if (model.isAuthStarted) {
-        return _buildWebView(model);
+    if (model.isSavingAuth) {
+      if (model.isVerifyFailed) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text("Failed to verify login information with dgg."),
+              ),
+              RaisedButton(
+                color: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text("Try again"),
+                onPressed: () => model.restartAuth(),
+              ),
+            ],
+          ),
+        );
       } else {
-        return _buildWebViewInstructions(context, model);
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: CircularProgressIndicator(),
+              ),
+              Text("Verifying information with dgg."),
+            ],
+          ),
+        );
       }
     } else {
-      return _buildLoginKeyInstructions(context, model);
+      if (model.authMethod == AuthViewModel.AUTH_METHOD_WEBVIEW) {
+        if (model.isAuthStarted) {
+          return _buildWebView(model);
+        } else {
+          return _buildWebViewInstructions(context, model);
+        }
+      } else {
+        return _buildLoginKeyInstructions(context, model);
+      }
     }
   }
 
@@ -205,21 +234,23 @@ class AuthView extends StatelessWidget {
                         ),
                         onPressed: () => model.startAuthentication(),
                       )
-                    : model.isSavingAuth
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          )
-                        : RaisedButton(
-                            color: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              "Get key from clipboard and submit",
-                            ),
-                            onPressed: () => model.getKeyFromClipboard(),
-                          ),
+                    : RaisedButton(
+                        color: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          "Get key from clipboard and submit",
+                        ),
+                        onPressed: () => model.getKeyFromClipboard(),
+                      ),
+                model.isClipboardError
+                    ? Text(
+                        "Failed to get login key from clipboard",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.red),
+                      )
+                    : Container(),
                 Image.asset("assets/images/login_key.png"),
               ],
             ),

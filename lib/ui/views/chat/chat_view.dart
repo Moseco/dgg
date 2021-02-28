@@ -5,7 +5,6 @@ import 'package:stacked/stacked.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     as extendedNestedScrollView;
-
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
@@ -49,6 +48,7 @@ class _ChatViewState extends State<ChatView> {
                         : model.menuItemClick(selected),
                     itemBuilder: (BuildContext context) {
                       return [
+                        PopupMenuItem<int>(value: 4, child: Text('Settings')),
                         PopupMenuItem<int>(value: 0, child: Text('Disconnect')),
                         PopupMenuItem<int>(value: 1, child: Text('Reconnect')),
                         PopupMenuItem<int>(
@@ -61,8 +61,7 @@ class _ChatViewState extends State<ChatView> {
               : null,
         ),
         body: SafeArea(
-          child:
-              model.isAssetsLoaded ? _buildLoaded(model) : _buildLoading(model),
+          child: model.isLoading ? _buildLoading(model) : _buildLoaded(model),
         ),
       ),
     );
@@ -75,9 +74,11 @@ class _ChatViewState extends State<ChatView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8),
-            child: Text("Loading assets"),
+            child: CircularProgressIndicator(),
           ),
-          CircularProgressIndicator(),
+          Text(model.isAuthenticating
+              ? "Authenticating with dgg"
+              : "Loading assets"),
         ],
       ),
     );

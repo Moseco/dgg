@@ -1,4 +1,5 @@
 import 'package:dgg/app/locator.dart';
+import 'package:dgg/app/router.gr.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -27,9 +28,10 @@ class SettingsViewModel extends BaseViewModel {
   int get themeIndex => _themeIndex;
 
   Future<void> initialize() async {
-    _isAnalyticsEnabled = await _sharedPreferencesService.getAnalyticsEnabled();
-    _isWakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
-    _themeIndex = await _sharedPreferencesService.getThemeIndex();
+    await _sharedPreferencesService.initialize();
+    _isAnalyticsEnabled = _sharedPreferencesService.getAnalyticsEnabled();
+    _isWakelockEnabled = _sharedPreferencesService.getWakelockEnabled();
+    _themeIndex = _sharedPreferencesService.getThemeIndex();
     notifyListeners();
   }
 
@@ -50,8 +52,9 @@ class SettingsViewModel extends BaseViewModel {
     );
   }
 
-  void back() {
-    _navigationService.back();
+  Future<void> navigateToAuth() async {
+    await _navigationService.navigateTo(Routes.authView);
+    notifyListeners();
   }
 
   Future<void> toggleCrashlyticsCollection(bool value) async {

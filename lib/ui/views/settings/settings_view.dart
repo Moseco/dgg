@@ -42,9 +42,9 @@ class SettingsView extends StatelessWidget {
                   : [
                       SettingsTile(
                         title: 'Sign in',
-                        subtitle: 'Must be done from home screen',
                         leading: Icon(Icons.account_circle),
-                        onPressed: (BuildContext context) => model.back(),
+                        onPressed: (BuildContext context) =>
+                            model.navigateToAuth(),
                       ),
                     ],
             ),

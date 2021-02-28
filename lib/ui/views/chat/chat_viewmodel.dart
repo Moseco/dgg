@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dgg/app/router.gr.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/message.dart';
@@ -11,6 +12,7 @@ import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/dgg_service.dart';
+import 'package:stacked_services/stacked_services.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -19,9 +21,12 @@ class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _remoteConfigService = locator<RemoteConfigService>();
+  final _navigationService = locator<NavigationService>();
 
   WebViewController webViewController;
 
+  bool get isLoading => isAuthenticating || !isAssetsLoaded;
+  bool get isAuthenticating => _dggService.sessionInfo == null;
   bool get isAssetsLoaded => _dggService.isAssetsLoaded;
   bool get isSignedIn => _dggService.isSignedIn;
 
@@ -41,8 +46,6 @@ class ChatViewModel extends BaseViewModel {
   List<String> get suggestions => _suggestions;
   String _previousLastWord = '';
 
-  bool _wakelockEnabled;
-
   String get twitchUrlBase =>
       'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&channel=';
   String _currentStreamChannel = 'destiny';
@@ -60,14 +63,29 @@ class ChatViewModel extends BaseViewModel {
   bool get isVoteCollapsed => _isVoteCollapsed;
 
   Future<void> initialize() async {
-    _wakelockEnabled = await _sharedPreferencesService.getWakelockEnabled();
-    if (_wakelockEnabled) {
+    await _sharedPreferencesService.initialize();
+    await _checkOnboarding();
+    if (_sharedPreferencesService.getWakelockEnabled()) {
       Wakelock.enable();
     }
+    await _getSessionInfo();
     _getStreamStatus();
     await _dggService.getAssets();
     notifyListeners();
     _connectChat();
+  }
+
+  Future<void> _checkOnboarding() async {
+    bool onboardingFinished = _sharedPreferencesService.getOnboarding();
+
+    if (!onboardingFinished) {
+      await _navigationService.navigateTo(Routes.onboardingView);
+    }
+  }
+
+  Future<void> _getSessionInfo() async {
+    await _dggService.getSessionInfo();
+    notifyListeners();
   }
 
   void _connectChat() {
@@ -294,6 +312,19 @@ class ChatViewModel extends BaseViewModel {
         //Re-open chat
         _connectChat();
         break;
+      case 4:
+        //Navigate to settings
+        //  Disconnect chat/turn off wakelock while in settings
+        if (_sharedPreferencesService.getWakelockEnabled()) {
+          Wakelock.disable();
+        }
+        _disconnectChat();
+        await _navigationService.navigateTo(Routes.settingsView);
+        if (_sharedPreferencesService.getWakelockEnabled()) {
+          Wakelock.enable();
+        }
+        _connectChat();
+        break;
       default:
         print("ERROR: Invalid chat menu item");
     }
@@ -459,11 +490,10 @@ class ChatViewModel extends BaseViewModel {
 
   @override
   void dispose() {
-    if (_wakelockEnabled) {
+    if (_sharedPreferencesService.getWakelockEnabled()) {
       Wakelock.disable();
     }
-    _chatSubscription?.cancel();
-    _dggService.closeWebSocketConnection();
+    _disconnectChat();
     _voteTimer?.cancel();
     super.dispose();
   }

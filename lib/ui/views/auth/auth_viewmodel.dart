@@ -1,4 +1,4 @@
-import 'package:dgg/services/crypto_service.dart';
+import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
@@ -6,9 +6,7 @@ import 'package:dgg/app/locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/services/cookie_manager_service.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 
 class AuthViewModel extends BaseViewModel {
   static const int AUTH_METHOD_WEBVIEW = 0;
@@ -17,7 +15,7 @@ class AuthViewModel extends BaseViewModel {
   final _cookieManagerService = locator<CookieManagerService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _navigationService = locator<NavigationService>();
-  final _cryptoService = locator<CryptoService>();
+  final _dggService = locator<DggService>();
 
   int _authMethod;
   int get authMethod => _authMethod;
@@ -28,6 +26,21 @@ class AuthViewModel extends BaseViewModel {
 
   bool _isSavingAuth = false;
   bool get isSavingAuth => _isSavingAuth;
+
+  bool _isVerifyFailed = false;
+  bool get isVerifyFailed => _isVerifyFailed;
+
+  bool _isClipboardError = false;
+  bool get isClipboardError => _isClipboardError;
+
+  Future<void> initialize() async {
+    await _sharedPreferencesService.initialize();
+  }
+
+  void setAuthMethod(int method) {
+    _authMethod = method;
+    notifyListeners();
+  }
 
   void startAuthentication() {
     _isAuthStarted = true;
@@ -43,14 +56,11 @@ class AuthViewModel extends BaseViewModel {
     AuthInfo authInfo = await _cookieManagerService.readCookies(currentUrl);
 
     if (authInfo != null) {
-      await _sharedPreferencesService.storeAuthInfo(authInfo);
-      _navigationService.back();
+      _isSavingAuth = true;
+      notifyListeners();
+      _sharedPreferencesService.storeAuthInfo(authInfo);
+      _getSessionInfo();
     }
-  }
-
-  void setAuthMethod(int method) {
-    _authMethod = method;
-    notifyListeners();
   }
 
   Future<void> getKeyFromClipboard() async {
@@ -59,14 +69,27 @@ class AuthViewModel extends BaseViewModel {
     ClipboardData data = await Clipboard.getData('text/plain');
     String loginKey = data.text;
 
-    if (loginKey != null) {
-      await _sharedPreferencesService
-          .storeAuthInfo(AuthInfo(loginKey: loginKey));
-      _navigationService.back();
+    if (loginKey != null && loginKey.isNotEmpty) {
+      _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));
+      _getSessionInfo();
     } else {
       _isSavingAuth = false;
+      _isClipboardError = true;
+      notifyListeners();
     }
-    notifyListeners();
+  }
+
+  Future<void> _getSessionInfo() async {
+    await _dggService.getSessionInfo();
+    if (_dggService.isSignedIn) {
+      //Success
+      _navigationService.back();
+    } else {
+      //Verification failed
+      _dggService.signOut();
+      _isVerifyFailed = true;
+      notifyListeners();
+    }
   }
 
   void goBackToInstructions() {
@@ -74,63 +97,26 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> startTokenAuth() async {
-    //Things for exchange
-    String appId = "***CLIENT ID***";
-    String secret = r"***CLIENT SECRET***";
-
-    String state = _cryptoService.generateRandomString(64);
-    String codeVerifier = _cryptoService.generateRandomString(64);
-
-    String codeChallenge =
-        _cryptoService.generateCodeChallenge(secret, codeVerifier);
-
-    // Start listening
-    getUriLinksStream().listen((Uri uri) {
-      // Use the uri and warn the user, if it is not correct
-      String fetchedCode = uri.queryParameters['code'];
-      String fetchedState = uri.queryParameters['state'];
-      if (state == fetchedState) {
-        _getAuthToken(appId, fetchedCode, codeVerifier);
-      } else {
-        print("State returned by server did not match");
-      }
-    }, onError: (err) {
-      // Handle exception by warning the user their action did not succeed
-      print("Listening to deep link broke");
-    });
-
-    //Make url and send user
-    Uri uri = Uri.parse("https://www.destiny.gg/oauth/authorize");
-    uri = uri.replace(queryParameters: {
-      "response_type": "code",
-      "client_id": appId,
-      "redirect_uri": "dev.moseco.dgg://auth",
-      "state": state,
-      "code_challenge": codeChallenge,
-    });
-
-    print(uri.toString());
-    launch(uri.toString());
+  Future<bool> handleOnWillPop() async {
+    if (isSavingAuth) {
+      return true;
+    } else if (isAuthStarted) {
+      goBackToInstructions();
+      return false;
+    } else if (isAuthMethodSelected) {
+      setAuthMethod(null);
+      return false;
+    } else {
+      return true;
+    }
   }
 
-  Future<void> _getAuthToken(
-      String appId, String code, String codeVerifier) async {
-    Uri uri = Uri.parse("https://www.destiny.gg/oauth/token");
-    uri = uri.replace(queryParameters: {
-      "grant_type": "authorization_code",
-      "code": code,
-      "client_id": appId,
-      "redirect_uri": "dev.moseco.dgg://auth",
-      "code_verifier": codeVerifier,
-    });
-
-    final response = await http.get(uri.toString());
-
-    if (response.statusCode == 200) {
-      print(response.body);
-    } else {
-      print("Http error ${response.statusCode}");
-    }
+  void restartAuth() {
+    _authMethod = null;
+    _isAuthStarted = false;
+    _isSavingAuth = false;
+    _isVerifyFailed = false;
+    _isClipboardError = false;
+    notifyListeners();
   }
 }
