@@ -111,7 +111,8 @@ class ItemUserMessage extends StatelessWidget {
               ),
               recognizer: Platform.isAndroid
                   ? (TapGestureRecognizer()
-                    ..onTap = () => model.setStreamChannel([element.channel]))
+                    ..onTap = () => model.setStreamChannel(
+                        element.embedId, element.embedType))
                   : null,
               //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
               //  Problem only happens on iOS so need different approach on Android/iOS

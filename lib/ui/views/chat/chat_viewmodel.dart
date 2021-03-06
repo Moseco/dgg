@@ -16,6 +16,7 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
@@ -24,6 +25,7 @@ class ChatViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
 
   WebViewController webViewController;
+  YoutubePlayerController youtubePlayerController;
 
   bool get isLoading => isAuthenticating || !isAssetsLoaded;
   bool get isAuthenticating => _dggService.sessionInfo == null;
@@ -48,12 +50,14 @@ class ChatViewModel extends BaseViewModel {
 
   String get twitchUrlBase =>
       'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&channel=';
-  String _currentStreamChannel = 'destiny';
-  String get currentStreamChannel => _currentStreamChannel;
+  String _currentEmbedId = 'destiny';
+  String get currentEmbedId => _currentEmbedId;
   bool _showStreamPrompt = false;
   bool get showStreamPrompt => _showStreamPrompt;
   bool _showStreamEmbed = false;
   bool get showStreamEmbed => _showStreamEmbed;
+  EmbedType _streamEmbedType = EmbedType.twitch;
+  EmbedType get streamEmbedType => _streamEmbedType;
 
   DggVote _currentVote;
   DggVote get currentVote => _currentVote;
@@ -461,17 +465,47 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setStreamChannel(List<String> channel) {
+  void setStreamChannelManual(List<String> channel) {
     if (channel != null && channel[0].trim().isNotEmpty) {
+      setStreamChannel(channel[0], "twitch");
+    }
+  }
+
+  void setStreamChannel(String embedId, String embedType) {
+    if (embedId != null && embedId.trim().isNotEmpty) {
       //Set new channel name
-      _currentStreamChannel = channel[0].trim();
-      if (_showStreamEmbed) {
-        //Embed already shown, use controller to load new stream
-        webViewController.loadUrl(twitchUrlBase + _currentStreamChannel);
-      } else {
-        //Embed not shown, show embed
-        setShowStreamEmbed(true);
+      _currentEmbedId = embedId.trim();
+      //Set values based on embed type and current embed state
+      switch (embedType) {
+        case "twitch":
+          if (_showStreamEmbed && _streamEmbedType == EmbedType.twitch) {
+            //Embed already shown, use controller to load new stream
+            webViewController.loadUrl(twitchUrlBase + _currentEmbedId);
+          } else {
+            _streamEmbedType = EmbedType.twitch;
+          }
+          break;
+        case "youtube":
+          if (_showStreamEmbed && _streamEmbedType == EmbedType.youtube) {
+            //Embed already shown, use controller to load new stream
+            youtubePlayerController.load(_currentEmbedId);
+          } else {
+            _streamEmbedType = EmbedType.youtube;
+            youtubePlayerController?.close();
+            youtubePlayerController = YoutubePlayerController(
+              initialVideoId: _currentEmbedId,
+              params: YoutubePlayerParams(
+                autoPlay: true,
+                showControls: false,
+              ),
+            );
+          }
+          break;
+        default:
+          break;
       }
+      //Show the stream embed
+      setShowStreamEmbed(true);
     }
   }
 
@@ -495,6 +529,12 @@ class ChatViewModel extends BaseViewModel {
     }
     _disconnectChat();
     _voteTimer?.cancel();
+    youtubePlayerController?.close();
     super.dispose();
   }
+}
+
+enum EmbedType {
+  twitch,
+  youtube,
 }

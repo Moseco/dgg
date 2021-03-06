@@ -9,7 +9,7 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
   final RegExp _embedUrlRegex = RegExp(
-    r"#twitch\/(?:[A-z0-9_\-]{3,64})",
+    r"#(twitch|youtube)\/(?:[A-z0-9_\-]{3,64})",
     caseSensitive: false,
   );
 
@@ -93,11 +93,13 @@ class UserMessageElementsService {
           String embedUrl = currentText.substring(match.start, match.end);
           int insertIndex = i + 1;
           String channel = embedUrl.substring(embedUrl.indexOf('/') + 1);
+          String embedType = embedUrl.substring(1, embedUrl.indexOf('/'));
           if (match.start > 0) {
             list[i] = TextElement(currentText.substring(0, match.start));
-            list.insert(insertIndex++, EmbedUrlElement(embedUrl, channel));
+            list.insert(
+                insertIndex++, EmbedUrlElement(embedUrl, channel, embedType));
           } else {
-            list[i] = EmbedUrlElement(embedUrl, channel);
+            list[i] = EmbedUrlElement(embedUrl, channel, embedType);
           }
 
           if (match.end < currentText.length) {

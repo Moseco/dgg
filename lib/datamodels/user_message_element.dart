@@ -28,9 +28,12 @@ class EmoteElement extends UserMessageElement {
 }
 
 class EmbedUrlElement extends UserMessageElement {
-  final String channel;
+  final String embedId;
+  final String embedType;
+
   const EmbedUrlElement(
     String text,
-    this.channel,
+    this.embedId,
+    this.embedType,
   ) : super(text);
 }

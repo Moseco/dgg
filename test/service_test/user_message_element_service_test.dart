@@ -299,7 +299,8 @@ void main() {
       expect(elements.length, 1);
       expect(elements[0].runtimeType, EmbedUrlElement);
       expect(elements[0].text, "#twitch/name");
-      expect((elements[0] as EmbedUrlElement).channel, "name");
+      expect((elements[0] as EmbedUrlElement).embedId, "name");
+      expect((elements[0] as EmbedUrlElement).embedType, "twitch");
     });
 
     test('Stream embed and text', () {
@@ -314,7 +315,8 @@ void main() {
       expect(elements[0].text, "Watching ");
       expect(elements[1].runtimeType, EmbedUrlElement);
       expect(elements[1].text, "#twitch/name");
-      expect((elements[1] as EmbedUrlElement).channel, "name");
+      expect((elements[1] as EmbedUrlElement).embedId, "name");
+      expect((elements[1] as EmbedUrlElement).embedType, "twitch");
       expect(elements[2].runtimeType, TextElement);
       expect(elements[2].text, " now");
     });
@@ -344,14 +346,15 @@ void main() {
     test('Stream embed with period', () {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
-        "#twitch/name.",
+        "#youtube/name.",
         Emotes(emoteMap: {}),
       );
 
       expect(elements.length, 2);
       expect(elements[0].runtimeType, EmbedUrlElement);
-      expect(elements[0].text, "#twitch/name");
-      expect((elements[0] as EmbedUrlElement).channel, "name");
+      expect(elements[0].text, "#youtube/name");
+      expect((elements[0] as EmbedUrlElement).embedId, "name");
+      expect((elements[0] as EmbedUrlElement).embedType, "youtube");
     });
   });
 }
