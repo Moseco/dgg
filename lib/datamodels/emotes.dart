@@ -21,6 +21,7 @@ class Emotes {
       emoteMap[element['prefix']] = Emote(
         name: element['prefix'],
         url: element['image'][0]['url'],
+        mime: element['image'][0]['mime'],
       );
     });
 
@@ -48,6 +49,7 @@ class Emotes {
 class Emote {
   final String name;
   final String url;
+  final String mime;
   bool animated;
   int width;
   bool loading;
@@ -56,6 +58,7 @@ class Emote {
   Emote({
     this.name,
     this.url,
+    this.mime,
     this.animated = false,
     this.width,
     this.loading = false,

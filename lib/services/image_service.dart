@@ -14,19 +14,22 @@ class ImageService {
     http.Response req = await client.get(Uri.parse(emote.url));
     Uint8List bytes = req.bodyBytes;
 
-    imglib.Image image = imglib.decodeImage(bytes);
-
-    if (emote.animated) {
-      imglib.Image croppped = imglib.copyCrop(
-        image,
-        0,
-        0,
-        emote.width,
-        image.height,
-      );
-      return Image.memory(imglib.encodePng(croppped));
+    if (emote.mime == "image/gif") {
+      return Image.memory(bytes);
     } else {
-      return Image.memory(imglib.encodePng(image));
+      if (emote.animated) {
+        imglib.Image image = imglib.decodeImage(bytes);
+        imglib.Image croppped = imglib.copyCrop(
+          image,
+          0,
+          0,
+          emote.width,
+          image.height,
+        );
+        return Image.memory(imglib.encodePng(croppped));
+      } else {
+        return Image.memory(bytes);
+      }
     }
   }
 }
