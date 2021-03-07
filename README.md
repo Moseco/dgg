@@ -20,8 +20,11 @@ Currently only Android is confirmed to be working, so some setup might be requir
     - [x] Support "#twitch/channel" format
     - [x] Support "#youtube/channel" format
 - [x] Chat voting
-- [ ] Context sensitive  emotes (e.g. sword direction)
 - [ ] Animated emotes 
+    - [x] Emotes in gif format
+    - [ ] Emotes with frames in a single png
+    - [ ] Emotes with extra effects
+- [ ] Context sensitive  emotes (e.g. sword direction)
 - [ ] Private messages
 - [ ] Chat text color changes (e.g. '>' causes green text for subs)
 - [ ] Allow user to set default stream embed platform (Twitch or YouTube)
