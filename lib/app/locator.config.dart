@@ -27,6 +27,8 @@ GetIt $initGetIt(
 }) {
   final gh = GetItHelper(get, environment, environmentFilter);
   final thirdPartyServicesModule = _$ThirdPartyServicesModule();
+  gh.lazySingleton<BottomSheetService>(
+      () => thirdPartyServicesModule.bottomSheetService);
   gh.lazySingleton<CookieManagerService>(() => CookieManagerService());
   gh.lazySingleton<DggService>(() => DggService());
   gh.lazySingleton<ImageService>(() => ImageService());
@@ -43,6 +45,8 @@ GetIt $initGetIt(
 }
 
 class _$ThirdPartyServicesModule extends ThirdPartyServicesModule {
+  @override
+  BottomSheetService get bottomSheetService => BottomSheetService();
   @override
   NavigationService get navigationService => NavigationService();
   @override

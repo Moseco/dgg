@@ -1,7 +1,7 @@
 import 'package:dgg/ui/views/chat/chat_viewmodel.dart';
 import 'package:flutter/material.dart';
 
-class ChatInput extends StatefulWidget {
+class ChatInput extends StatelessWidget {
   final ChatViewModel model;
 
   const ChatInput({
@@ -10,15 +10,8 @@ class ChatInput extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChatInputState createState() => _ChatInputState();
-}
-
-class _ChatInputState extends State<ChatInput> {
-  final _textEditingController = TextEditingController();
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.model.isSignedIn) {
+    if (model.isSignedIn) {
       return _buildInput(context);
     } else {
       return _buildNoInput();
@@ -55,7 +48,7 @@ class _ChatInputState extends State<ChatInput> {
   }
 
   Widget _buildSuggestionList(BuildContext context) {
-    if (widget.model.draft.isEmpty) {
+    if (model.draft.isEmpty) {
       return Container();
     } else {
       return Container(
@@ -69,19 +62,14 @@ class _ChatInputState extends State<ChatInput> {
         ),
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: widget.model.suggestions.length,
+          itemCount: model.suggestions.length,
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
-              onTap: () {
-                _textEditingController.text =
-                    widget.model.completeSuggestion(index);
-                _textEditingController.selection = TextSelection.fromPosition(
-                    TextPosition(offset: _textEditingController.text.length));
-              },
+              onTap: () => model.completeSuggestion(index),
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Text(widget.model.suggestions[index]),
+                  child: Text(model.suggestions[index]),
                 ),
               ),
             );
@@ -93,32 +81,21 @@ class _ChatInputState extends State<ChatInput> {
 
   Widget _buildTextField(BuildContext context) {
     return TextField(
-      controller: _textEditingController,
+      controller: model.chatInputController,
       minLines: 1,
       maxLines: 3,
-      onChanged: widget.model.updateChatDraft,
+      onChanged: model.updateChatDraft,
       textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         hintText: 'Type a message...',
         suffixIcon: IconButton(
           icon: Icon(Icons.send),
-          onPressed:
-              widget.model.isChatConnected && widget.model.draft.isNotEmpty
-                  ? () {
-                      if (widget.model.sendChatMessage()) {
-                        _textEditingController.clear();
-                      }
-                    }
-                  : null,
+          onPressed: model.isChatConnected && model.draft.isNotEmpty
+              ? () => model.sendChatMessage()
+              : null,
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _textEditingController.dispose();
-    super.dispose();
   }
 }

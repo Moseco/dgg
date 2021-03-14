@@ -10,4 +10,6 @@ abstract class ThirdPartyServicesModule {
   SnackbarService get snackbarService;
   @lazySingleton
   ThemeService get themeService => ThemeService.getInstance();
+  @lazySingleton
+  BottomSheetService get bottomSheetService;
 }

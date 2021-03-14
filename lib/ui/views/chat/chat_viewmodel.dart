@@ -9,10 +9,14 @@ import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
+import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
@@ -23,9 +27,12 @@ class ChatViewModel extends BaseViewModel {
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _remoteConfigService = locator<RemoteConfigService>();
   final _navigationService = locator<NavigationService>();
+  final _bottomSheetService = locator<BottomSheetService>();
+  final _snackbarService = locator<SnackbarService>();
 
   WebViewController webViewController;
   YoutubePlayerController youtubePlayerController;
+  final chatInputController = TextEditingController();
 
   bool get isLoading => isAuthenticating || !isAssetsLoaded;
   bool get isAuthenticating => _dggService.sessionInfo == null;
@@ -339,18 +346,16 @@ class ChatViewModel extends BaseViewModel {
     _updateSuggestions();
   }
 
-  bool sendChatMessage() {
+  void sendChatMessage() {
     String draftTrim = _draft.trim();
     if (draftTrim.isNotEmpty && isChatConnected) {
       _dggService.sendChatMessage(draftTrim);
       updateChatDraft('');
-      return true;
-    } else {
-      return false;
+      chatInputController.clear();
     }
   }
 
-  String completeSuggestion(int suggestionIndex) {
+  void completeSuggestion(int suggestionIndex) {
     String newDraft;
     int lastWhiteSpace = _draft.lastIndexOf(RegExp(r'\s'));
     if (lastWhiteSpace == -1) {
@@ -364,7 +369,9 @@ class ChatViewModel extends BaseViewModel {
     }
 
     updateChatDraft(newDraft);
-    return newDraft;
+    chatInputController.text = newDraft;
+    chatInputController.selection =
+        TextSelection.fromPosition(TextPosition(offset: newDraft.length));
   }
 
   void _updateSuggestions() {
@@ -522,6 +529,48 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  Future<void> openUrl(String url) async {
+    String urlToOpen = url;
+    if (!url.startsWith("http")) {
+      urlToOpen = "http://" + url;
+    }
+
+    if (await canLaunch(urlToOpen)) {
+      launch(urlToOpen);
+    } else {
+      _snackbarService.showSnackbar(
+        message: "Could not open url. Copied to clipboard",
+        duration: const Duration(seconds: 2),
+      );
+      Clipboard.setData(ClipboardData(text: url));
+    }
+  }
+
+  Future<void> onUserMessageLongPress(UserMessage message) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      variant: BottomSheetType.messageAction,
+      customData: message,
+      barrierDismissible: true,
+    );
+
+    if (sheetResponse != null) {
+      switch (sheetResponse.responseData) {
+        case MessageActionSheetResponse.copy:
+          Clipboard.setData(ClipboardData(text: message.data));
+          break;
+        case MessageActionSheetResponse.reply:
+          String newDraft = "${message.user.nick} ";
+          updateChatDraft(newDraft);
+          chatInputController.text = newDraft;
+          chatInputController.selection =
+              TextSelection.fromPosition(TextPosition(offset: newDraft.length));
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   @override
   void dispose() {
     if (_sharedPreferencesService.getWakelockEnabled()) {
@@ -530,6 +579,7 @@ class ChatViewModel extends BaseViewModel {
     _disconnectChat();
     _voteTimer?.cancel();
     youtubePlayerController?.close();
+    chatInputController.dispose();
     super.dispose();
   }
 }

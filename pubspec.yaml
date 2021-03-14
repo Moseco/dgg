@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.4.1+5
+version: 0.4.2+6
 
 environment:
   sdk: ">=2.8.0 <3.0.0"
@@ -17,7 +17,7 @@ dependencies:
   stacked: ^1.7.6
   #navigation
   auto_route: ^0.6.9
-  stacked_services: ^0.5.4+4
+  stacked_services: ^0.7.3
   #inversion of control
   get_it: ^5.0.1
   injectable: ^1.0.5

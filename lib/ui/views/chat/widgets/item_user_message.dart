@@ -6,8 +6,6 @@ import 'package:dgg/ui/views/chat/chat_viewmodel.dart';
 import 'package:dgg/ui/views/chat/widgets/emote_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ItemUserMessage extends StatelessWidget {
   final ChatViewModel model;
@@ -22,7 +20,7 @@ class ItemUserMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () => _onLongPress(context),
+      onLongPress: () => model.onUserMessageLongPress(message),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -40,7 +38,7 @@ class ItemUserMessage extends StatelessWidget {
     if (message.isMentioned) {
       return Color(0xBF06263E);
     } else if (message.isOwn) {
-      return Color(0x409e9e9e); //0x80151515
+      return Color(0x409e9e9e);
     } else {
       return null;
     }
@@ -88,7 +86,7 @@ class ItemUserMessage extends StatelessWidget {
               ),
               recognizer: Platform.isAndroid
                   ? (TapGestureRecognizer()
-                    ..onTap = () => _openUrl(context, element.text))
+                    ..onTap = () => model.openUrl(element.text))
                   : null,
               //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
               //  Problem only happens on iOS so need different approach on Android/iOS
@@ -132,34 +130,5 @@ class ItemUserMessage extends StatelessWidget {
       });
     }
     return textSpans;
-  }
-
-  _onLongPress(BuildContext context) {
-    //Copy message text to clipboard
-    Scaffold.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Message copied to clipboard"),
-      ),
-    );
-    Clipboard.setData(ClipboardData(text: message.data));
-  }
-
-  _openUrl(BuildContext context, String url) async {
-    String urlToOpen = url;
-    if (!url.startsWith("http")) {
-      urlToOpen = "http://" + url;
-    }
-
-    if (await canLaunch(urlToOpen)) {
-      launch(urlToOpen);
-    } else {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Could not open. Url copied to clipboard"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      Clipboard.setData(ClipboardData(text: url));
-    }
   }
 }
