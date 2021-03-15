@@ -270,20 +270,16 @@ class ChatViewModel extends BaseViewModel {
 
         notifyListeners();
       },
-      onDone: () {
-        _messages.add(StatusMessage(data: "Disconneced"));
-        _isChatConnected = false;
-        notifyListeners();
-      },
-      onError: (error) {
-        print("STREAM REPORTED ERROR");
-      },
+      onDone: () => _disconnectChat(),
+      onError: (error) => print("STREAM REPORTED ERROR"),
     );
   }
 
   Future<void> _disconnectChat() async {
+    if (_isChatConnected) {
+      _messages.add(StatusMessage(data: "Disconnected"));
+    }
     _isChatConnected = false;
-    _messages.add(StatusMessage(data: "Disconneced"));
     notifyListeners();
     _chatSubscription?.cancel();
     _chatSubscription = null;
