@@ -48,6 +48,9 @@ class DggService {
   //Dgg chat websocket
   WebSocketChannel _webSocketChannel;
 
+  //RegEx
+  final RegExp numberRegex = RegExp(r"\d*\.?\d*");
+
   Future<void> getSessionInfo() async {
     _sessionInfo = null;
     _authInfo = _sharedPreferencesService.getAuthInfo();
@@ -232,7 +235,13 @@ class DggService {
         while (!currentLineTrimmed.startsWith("}")) {
           // //Check if body has animation attribute
           if (currentLineTrimmed.startsWith("animation:")) {
-            emoteList.emoteMap[emoteName].animated = true;
+            if (currentLineTrimmed.contains("steps(")) {
+              //If animation has steps, parse the duration and number of repeats
+              parseEmoteSteps(
+                emoteList.emoteMap[emoteName],
+                currentLineTrimmed,
+              );
+            }
           } else if (currentLineTrimmed.startsWith("width:")) {
             //Get width
             int startIndex = currentLineTrimmed.indexOf(":");
@@ -240,15 +249,81 @@ class DggService {
             int width = int.parse(
                 currentLineTrimmed.substring(startIndex + 1, endIndex).trim());
 
-            //Check if width is already found
-            //  If it has, keep the lower value
-            //  Otherwise, just store it
-            if ((emoteList.emoteMap[emoteName].width ?? 99999) > width) {
+            //Keep lowest width found
+            //  If we find a lower width, then it is step animated
+            if (emoteList.emoteMap[emoteName].width > width) {
               emoteList.emoteMap[emoteName].width = width;
+              emoteList.emoteMap[emoteName].animated = true;
             }
           }
           currentLineTrimmed = lines[++i].trim();
         }
+      }
+    }
+  }
+
+  void parseEmoteSteps(Emote emote, String line) {
+    _StepParam _stepParam1;
+    _StepParam _stepParam2;
+
+    //Remove the last character which will be ';'
+    //  Makes things easier later
+    List<String> words = line.substring(0, line.length - 1).split(' ');
+    for (int i = 0; i < words.length; i++) {
+      if (words[i].startsWith("steps(")) {
+        //Found steps
+        //Check before: i-1
+        _stepParam1 = _parseStepParam(words[i - 1]);
+        if (_stepParam1 == null && words.length > i + 2) {
+          //All params come after, do i+2 here
+          _stepParam1 = _parseStepParam(words[i + 2]);
+        }
+
+        //Make sure there is an after, if there is check it: i+1
+        if (words.length > i + 1) {
+          _stepParam2 = _parseStepParam(words[i + 1]);
+        }
+        break;
+      }
+    }
+
+    emote.duration = _stepParam1?.type == _StepParamType.duration
+        ? _stepParam1?.value
+        : _stepParam2?.value;
+    emote.repeatCount = _stepParam1?.type == _StepParamType.repeatCount
+        ? _stepParam1?.value
+        : _stepParam2?.value;
+
+    //Some emotes have duration in a different line, force 1 second in this case
+    if (emote.duration == null) {
+      emote.duration = 1000;
+    }
+  }
+
+  _StepParam _parseStepParam(String param) {
+    RegExpMatch match = numberRegex.firstMatch(param);
+    if (param.endsWith("ms")) {
+      //Duration in milliseconds
+      return _StepParam(
+        double.parse(param.substring(0, match.end)).toInt(),
+        _StepParamType.duration,
+      );
+    } else if (param.endsWith("s")) {
+      //Duration in seconds
+      return _StepParam(
+        (double.parse(param.substring(0, match.end)) * 1000).toInt(),
+        _StepParamType.duration,
+      );
+    } else {
+      if (match.end != 0) {
+        //Number of repeats
+        return _StepParam(
+          int.parse(param.substring(0, match.end)),
+          _StepParamType.repeatCount,
+        );
+      } else {
+        //Some other parameter we do not care about
+        return null;
       }
     }
   }
@@ -291,4 +366,19 @@ class DggService {
     _currentNick = null;
     _sharedPreferencesService.clearAuthInfo();
   }
+}
+
+class _StepParam {
+  final int value;
+  final _StepParamType type;
+
+  const _StepParam(
+    this.value,
+    this.type,
+  );
+}
+
+enum _StepParamType {
+  duration,
+  repeatCount,
 }

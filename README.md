@@ -22,7 +22,7 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [x] Chat voting
 - [ ] Animated emotes 
     - [x] Emotes in gif format
-    - [ ] Emotes with frames in a single png
+    - [x] Emotes with frames in a single png
     - [ ] Emotes with extra effects
 - [ ] Context sensitive  emotes (e.g. sword direction)
 - [ ] Private messages

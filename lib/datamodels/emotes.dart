@@ -22,6 +22,7 @@ class Emotes {
         name: element['prefix'],
         url: element['image'][0]['url'],
         mime: element['image'][0]['mime'],
+        width: element['image'][0]['width'],
       );
     });
 
@@ -54,6 +55,9 @@ class Emote {
   int width;
   bool loading;
   Image image;
+  List<Image> frames;
+  int duration;
+  int repeatCount;
 
   Emote({
     this.name,
@@ -63,5 +67,8 @@ class Emote {
     this.width,
     this.loading = false,
     this.image,
+    this.frames,
+    this.duration,
+    this.repeatCount,
   });
 }

@@ -19,14 +19,25 @@ class ImageService {
     } else {
       if (emote.animated) {
         imglib.Image image = imglib.decodeImage(bytes);
-        imglib.Image croppped = imglib.copyCrop(
-          image,
-          0,
-          0,
-          emote.width,
-          image.height,
-        );
-        return Image.memory(imglib.encodePng(croppped));
+
+        emote.frames = [];
+        int frameCount = image.width ~/ emote.width;
+
+        for (int i = 0; i < frameCount; i++) {
+          imglib.Image frame = imglib.copyCrop(
+            image,
+            i * emote.width,
+            0,
+            emote.width,
+            image.height,
+          );
+          emote.frames.add(Image.memory(
+            imglib.encodePng(frame),
+            gaplessPlayback: true,
+          ));
+        }
+
+        return emote.frames[0];
       } else {
         return Image.memory(bytes);
       }

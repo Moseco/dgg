@@ -1,13 +1,9 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:dgg/datamodels/message.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     as extendedNestedScrollView;
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
@@ -64,182 +60,67 @@ class _ChatViewState extends State<ChatView> {
               : null,
         ),
         body: SafeArea(
-          child: model.isLoading ? _buildLoading(model) : _buildLoaded(model),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoading(ChatViewModel model) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: CircularProgressIndicator(),
-          ),
-          Text(model.isAuthenticating
-              ? "Authenticating with dgg"
-              : "Loading assets"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoaded(ChatViewModel model) {
-    return Column(
-      children: [
-        _buildContent(model),
-        model.isListAtBottom ? Container() : _buildResumeChat(),
-        ChatInput(model: model),
-      ],
-    );
-  }
-
-  Widget _buildContent(ChatViewModel model) {
-    return Expanded(
-      child: extendedNestedScrollView.NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverToBoxAdapter(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildStreamEmbed(model),
-                  model.currentVote == null
-                      ? Container()
-                      : ChatVote(model: model),
-                ],
-              ),
-            ),
-          ];
-        },
-        pinnedHeaderSliverHeightBuilder: () => kToolbarHeight,
-        body: _buildChat(model),
-      ),
-    );
-  }
-
-  Widget _buildStreamEmbed(ChatViewModel model) {
-    if (model.showStreamPrompt) {
-      return Container(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Text("Destiny is live. Show the stream?"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: RaisedButton(
-                    child: Text("Yes"),
-                    onPressed: () => model.setShowStreamEmbed(true),
+          child: model.isLoading
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: CircularProgressIndicator(),
+                      ),
+                      Text(model.isAuthenticating
+                          ? "Authenticating with dgg"
+                          : "Loading assets"),
+                    ],
                   ),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: extendedNestedScrollView.NestedScrollView(
+                        headerSliverBuilder:
+                            (BuildContext context, bool innerBoxIsScrolled) {
+                          return <Widget>[
+                            SliverToBoxAdapter(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ChatStreamEmbed(),
+                                  model.currentVote == null
+                                      ? Container()
+                                      : ChatVote(model: model),
+                                ],
+                              ),
+                            ),
+                          ];
+                        },
+                        pinnedHeaderSliverHeightBuilder: () => kToolbarHeight,
+                        body: ChatList(scrollController: _scrollController),
+                      ),
+                    ),
+                    model.isListAtBottom
+                        ? Container()
+                        : InkWell(
+                            onTap: () => _scrollController.animateTo(
+                              0.0,
+                              curve: Curves.easeOut,
+                              duration: const Duration(milliseconds: 200),
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              color: Colors.red,
+                              child: Center(
+                                child: Text(
+                                  "Chat paused, tap here to resume",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                    ChatInput(model: model),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: RaisedButton(
-                    child: Text("No"),
-                    onPressed: () => model.setShowStreamEmbed(false),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    } else {
-      if (model.showStreamEmbed) {
-        switch (model.streamEmbedType) {
-          case EmbedType.twitch:
-            return Container(
-              height: 9 / 16 * MediaQuery.of(context).size.width,
-              child: WebView(
-                initialUrl: model.twitchUrlBase + model.currentEmbedId,
-                javascriptMode: JavascriptMode.unrestricted,
-                initialMediaPlaybackPolicy:
-                    AutoMediaPlaybackPolicy.always_allow,
-                onWebViewCreated: (WebViewController webViewController) {
-                  model.webViewController = webViewController;
-                },
-              ),
-            );
-          case EmbedType.youtube:
-            return YoutubePlayerIFrame(
-              controller: model.youtubePlayerController,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-            );
-          default:
-            return Container();
-        }
-      } else {
-        return Container();
-      }
-    }
-  }
-
-  Widget _buildChat(ChatViewModel model) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (scrollNotification) {
-        if (scrollNotification is ScrollEndNotification) {
-          if (_scrollController.offset <=
-                  _scrollController.position.minScrollExtent &&
-              !_scrollController.position.outOfRange) {
-            model.toggleChat(true);
-          } else {
-            model.toggleChat(false);
-          }
-        }
-        return true;
-      },
-      child: ListView.builder(
-        reverse: true,
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        controller: _scrollController,
-        itemCount: model.messages.length,
-        itemBuilder: (context, index) {
-          int messageIndex = model.messages.length - index - 1;
-          Message currentMessage = model.messages[messageIndex];
-
-          if (currentMessage is UserMessage) {
-            return ItemUserMessage(
-              model: model,
-              message: currentMessage,
-            );
-          } else if (currentMessage is StatusMessage) {
-            return ItemStatusMessage(message: currentMessage);
-          } else if (currentMessage is BroadcastMessage) {
-            return ItemBroadcastMessage(message: currentMessage);
-          } else if (currentMessage is ComboMessage) {
-            return ItemComboMessage(message: currentMessage);
-          } else {
-            return Text(
-              "UNSUPPORTED MESSAGE TYPE",
-              style: TextStyle(color: Colors.red),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildResumeChat() {
-    return InkWell(
-      onTap: () => _scrollController.animateTo(
-        0.0,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 200),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        color: Colors.red,
-        child: Center(
-          child: Text(
-            "Chat paused, tap here to resume",
-            textAlign: TextAlign.center,
-          ),
         ),
       ),
     );
