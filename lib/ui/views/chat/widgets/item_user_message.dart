@@ -25,9 +25,15 @@ class ItemUserMessage extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         color: _getBackgroundColor(),
-        child: RichText(
-          text: TextSpan(
-            children: getMessageTextSpans(context),
+        child: ExcludeSemantics(
+          //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+          //  Problem only happens on iOS so need different approach on Android/iOS
+          //  https://github.com/flutter/flutter/issues/51936
+          excluding: Platform.isIOS,
+          child: RichText(
+            text: TextSpan(
+              children: getMessageTextSpans(context),
+            ),
           ),
         ),
       ),
@@ -84,13 +90,8 @@ class ItemUserMessage extends StatelessWidget {
                 fontSize: 16,
                 color: Colors.blue,
               ),
-              recognizer: Platform.isAndroid
-                  ? (TapGestureRecognizer()
-                    ..onTap = () => model.openUrl(element.text))
-                  : null,
-              //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
-              //  Problem only happens on iOS so need different approach on Android/iOS
-              //  https://github.com/flutter/flutter/issues/51936
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => model.openUrl(element.text),
             ),
           );
         } else if (element is EmoteElement) {
@@ -107,14 +108,9 @@ class ItemUserMessage extends StatelessWidget {
                 fontSize: 16,
                 color: Colors.blue,
               ),
-              recognizer: Platform.isAndroid
-                  ? (TapGestureRecognizer()
-                    ..onTap = () => model.setStreamChannel(
-                        element.embedId, element.embedType))
-                  : null,
-              //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
-              //  Problem only happens on iOS so need different approach on Android/iOS
-              //  https://github.com/flutter/flutter/issues/51936
+              recognizer: TapGestureRecognizer()
+                ..onTap = () =>
+                    model.setStreamChannel(element.embedId, element.embedType),
             ),
           );
         } else {
