@@ -19,6 +19,8 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [x] Allow clicking in chat embed messages
     - [x] Support "#twitch/channel" format
     - [x] Support "#youtube/channel" format
+    - [ ] Support "#twitch-vod/id" format
+    - [ ] Support "#twitch-clip/id" format
 - [x] Chat voting
 - [ ] Animated emotes 
     - [x] Emotes in gif format
@@ -32,4 +34,16 @@ Currently only Android is confirmed to be working, so some setup might be requir
 
 ## Building
 
-This project uses Firebase for analytics/crashlytics. To get a build working you will either need to [create a Firebase project on your own](https://firebase.google.com/docs/flutter/setup?platform=android) or remove the Firebase related code manually. The easiest way to do this is to remove the Firebase packages from the pubspec.yaml file (currently firebase_core, firebase_remote_config, firebase_crashlytics, and firebase_analytics) and delete any code that the editor now doesn't recognize.
+### Basic
+
+Follow the [Flutter documentation](https://flutter.dev/docs) to get the framework up and running.
+
+### Firebase
+
+This project uses Firebase for analytics/crashlytics. To get a build working you will either need to [create a Firebase project on your own and add a config file](https://firebase.flutter.dev/docs/overview) or remove the Firebase related code manually.
+
+If you want to remove Firebase, here is a rough list of what you need to do (at least for Android).
+
+* Remove `classpath 'com.google.gms:google-services:4.3.3'` and `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.2.0'` from `android/build.gradle`
+* Remove `apply plugin: 'com.google.gms.google-services'` and `apply plugin: 'com.google.firebase.crashlytics'` from `android/app/build.gradle`
+* Remove `firebase_core` and `firebase_remote_config` and `firebase_crashlytics:` and `firebase_analytics` from `pubspec.yaml`. Then go through `lib/` and delete any code that the editor now doesn't recognize.
