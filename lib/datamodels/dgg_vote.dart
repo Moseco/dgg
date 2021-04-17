@@ -17,15 +17,15 @@ class DggVote {
   final bool isSubVote;
 
   const DggVote({
-    this.question,
-    this.options,
-    this.voteCount,
-    this.voters,
+    required this.question,
+    required this.options,
+    required this.voteCount,
+    required this.voters,
     this.time = 30,
     this.isSubVote = false,
   });
 
-  static DggVote fromString(String voteString) {
+  static DggVote? fromString(String voteString) {
     int time = 30;
     bool isSubVote = false;
 

@@ -5,10 +5,7 @@ import 'package:dgg/datamodels/message.dart';
 class ItemComboMessage extends StatelessWidget {
   final ComboMessage message;
 
-  const ItemComboMessage({
-    Key key,
-    this.message,
-  }) : super(key: key);
+  const ItemComboMessage({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

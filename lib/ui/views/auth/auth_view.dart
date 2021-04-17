@@ -6,7 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'auth_viewmodel.dart';
 
 class AuthView extends StatelessWidget {
-  const AuthView({Key key}) : super(key: key);
+  const AuthView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

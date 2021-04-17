@@ -13,12 +13,12 @@ class CookieManagerService {
     return cookieManager.clearCookies();
   }
 
-  Future<AuthInfo> readCookies(String currentUrl) async {
+  Future<AuthInfo?> readCookies(String currentUrl) async {
     if (currentUrl == urlProfile) {
       final gotCookies = await cookieManager.getCookies(url);
 
-      String sid;
-      String rememberMe;
+      String? sid;
+      String? rememberMe;
       for (var item in gotCookies) {
         if (item.name == COOKIE_NAME_SID) {
           sid = item.value;
@@ -28,10 +28,7 @@ class CookieManagerService {
       }
 
       if (sid != null) {
-        return AuthInfo(
-          sid: sid,
-          rememberMe: rememberMe,
-        );
+        return AuthInfo(sid: sid, rememberMe: rememberMe);
       } else {
         return null;
       }

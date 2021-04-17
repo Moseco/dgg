@@ -36,20 +36,20 @@ class DggService {
   final _imageService = locator<ImageService>();
 
   //Authentication information
-  AuthInfo _authInfo;
-  SessionInfo _sessionInfo;
-  SessionInfo get sessionInfo => _sessionInfo;
-  String _currentNick;
+  AuthInfo? _authInfo;
+  SessionInfo? _sessionInfo;
+  SessionInfo? get sessionInfo => _sessionInfo;
+  String? _currentNick;
   bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
-  String _dggCacheKey;
+  String? _dggCacheKey;
   bool get isAssetsLoaded => flairs != null && emotes != null;
-  Flairs flairs;
-  Emotes emotes;
+  Flairs? flairs;
+  Emotes? emotes;
 
   //Dgg chat websocket
-  WebSocketChannel _webSocketChannel;
+  WebSocketChannel? _webSocketChannel;
 
   //RegEx
   final RegExp numberRegex = RegExp(r"\d*\.?\d*");
@@ -64,9 +64,9 @@ class DggService {
     }
 
     Uri uri;
-    if (_authInfo.loginKey != null) {
+    if (_authInfo!.loginKey != null) {
       uri = Uri.https(dggBase, userInfoPath, {
-        "token": _authInfo.loginKey,
+        "token": _authInfo!.loginKey,
       });
     } else {
       uri = Uri.https(dggBase, sessionInfoPath);
@@ -74,8 +74,8 @@ class DggService {
 
     final response = await http.get(
       uri,
-      headers: _authInfo.sid != null
-          ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
+      headers: _authInfo!.sid != null
+          ? {HttpHeaders.cookieHeader: _authInfo!.toHeaderString()}
           : null,
     );
 
@@ -97,19 +97,19 @@ class DggService {
     _webSocketChannel = IOWebSocketChannel.connect(
       webSocketUrl,
       headers: _sessionInfo is Available
-          ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
+          ? {HttpHeaders.cookieHeader: _authInfo!.toHeaderString()}
           : null,
     );
 
-    return _webSocketChannel;
+    return _webSocketChannel!;
   }
 
   Future<void> closeWebSocketConnection() async {
-    await _webSocketChannel?.sink?.close(status.goingAway);
+    await _webSocketChannel?.sink.close(status.goingAway);
     _webSocketChannel = null;
   }
 
-  Message parseWebSocketData(String data) {
+  Message? parseWebSocketData(String? data) {
     String dataString = data.toString();
     int spaceIndex = dataString.indexOf(' ');
     String key = dataString.substring(0, spaceIndex);
@@ -121,7 +121,7 @@ class DggService {
       case "MSG":
         return UserMessage.fromJson(
           jsonString,
-          flairs,
+          flairs!,
           emotes,
           _userMessageElementsService.createMessageElements,
           currentNick: _currentNick,
@@ -203,26 +203,25 @@ class DggService {
       final response = await http.get(emotesUri);
 
       if (response.statusCode == 200) {
-        Emotes emoteList = Emotes.fromJson(response.body);
+        Emotes? emoteList = Emotes.fromJson(response.body);
+
         await _getEmoteCss(emotesCssUri, emoteList);
-      } else {
-        emotes = Emotes();
       }
     }
   }
 
-  Future<void> _getEmoteCss(Uri emotesCssUri, Emotes emoteList) async {
-    final response = await http.get(emotesCssUri);
+  Future<void> _getEmoteCss(Uri emotesCssUri, Emotes? emoteList) async {
+    if (emoteList != null) {
+      final response = await http.get(emotesCssUri);
 
-    if (response.statusCode == 200) {
-      parseCss(response.body, emoteList);
-      emotes = emoteList;
-    } else {
-      emotes = emoteList;
+      if (response.statusCode == 200) {
+        _parseCss(response.body, emoteList);
+      }
     }
+    emotes = emoteList;
   }
 
-  void parseCss(String source, Emotes emoteList) {
+  void _parseCss(String source, Emotes emoteList) {
     //Split css file by lines
     List<String> lines = LineSplitter().convert(source);
 
@@ -242,8 +241,8 @@ class DggService {
           if (currentLineTrimmed.startsWith("animation:")) {
             if (currentLineTrimmed.contains("steps(")) {
               //If animation has steps, parse the duration and number of repeats
-              parseEmoteSteps(
-                emoteList.emoteMap[emoteName],
+              _parseEmoteSteps(
+                emoteList.emoteMap[emoteName]!,
                 currentLineTrimmed,
               );
             }
@@ -256,9 +255,9 @@ class DggService {
 
             //Keep lowest width found
             //  If we find a lower width, then it is step animated
-            if (emoteList.emoteMap[emoteName].width > width) {
-              emoteList.emoteMap[emoteName].width = width;
-              emoteList.emoteMap[emoteName].animated = true;
+            if (emoteList.emoteMap[emoteName]!.width > width) {
+              emoteList.emoteMap[emoteName]!.width = width;
+              emoteList.emoteMap[emoteName]!.animated = true;
             }
           }
           currentLineTrimmed = lines[++i].trim();
@@ -267,9 +266,9 @@ class DggService {
     }
   }
 
-  void parseEmoteSteps(Emote emote, String line) {
-    _StepParam _stepParam1;
-    _StepParam _stepParam2;
+  void _parseEmoteSteps(Emote emote, String line) {
+    _StepParam? _stepParam1;
+    _StepParam? _stepParam2;
 
     //Remove the last character which will be ';'
     //  Makes things easier later
@@ -305,22 +304,22 @@ class DggService {
     }
   }
 
-  _StepParam _parseStepParam(String param) {
-    RegExpMatch match = numberRegex.firstMatch(param);
+  _StepParam? _parseStepParam(String param) {
+    RegExpMatch? match = numberRegex.firstMatch(param);
     if (param.endsWith("ms")) {
       //Duration in milliseconds
       return _StepParam(
-        double.parse(param.substring(0, match.end)).toInt(),
+        double.parse(param.substring(0, match!.end)).toInt(),
         _StepParamType.duration,
       );
     } else if (param.endsWith("s")) {
       //Duration in seconds
       return _StepParam(
-        (double.parse(param.substring(0, match.end)) * 1000).toInt(),
+        (double.parse(param.substring(0, match!.end)) * 1000).toInt(),
         _StepParamType.duration,
       );
     } else {
-      if (match.end != 0) {
+      if (match!.end != 0) {
         //Number of repeats
         return _StepParam(
           int.parse(param.substring(0, match.end)),
@@ -348,7 +347,7 @@ class DggService {
 
   void sendChatMessage(String message) {
     try {
-      _webSocketChannel.sink.add('MSG {"data": "$message"}');
+      _webSocketChannel?.sink.add('MSG {"data": "$message"}');
     } catch (_) {
       print("Message failed to send");
     }

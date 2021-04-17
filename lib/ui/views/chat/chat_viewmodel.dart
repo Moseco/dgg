@@ -30,8 +30,8 @@ class ChatViewModel extends BaseViewModel {
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
 
-  WebViewController webViewController;
-  YoutubePlayerController youtubePlayerController;
+  late WebViewController webViewController;
+  YoutubePlayerController? youtubePlayerController;
   final chatInputController = TextEditingController();
 
   bool get isLoading => isAuthenticating || !isAssetsLoaded;
@@ -39,7 +39,7 @@ class ChatViewModel extends BaseViewModel {
   bool get isAssetsLoaded => _dggService.isAssetsLoaded;
   bool get isSignedIn => _dggService.isSignedIn;
 
-  StreamSubscription _chatSubscription;
+  StreamSubscription? _chatSubscription;
   List<Message> _messages = [];
   List<Message> get messages => _isListAtBottom ? _messages : _pausedMessages;
   List<User> _users = [];
@@ -66,10 +66,10 @@ class ChatViewModel extends BaseViewModel {
   EmbedType _streamEmbedType = EmbedType.twitch;
   EmbedType get streamEmbedType => _streamEmbedType;
 
-  DggVote _currentVote;
-  DggVote get currentVote => _currentVote;
-  Timer _voteTimer;
-  int get voteTimePassed => _voteTimer.tick;
+  DggVote? _currentVote;
+  DggVote? get currentVote => _currentVote;
+  Timer? _voteTimer;
+  int get voteTimePassed => _voteTimer!.tick;
   bool _isVoteCollapsed = false;
   bool get isVoteCollapsed => _isVoteCollapsed;
 
@@ -104,7 +104,7 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
     _chatSubscription = _dggService.openWebSocketConnection().stream.listen(
       (data) {
-        Message currentMessage = _dggService.parseWebSocketData(data);
+        Message? currentMessage = _dggService.parseWebSocketData(data);
 
         switch (currentMessage.runtimeType) {
           case NamesMessage:
@@ -114,7 +114,7 @@ class ChatViewModel extends BaseViewModel {
                 StatusMessage(data: "Connected with ${_users.length} users"));
             break;
           case UserMessage:
-            UserMessage userMessage = currentMessage;
+            UserMessage userMessage = currentMessage as UserMessage;
             //for each emote, check if needs to be loaded
             userMessage.elements.forEach((element) {
               if (element is EmoteElement) {
@@ -127,7 +127,8 @@ class ChatViewModel extends BaseViewModel {
             if (userMessage.elements.length == 1 &&
                 userMessage.elements[0] is EmoteElement) {
               //Current message only has one emote in it
-              EmoteElement currentEmote = userMessage.elements[0];
+              EmoteElement currentEmote =
+                  userMessage.elements[0] as EmoteElement;
               Message recentMessage = _messages[_messages.length - 1];
               if (recentMessage is ComboMessage) {
                 //Most recent is combo
@@ -155,7 +156,7 @@ class ChatViewModel extends BaseViewModel {
             //Check if message is starting a vote
             if (userMessage.data.startsWith(DggVote.voteStartRegex)) {
               if (_dggService.hasVotePermission(userMessage.user.features)) {
-                DggVote dggVote = DggVote.fromString(userMessage.data);
+                DggVote? dggVote = DggVote.fromString(userMessage.data);
                 if (dggVote != null) {
                   _currentVote = dggVote;
                   _voteTimer?.cancel();
@@ -172,14 +173,14 @@ class ChatViewModel extends BaseViewModel {
               }
             }
             //Check if message is a vote
-            if (_currentVote != null && _currentVote.time > voteTimePassed) {
+            if (_currentVote != null && _currentVote!.time > voteTimePassed) {
               String temp =
                   userMessage.data.replaceFirst(DggVote.voteValidRegex, '');
               //Check if message is a vote and restrict length to prevent max int error
               if (temp.isEmpty && userMessage.data.length < 3) {
                 int vote = int.parse(userMessage.data);
-                if (vote > 0 && vote <= _currentVote.options.length) {
-                  _currentVote.castVote(
+                if (vote > 0 && vote <= _currentVote!.options.length) {
+                  _currentVote!.castVote(
                       userMessage.user.nick, vote, userMessage.user.features);
                 }
               }
@@ -195,11 +196,11 @@ class ChatViewModel extends BaseViewModel {
             _users.remove((currentMessage as QuitMessage).user);
             break;
           case BroadcastMessage:
-            _messages.add(currentMessage);
+            _messages.add(currentMessage!);
             break;
           case MuteMessage:
             //Go through up to previous 10 messages and censor messages from muted user
-            MuteMessage muteMessage = currentMessage;
+            MuteMessage muteMessage = currentMessage as MuteMessage;
             int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
             for (int i = 1; i < lengthToCheck; i++) {
               Message msg = _messages[_messages.length - i];
@@ -213,26 +214,26 @@ class ChatViewModel extends BaseViewModel {
                 data: "${muteMessage.data} muted by ${muteMessage.nick}"));
             break;
           case UnmuteMessage:
-            UnmuteMessage unmuteMessage = currentMessage;
+            UnmuteMessage unmuteMessage = currentMessage as UnmuteMessage;
             _messages.add(StatusMessage(
                 data:
                     "${unmuteMessage.data} unmuted by ${unmuteMessage.nick}"));
             break;
           case BanMessage:
-            BanMessage banMessage = currentMessage;
+            BanMessage banMessage = currentMessage as BanMessage;
             _messages.add(StatusMessage(
                 data: "${banMessage.data} banned by ${banMessage.nick}"));
             break;
           case UnbanMessage:
-            UnbanMessage unbanMessage = currentMessage;
+            UnbanMessage unbanMessage = currentMessage as UnbanMessage;
             _messages.add(StatusMessage(
                 data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
             break;
           case StatusMessage:
-            _messages.add(currentMessage);
+            _messages.add(currentMessage!);
             break;
           case SubOnlyMessage:
-            SubOnlyMessage subOnlyMessage = currentMessage;
+            SubOnlyMessage subOnlyMessage = currentMessage as SubOnlyMessage;
             String subMode =
                 subOnlyMessage.data == 'on' ? 'enabled' : 'disabled';
             _messages.add(StatusMessage(
@@ -240,7 +241,7 @@ class ChatViewModel extends BaseViewModel {
                     "Subscriber only mode $subMode by ${subOnlyMessage.nick}"));
             break;
           case ErrorMessage:
-            ErrorMessage errorMessage = currentMessage;
+            ErrorMessage errorMessage = currentMessage as ErrorMessage;
             if (errorMessage.description == "banned") {
               _messages.add(StatusMessage(
                 data:
@@ -404,7 +405,7 @@ class ChatViewModel extends BaseViewModel {
         RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
 
         //check emotes
-        _dggService.emotes.emoteMap.forEach((k, v) {
+        _dggService.emotes!.emoteMap.forEach((k, v) {
           if (k.startsWith(lastWordRegex)) {
             newSuggestions.add(k);
           }
@@ -439,7 +440,7 @@ class ChatViewModel extends BaseViewModel {
   Future<void> _getStreamStatus() async {
     String twitchClientId = await _remoteConfigService.getTwitchClientId();
 
-    if (twitchClientId != null && twitchClientId.isNotEmpty) {
+    if (twitchClientId.isNotEmpty) {
       //Twitch api to check status of a channel
       //  Hardcoded to Destiny's stream
       final response = await http.get(
@@ -468,52 +469,50 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setStreamChannelManual(List<String> channel) {
+  void setStreamChannelManual(List<String>? channel) {
     if (channel != null && channel[0].trim().isNotEmpty) {
       setStreamChannel(channel[0], "twitch");
     }
   }
 
   void setStreamChannel(String embedId, String embedType) {
-    if (embedId != null && embedId.trim().isNotEmpty) {
-      //Set new channel name
-      _currentEmbedId = embedId.trim();
-      //Set values based on embed type and current embed state
-      switch (embedType) {
-        case "twitch":
-          if (_showStreamEmbed && _streamEmbedType == EmbedType.twitch) {
-            //Embed already shown, use controller to load new stream
-            webViewController.loadUrl(twitchUrlBase + _currentEmbedId);
-          } else {
-            _streamEmbedType = EmbedType.twitch;
-          }
-          break;
-        case "youtube":
-          if (_showStreamEmbed && _streamEmbedType == EmbedType.youtube) {
-            //Embed already shown, use controller to load new stream
-            youtubePlayerController.load(_currentEmbedId);
-          } else {
-            _streamEmbedType = EmbedType.youtube;
-            youtubePlayerController?.close();
-            youtubePlayerController = YoutubePlayerController(
-              initialVideoId: _currentEmbedId,
-              params: YoutubePlayerParams(
-                autoPlay: true,
-                showControls: false,
-              ),
-            );
-          }
-          break;
-        default:
-          break;
-      }
-      //Show the stream embed
-      setShowStreamEmbed(true);
+    //Set new channel name
+    _currentEmbedId = embedId.trim();
+    //Set values based on embed type and current embed state
+    switch (embedType) {
+      case "twitch":
+        if (_showStreamEmbed && _streamEmbedType == EmbedType.twitch) {
+          //Embed already shown, use controller to load new stream
+          webViewController.loadUrl(twitchUrlBase + _currentEmbedId);
+        } else {
+          _streamEmbedType = EmbedType.twitch;
+        }
+        break;
+      case "youtube":
+        if (_showStreamEmbed && _streamEmbedType == EmbedType.youtube) {
+          //Embed already shown, use controller to load new stream
+          youtubePlayerController!.load(_currentEmbedId);
+        } else {
+          _streamEmbedType = EmbedType.youtube;
+          youtubePlayerController?.close();
+          youtubePlayerController = YoutubePlayerController(
+            initialVideoId: _currentEmbedId,
+            params: YoutubePlayerParams(
+              autoPlay: true,
+              showControls: false,
+            ),
+          );
+        }
+        break;
+      default:
+        break;
     }
+    //Show the stream embed
+    setShowStreamEmbed(true);
   }
 
   void handleVoteTimer(Timer timer) {
-    if (timer.tick > _currentVote.time + 5) {
+    if (timer.tick > _currentVote!.time + 5) {
       timer.cancel();
       _currentVote = null;
     }
@@ -542,7 +541,7 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> onUserMessageLongPress(UserMessage message) async {
+  Future<void> onUserMessageLongPress(UserMessage? message) async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       variant: BottomSheetType.messageAction,
       customData: message,
@@ -552,10 +551,10 @@ class ChatViewModel extends BaseViewModel {
     if (sheetResponse != null) {
       switch (sheetResponse.responseData) {
         case MessageActionSheetResponse.copy:
-          Clipboard.setData(ClipboardData(text: message.data));
+          Clipboard.setData(ClipboardData(text: message!.data));
           break;
         case MessageActionSheetResponse.reply:
-          String newDraft = "${message.user.nick} ";
+          String newDraft = "${message!.user.nick} ";
           updateChatDraft(newDraft);
           chatInputController.text = newDraft;
           chatInputController.selection =

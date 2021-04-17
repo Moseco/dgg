@@ -24,6 +24,7 @@ void main() {
 
     test('User message no flair', () {
       //TODO will need some mock here
+      
       // UserMessage userMessage = UserMessage.fromJson(TestData.WS_USER_MESSAGE_NO_FLAIR_STRING, [], [], (, ) => null,);
     });
 

@@ -11,10 +11,7 @@ import 'item_user_message.dart';
 class ChatList extends ViewModelWidget<ChatViewModel> {
   final ScrollController scrollController;
 
-  const ChatList({
-    Key key,
-    @required this.scrollController,
-  }) : super(key: key);
+  const ChatList({Key? key, required this.scrollController}) : super(key: key);
 
   @override
   Widget build(BuildContext context, ChatViewModel model) {
@@ -71,8 +68,8 @@ class ChatList extends ViewModelWidget<ChatViewModel> {
           },
           childCount: model.messages.length,
           findChildIndexCallback: (Key key) {
-            final ValueKey valueKey = key;
-            return model.messages.length - valueKey.value - 1;
+            final ValueKey valueKey = key as ValueKey<int>;
+            return model.messages.length - valueKey.value - 1 as int?;
           },
         ),
       ),

@@ -3,14 +3,14 @@ class User {
   final List<String> features;
 
   User({
-    this.nick,
-    this.features,
+    required this.nick,
+    required this.features,
   });
 
   static User fromJson(Map<String, dynamic> json) {
     return User(
       nick: json['nick'] as String,
-      features: json['features']?.cast<String>(),
+      features: json['features']?.cast<String>() ?? [],
     );
   }
 }

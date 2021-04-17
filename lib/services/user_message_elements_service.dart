@@ -1,5 +1,6 @@
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
+
 class UserMessageElementsService {
   final RegExp _urlRegex = RegExp(
     r"(http://|ftp://|https://)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?",
@@ -10,13 +11,13 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
 
-  List<UserMessageElement> createMessageElements(String text, Emotes emotes) {
+  List<UserMessageElement> createMessageElements(String text, Emotes? emotes) {
     if (text.isEmpty) {
       return [];
     }
 
     List<UserMessageElement> elements = parseUrls([TextElement(text)]);
-    if (emotes.emoteMap.length > 0) {
+    if (emotes != null && emotes.emoteMap.length > 0) {
       elements = parseEmotes(elements, emotes);
     }
     elements = parseEmbedUrls(elements);
@@ -28,7 +29,7 @@ class UserMessageElementsService {
     List<UserMessageElement> list = List<UserMessageElement>.from(elements);
     for (var i = 0; i < list.length; i++) {
       if (list[i] is TextElement) {
-        RegExpMatch match = _urlRegex.firstMatch(list[i].text);
+        RegExpMatch? match = _urlRegex.firstMatch(list[i].text);
         if (match != null) {
           String currentText = list[i].text;
           String url = currentText.substring(match.start, match.end);
@@ -56,7 +57,7 @@ class UserMessageElementsService {
     List<UserMessageElement> list = List<UserMessageElement>.from(elements);
     for (var i = 0; i < list.length; i++) {
       if (list[i] is TextElement) {
-        RegExpMatch match = emotes.emoteRegex.firstMatch(list[i].text);
+        RegExpMatch? match = emotes.emoteRegex.firstMatch(list[i].text);
         if (match != null) {
           String currentText = list[i].text;
           String emoteName = currentText.substring(match.start, match.end);
@@ -64,9 +65,9 @@ class UserMessageElementsService {
           if (match.start > 0) {
             list[i] = TextElement(currentText.substring(0, match.start));
             list.insert(insertIndex++,
-                EmoteElement(emoteName, emotes.emoteMap[emoteName]));
+                EmoteElement(emoteName, emotes.emoteMap[emoteName]!));
           } else {
-            list[i] = EmoteElement(emoteName, emotes.emoteMap[emoteName]);
+            list[i] = EmoteElement(emoteName, emotes.emoteMap[emoteName]!);
           }
 
           if (match.end < currentText.length) {
@@ -84,7 +85,7 @@ class UserMessageElementsService {
     List<UserMessageElement> list = List<UserMessageElement>.from(elements);
     for (var i = 0; i < list.length; i++) {
       if (list[i] is TextElement) {
-        RegExpMatch match = _embedUrlRegex.firstMatch(list[i].text);
+        RegExpMatch? match = _embedUrlRegex.firstMatch(list[i].text);
         if (match != null) {
           String currentText = list[i].text;
           String embedUrl = currentText.substring(match.start, match.end);

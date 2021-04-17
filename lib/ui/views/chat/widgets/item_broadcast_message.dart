@@ -5,8 +5,8 @@ class ItemBroadcastMessage extends StatelessWidget {
   final BroadcastMessage message;
 
   const ItemBroadcastMessage({
-    Key key,
-    this.message,
+    Key? key,
+    required this.message,
   }) : super(key: key);
 
   @override

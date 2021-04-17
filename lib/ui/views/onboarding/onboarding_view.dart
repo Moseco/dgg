@@ -5,7 +5,7 @@ import 'package:stacked/stacked.dart';
 import 'onboarding_viewmodel.dart';
 
 class OnboardingView extends StatelessWidget {
-  const OnboardingView({Key key}) : super(key: key);
+  const OnboardingView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

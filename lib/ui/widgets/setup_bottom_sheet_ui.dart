@@ -27,9 +27,9 @@ class _MessageActionBottomSheet extends StatelessWidget {
   final Function(SheetResponse) completer;
 
   const _MessageActionBottomSheet({
-    Key key,
-    this.request,
-    this.completer,
+    Key? key,
+    required this.request,
+    required this.completer,
   }) : super(key: key);
 
   @override

@@ -9,7 +9,7 @@ class SharedPreferencesService {
   static const String KEY_WAKELOCK_ENABLED = "KEY_WAKELOCK_ENABLED";
   static const String KEY_ONBOARDING = "KEY_ONBOARDING";
 
-  SharedPreferences _sharedPreferences;
+  SharedPreferences? _sharedPreferences;
 
   Future<void> initialize() async {
     if (_sharedPreferences == null) {
@@ -17,10 +17,10 @@ class SharedPreferencesService {
     }
   }
 
-  AuthInfo getAuthInfo() {
-    String sid = _sharedPreferences.getString(KEY_SID);
-    String rememberMe = _sharedPreferences.getString(KEY_REMEMBER_ME);
-    String loginKey = _sharedPreferences.getString(KEY_LOGIN_KEY);
+  AuthInfo? getAuthInfo() {
+    String? sid = _sharedPreferences!.getString(KEY_SID);
+    String? rememberMe = _sharedPreferences!.getString(KEY_REMEMBER_ME);
+    String? loginKey = _sharedPreferences!.getString(KEY_LOGIN_KEY);
 
     if (sid != null) {
       return AuthInfo(
@@ -37,53 +37,53 @@ class SharedPreferencesService {
   Future<void> storeAuthInfo(AuthInfo authInfo) async {
     // Check and store sid
     if (authInfo.sid != null) {
-      await _sharedPreferences.setString(KEY_SID, authInfo.sid);
+      await _sharedPreferences!.setString(KEY_SID, authInfo.sid!);
     }
     // Check and store rememberme
     if (authInfo.rememberMe != null) {
-      await _sharedPreferences.setString(KEY_REMEMBER_ME, authInfo.rememberMe);
+      await _sharedPreferences!.setString(KEY_REMEMBER_ME, authInfo.rememberMe!);
     }
     // Check and store loginKey
     if (authInfo.loginKey != null) {
-      await _sharedPreferences.setString(KEY_LOGIN_KEY, authInfo.loginKey);
+      await _sharedPreferences!.setString(KEY_LOGIN_KEY, authInfo.loginKey!);
     }
   }
 
   Future<void> clearAuthInfo() async {
     await Future.wait([
-      _sharedPreferences.remove(KEY_SID),
-      _sharedPreferences.remove(KEY_REMEMBER_ME),
-      _sharedPreferences.remove(KEY_LOGIN_KEY),
+      _sharedPreferences!.remove(KEY_SID),
+      _sharedPreferences!.remove(KEY_REMEMBER_ME),
+      _sharedPreferences!.remove(KEY_LOGIN_KEY),
     ]);
   }
 
   bool getAnalyticsEnabled() {
-    return _sharedPreferences.getBool(KEY_ANALYTICS_ENABLED) ?? true;
+    return _sharedPreferences!.getBool(KEY_ANALYTICS_ENABLED) ?? true;
   }
 
   Future<void> setAnalyticsEnabled(bool value) async {
-    await _sharedPreferences.setBool(KEY_ANALYTICS_ENABLED, value);
+    await _sharedPreferences!.setBool(KEY_ANALYTICS_ENABLED, value);
   }
 
   bool getWakelockEnabled() {
-    return _sharedPreferences.getBool(KEY_WAKELOCK_ENABLED) ?? true;
+    return _sharedPreferences!.getBool(KEY_WAKELOCK_ENABLED) ?? true;
   }
 
   Future<void> setWakelockEnabled(bool value) async {
-    await _sharedPreferences.setBool(KEY_WAKELOCK_ENABLED, value);
+    await _sharedPreferences!.setBool(KEY_WAKELOCK_ENABLED, value);
   }
 
   bool getOnboarding() {
-    return _sharedPreferences.getBool(KEY_ONBOARDING) ?? false;
+    return _sharedPreferences!.getBool(KEY_ONBOARDING) ?? false;
   }
 
   Future<void> setOnboarding() async {
-    await _sharedPreferences.setBool(KEY_ONBOARDING, true);
+    await _sharedPreferences!.setBool(KEY_ONBOARDING, true);
   }
 
   int getThemeIndex() {
     //This will potentially break in the future
     //The key is taken from stacked_themes source code
-    return _sharedPreferences.getInt("user_key") ?? 0;
+    return _sharedPreferences!.getInt("user_key") ?? 0;
   }
 }

@@ -18,8 +18,8 @@ class OnboardingViewModel extends BaseViewModel {
   bool _isAnalyticsEnabled = true;
   bool get isAnalyticsEnabled => _isAnalyticsEnabled;
   bool get isSignedIn => _dggService.isSignedIn;
-  String _nickname;
-  String get nickname => _nickname;
+  String? _nickname;
+  String? get nickname => _nickname;
 
   Future<void> toggleCrashlyticsCollection(bool value) async {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(value);

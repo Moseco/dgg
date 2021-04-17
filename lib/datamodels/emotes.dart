@@ -7,23 +7,21 @@ class Emotes {
   final RegExp emoteRegex;
 
   const Emotes({
-    this.emoteMap,
-    this.emoteRegex,
+    required this.emoteMap,
+    required this.emoteRegex,
   });
 
-  static Emotes fromJson(String jsonString) {
-    List<dynamic> json = jsonDecode(jsonString);
+  static Emotes? fromJson(String jsonString) {
+    List<dynamic> emoteList = jsonDecode(jsonString);
 
     Map<String, Emote> emoteMap = Map();
     StringBuffer stringBuffer = StringBuffer();
 
-    json.forEach((element) {
-      emoteMap[element['prefix']] = Emote(
-        name: element['prefix'],
-        url: element['image'][0]['url'],
-        mime: element['image'][0]['mime'],
-        width: element['image'][0]['width'],
-      );
+    emoteList.forEach((map) {
+      Emote? emote = Emote.fromMap(map);
+      if (emote != null) {
+        emoteMap[emote.name] = emote;
+      }
     });
 
     if (emoteMap.length > 0) {
@@ -38,6 +36,8 @@ class Emotes {
       stringBuffer.write("\\b");
       stringBuffer.write(keyList.last);
       stringBuffer.write("\\b");
+    } else {
+      return null;
     }
 
     return Emotes(
@@ -51,24 +51,41 @@ class Emote {
   final String name;
   final String url;
   final String mime;
-  bool animated;
   int width;
+  bool animated;
   bool loading;
-  Image image;
-  List<Image> frames;
-  int duration;
-  int repeatCount;
+  Image? image;
+  List<Image>? frames;
+  int? duration;
+  int? repeatCount;
 
   Emote({
-    this.name,
-    this.url,
-    this.mime,
+    required this.name,
+    required this.url,
+    required this.mime,
+    required this.width,
     this.animated = false,
-    this.width,
     this.loading = false,
     this.image,
     this.frames,
     this.duration,
     this.repeatCount,
   });
+
+  static Emote? fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("prefix") && map.containsKey("image")) {
+      Map<String, dynamic> imageMap = map["image"][0];
+      if (imageMap.containsKey("url") &&
+          imageMap.containsKey("mime") &&
+          imageMap.containsKey("width")) {
+        return Emote(
+          name: map['prefix'],
+          url: imageMap['url'],
+          mime: imageMap['mime'],
+          width: imageMap['width'],
+        );
+      }
+    }
+    return null;
+  }
 }

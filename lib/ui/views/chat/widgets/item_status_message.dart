@@ -4,10 +4,7 @@ import 'package:dgg/datamodels/message.dart';
 class ItemStatusMessage extends StatelessWidget {
   final StatusMessage message;
 
-  const ItemStatusMessage({
-    Key key,
-    this.message,
-  }) : super(key: key);
+  const ItemStatusMessage({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

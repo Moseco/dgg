@@ -17,7 +17,7 @@ class SettingsViewModel extends BaseViewModel {
   final _themeService = locator<ThemeService>();
 
   bool get isSignedIn => _dggService.sessionInfo is Available;
-  String get username => (_dggService.sessionInfo as Available).nick;
+  String? get username => (_dggService.sessionInfo as Available).nick;
   bool get isCrashlyticsCollectionEnabled =>
       FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
   bool _isAnalyticsEnabled = false;
