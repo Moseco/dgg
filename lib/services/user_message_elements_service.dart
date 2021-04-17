@@ -1,8 +1,5 @@
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
-import 'package:injectable/injectable.dart';
-
-@lazySingleton
 class UserMessageElementsService {
   final RegExp _urlRegex = RegExp(
     r"(http://|ftp://|https://)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?",

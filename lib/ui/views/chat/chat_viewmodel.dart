@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dgg/app/router.gr.dart';
+import 'package:dgg/app/app.locator.dart';
+import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/message.dart';
@@ -13,7 +14,6 @@ import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stacked/stacked.dart';
-import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -443,7 +443,7 @@ class ChatViewModel extends BaseViewModel {
       //Twitch api to check status of a channel
       //  Hardcoded to Destiny's stream
       final response = await http.get(
-        'https://api.twitch.tv/kraken/streams/18074328',
+        Uri.https("api.twitch.tv", "/kraken/streams/18074328"),
         headers: {
           'Accept': 'application/vnd.twitchtv.v5+json',
           'Client-ID': twitchClientId,

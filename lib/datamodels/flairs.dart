@@ -10,7 +10,7 @@ class Flairs {
   static Flairs fromJson(String jsonString) {
     List<dynamic> json = jsonDecode(jsonString);
 
-    List<Flair> flairs = List();
+    List<Flair> flairs = [];
     json.forEach((element) {
       flairs.add(Flair.fromJson(element));
     });

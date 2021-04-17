@@ -1,8 +1,8 @@
+import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
-import 'package:dgg/app/locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/services/cookie_manager_service.dart';
 import 'package:stacked_services/stacked_services.dart';

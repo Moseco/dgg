@@ -1,5 +1,5 @@
-import 'package:dgg/app/locator.dart';
-import 'package:dgg/app/router.gr.dart';
+import 'package:dgg/app/app.locator.dart';
+import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';

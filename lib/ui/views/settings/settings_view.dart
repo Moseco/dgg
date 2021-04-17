@@ -148,8 +148,8 @@ class SettingsView extends StatelessWidget {
           ),
         ),
         actions: [
-          FlatButton(
-            child: Text("Cancel"),
+          TextButton(
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
           )
         ],

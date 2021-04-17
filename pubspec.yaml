@@ -11,55 +11,46 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.2
   
-  #state management
-  stacked: ^1.7.6
-  #navigation
-  auto_route: ^0.6.9
-  stacked_services: ^0.7.3
-  #inversion of control
-  get_it: ^5.0.1
-  injectable: ^1.0.5
+  # State management
+  stacked: ^2.0.4
+  stacked_services: ^0.8.3
+  stacked_themes: ^0.3.2
 
-  #TODO still need to do iOS setup
-  #firebase
-  firebase_core: ^0.5.2+1
-  firebase_remote_config: ^0.4.2
-  firebase_crashlytics: "^0.2.4"
-  firebase_analytics: "^6.3.0"
+  # Firebase
+  firebase_core: ^1.0.3
+  firebase_remote_config: ^0.10.0-dev.0
+  firebase_crashlytics: ^2.0.0
+  firebase_analytics: ^8.0.0
 
-  #oauth
-  uni_links: ^0.4.0
-  crypto: ^2.1.5
+  # UI
+  flutter_staggered_animations: ^1.0.0
+  settings_ui: ^1.0.0
+  adaptive_dialog: ^0.10.0+5
+  percent_indicator: ^3.0.1
+  extended_nested_scroll_view: ^3.0.0
+  introduction_screen: ^2.1.0
 
-  #other
-  shared_preferences: ^0.5.10
-  http: ^0.12.2
-  webview_flutter: ^1.0.1
-  webview_cookie_manager: ^1.0.3
-  web_socket_channel: ^1.1.0
-  url_launcher: ^5.7.0
-  image: ^2.1.18
-  flutter_staggered_animations: ^0.1.2
-  settings_ui: ^0.5.0
-  wakelock: ^0.2.1+1
-  introduction_screen: ^1.0.9
-  stacked_themes: ^0.2.2+2
-  adaptive_dialog: ^0.9.3
-  percent_indicator: ^2.1.9
-  extended_nested_scroll_view: ^2.0.1
-  youtube_player_iframe: ^1.2.0+2
+  # Other
+  shared_preferences: ^2.0.5
+  http: ^0.13.1
+  webview_flutter: ^2.0.4
+  webview_cookie_manager: ^2.0.0
+  web_socket_channel: ^2.0.0
+  url_launcher: ^6.0.3
+  image: ^3.0.2
+  wakelock: ^0.5.0+2
+  youtube_player_iframe: ^2.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  build_runner: ^1.10.3
-  auto_route_generator: ^0.6.10
-  injectable_generator: ^1.0.6
+  build_runner:
+  stacked_generator: ^0.3.3
 
-  flutter_launcher_icons: ^0.8.1
+  flutter_launcher_icons: ^0.9.0
 
 #TODO need to make iOS icons later
 #To run:

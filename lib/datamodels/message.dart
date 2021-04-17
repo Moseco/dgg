@@ -80,7 +80,7 @@ class NamesMessage extends Message {
   static NamesMessage fromJson(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
-    List<User> chatUsers = List();
+    List<User> chatUsers = [];
     json['users']
         .cast<dynamic>()
         .forEach((item) => chatUsers.add(User.fromJson(item)));

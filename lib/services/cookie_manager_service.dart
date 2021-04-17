@@ -1,8 +1,6 @@
 import 'package:dgg/datamodels/auth_info.dart';
-import 'package:injectable/injectable.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 
-@lazySingleton
 class CookieManagerService {
   static const COOKIE_NAME_SID = "sid";
   static const COOKIE_NAME_REMEMBER_ME = "rememberme";

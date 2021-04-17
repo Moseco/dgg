@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
@@ -9,24 +10,26 @@ import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
-import 'package:injectable/injectable.dart';
-import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
-@lazySingleton
 class DggService {
-  static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
-  static const String userInfoUrl = "https://www.destiny.gg/api/userinfo";
-  static const String webSocketUrl = "wss://chat.destiny.gg/ws";
-  static const String chatUrl = "https://www.destiny.gg/embed/chat";
-  static const String cdnBaseUrl = "https://cdn.destiny.gg";
-  static const String flairsPath = "/flairs/flairs.json";
-  static const String emotesPath = "/emotes/emotes.json";
-  static const String emotesCssPath = "/emotes/emotes.css";
+  // Base urls
+  static const String dggBase = r"destiny.gg";
+  static const String dggCdnBase = r"cdn.destiny.gg";
+  // Url endpoints
+  static const String sessionInfoPath = r"/api/chat/me";
+  static const String userInfoPath = r"/api/userinfo";
+  static const String chatPath = r"/embed/chat";
+  static const String flairsPath = r"/flairs/flairs.json";
+  static const String emotesPath = r"/emotes/emotes.json";
+  static const String emotesCssPath = r"/emotes/emotes.css";
+
+  // Dgg websocket url
+  static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _userMessageElementsService = locator<UserMessageElementsService>();
@@ -60,15 +63,17 @@ class DggService {
       return;
     }
 
-    String urlToUse;
+    Uri uri;
     if (_authInfo.loginKey != null) {
-      urlToUse = "$userInfoUrl?token=${_authInfo.loginKey}";
+      uri = Uri.https(dggBase, userInfoPath, {
+        "token": _authInfo.loginKey,
+      });
     } else {
-      urlToUse = sessionInfoUrl;
+      uri = Uri.https(dggBase, sessionInfoPath);
     }
 
     final response = await http.get(
-      urlToUse,
+      uri,
       headers: _authInfo.sid != null
           ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
           : null,
@@ -157,7 +162,7 @@ class DggService {
   Future<void> getAssets() async {
     //First get cache key
     if (_dggCacheKey == null) {
-      final response = await http.get(chatUrl);
+      final response = await http.get(Uri.https(dggBase, chatPath));
 
       if (response.statusCode == 200) {
         int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
@@ -166,24 +171,24 @@ class DggService {
       }
     }
 
-    String flairsUrl = cdnBaseUrl + flairsPath;
-    String emotesUrl = cdnBaseUrl + emotesPath;
-    String emotesCssUrl = cdnBaseUrl + emotesCssPath;
+    Uri flairsUri = Uri.https(dggCdnBase, flairsPath);
+    Uri emotesUri = Uri.https(dggCdnBase, emotesPath);
+    Uri emotesCssUri = Uri.https(dggCdnBase, emotesCssPath);
 
     if (_dggCacheKey != null) {
-      flairsUrl = flairsUrl + "?_=" + _dggCacheKey;
-      emotesUrl = emotesUrl + "?_=" + _dggCacheKey;
-      emotesCssUrl = emotesCssUrl + "?_=" + _dggCacheKey;
+      flairsUri.replace(queryParameters: {"_": _dggCacheKey});
+      emotesUri.replace(queryParameters: {"_": _dggCacheKey});
+      emotesCssUri.replace(queryParameters: {"_": _dggCacheKey});
     }
 
     //Get assets based on url
-    await getFlairs(flairsUrl);
-    await getEmotes(emotesUrl, emotesCssUrl);
+    await getFlairs(flairsUri);
+    await getEmotes(emotesUri, emotesCssUri);
   }
 
-  Future<void> getFlairs(String flairsUrl) async {
+  Future<void> getFlairs(Uri flairsUri) async {
     if (flairs == null) {
-      final response = await http.get(flairsUrl);
+      final response = await http.get(flairsUri);
 
       if (response.statusCode == 200) {
         flairs = Flairs.fromJson(response.body);
@@ -193,21 +198,21 @@ class DggService {
     }
   }
 
-  Future<void> getEmotes(String emotesUrl, String emotesCssUrl) async {
+  Future<void> getEmotes(Uri emotesUri, Uri emotesCssUri) async {
     if (emotes == null) {
-      final response = await http.get(emotesUrl);
+      final response = await http.get(emotesUri);
 
       if (response.statusCode == 200) {
         Emotes emoteList = Emotes.fromJson(response.body);
-        await _getEmoteCss(emotesCssUrl, emoteList);
+        await _getEmoteCss(emotesCssUri, emoteList);
       } else {
         emotes = Emotes();
       }
     }
   }
 
-  Future<void> _getEmoteCss(String emotesCssUrl, Emotes emoteList) async {
-    final response = await http.get(emotesCssUrl);
+  Future<void> _getEmoteCss(Uri emotesCssUri, Emotes emoteList) async {
+    final response = await http.get(emotesCssUri);
 
     if (response.statusCode == 200) {
       parseCss(response.body, emoteList);

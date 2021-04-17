@@ -1,8 +1,6 @@
 import 'package:dgg/datamodels/auth_info.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-@lazySingleton
 class SharedPreferencesService {
   static const String KEY_SID = "KEY_SID";
   static const String KEY_REMEMBER_ME = "KEY_REMEMBER_ME";
@@ -37,11 +35,18 @@ class SharedPreferencesService {
   }
 
   Future<void> storeAuthInfo(AuthInfo authInfo) async {
-    await Future.wait([
-      _sharedPreferences.setString(KEY_SID, authInfo.sid),
-      _sharedPreferences.setString(KEY_REMEMBER_ME, authInfo.rememberMe),
-      _sharedPreferences.setString(KEY_LOGIN_KEY, authInfo.loginKey),
-    ]);
+    // Check and store sid
+    if (authInfo.sid != null) {
+      await _sharedPreferences.setString(KEY_SID, authInfo.sid);
+    }
+    // Check and store rememberme
+    if (authInfo.rememberMe != null) {
+      await _sharedPreferences.setString(KEY_REMEMBER_ME, authInfo.rememberMe);
+    }
+    // Check and store loginKey
+    if (authInfo.loginKey != null) {
+      await _sharedPreferences.setString(KEY_LOGIN_KEY, authInfo.loginKey);
+    }
   }
 
   Future<void> clearAuthInfo() async {

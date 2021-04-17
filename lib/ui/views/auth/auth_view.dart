@@ -55,10 +55,12 @@ class AuthView extends StatelessWidget {
               width: 200,
               height: 50,
               margin: const EdgeInsets.only(top: 16),
-              child: RaisedButton(
-                color: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 child: Text(
                   "Use in-app webview",
@@ -68,10 +70,13 @@ class AuthView extends StatelessWidget {
                     model.setAuthMethod(AuthViewModel.AUTH_METHOD_WEBVIEW),
               ),
             ),
-            FlatButton(
+            TextButton(
               child: Text(
                 "Use login key",
-                style: TextStyle(decoration: TextDecoration.underline),
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  color: Colors.white,
+                ),
               ),
               onPressed: () =>
                   model.setAuthMethod(AuthViewModel.AUTH_METHOD_LOGIN_KEY),
@@ -93,10 +98,12 @@ class AuthView extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 child: Text("Failed to verify login information with dgg."),
               ),
-              RaisedButton(
-                color: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 child: Text("Try again"),
                 onPressed: () => model.restartAuth(),
@@ -169,14 +176,14 @@ class AuthView extends StatelessWidget {
                     style: TextStyle(color: Colors.red),
                   ),
                 ),
-                RaisedButton(
-                  color: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: Text(
-                    "Start",
-                  ),
+                  child: Text("Start"),
                   onPressed: () => model.startAuthentication(),
                 ),
               ],
@@ -224,24 +231,24 @@ class AuthView extends StatelessWidget {
                   ),
                 ),
                 !model.isAuthStarted
-                    ? RaisedButton(
-                        color: Theme.of(context).primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    ? ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                        child: Text(
-                          "Go to destiny.gg",
-                        ),
+                        child: Text("Go to destiny.gg"),
                         onPressed: () => model.startAuthentication(),
                       )
-                    : RaisedButton(
-                        color: Theme.of(context).primaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                        child: Text(
-                          "Get key from clipboard and submit",
-                        ),
+                        child: Text("Get key from clipboard and submit"),
                         onPressed: () => model.getKeyFromClipboard(),
                       ),
                 model.isClipboardError
