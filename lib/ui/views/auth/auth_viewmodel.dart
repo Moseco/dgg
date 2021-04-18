@@ -1,8 +1,8 @@
+import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
-import 'package:dgg/app/locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/services/cookie_manager_service.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -17,8 +17,8 @@ class AuthViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _dggService = locator<DggService>();
 
-  int _authMethod;
-  int get authMethod => _authMethod;
+  int? _authMethod;
+  int? get authMethod => _authMethod;
   bool get isAuthMethodSelected => _authMethod != null;
 
   bool _isAuthStarted = false;
@@ -37,7 +37,7 @@ class AuthViewModel extends BaseViewModel {
     await _sharedPreferencesService.initialize();
   }
 
-  void setAuthMethod(int method) {
+  void setAuthMethod(int? method) {
     _authMethod = method;
     notifyListeners();
   }
@@ -53,7 +53,7 @@ class AuthViewModel extends BaseViewModel {
   }
 
   Future<void> readCookies(String currentUrl) async {
-    AuthInfo authInfo = await _cookieManagerService.readCookies(currentUrl);
+    AuthInfo? authInfo = await _cookieManagerService.readCookies(currentUrl);
 
     if (authInfo != null) {
       _isSavingAuth = true;
@@ -66,8 +66,8 @@ class AuthViewModel extends BaseViewModel {
   Future<void> getKeyFromClipboard() async {
     _isSavingAuth = true;
     notifyListeners();
-    ClipboardData data = await Clipboard.getData('text/plain');
-    String loginKey = data.text;
+    ClipboardData? data = await Clipboard.getData('text/plain');
+    String? loginKey = data?.text;
 
     if (loginKey != null && loginKey.isNotEmpty) {
       _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));

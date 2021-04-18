@@ -1,8 +1,6 @@
 import 'package:dgg/datamodels/auth_info.dart';
-import 'package:injectable/injectable.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 
-@lazySingleton
 class CookieManagerService {
   static const COOKIE_NAME_SID = "sid";
   static const COOKIE_NAME_REMEMBER_ME = "rememberme";
@@ -15,12 +13,12 @@ class CookieManagerService {
     return cookieManager.clearCookies();
   }
 
-  Future<AuthInfo> readCookies(String currentUrl) async {
+  Future<AuthInfo?> readCookies(String currentUrl) async {
     if (currentUrl == urlProfile) {
       final gotCookies = await cookieManager.getCookies(url);
 
-      String sid;
-      String rememberMe;
+      String? sid;
+      String? rememberMe;
       for (var item in gotCookies) {
         if (item.name == COOKIE_NAME_SID) {
           sid = item.value;
@@ -30,10 +28,7 @@ class CookieManagerService {
       }
 
       if (sid != null) {
-        return AuthInfo(
-          sid: sid,
-          rememberMe: rememberMe,
-        );
+        return AuthInfo(sid: sid, rememberMe: rememberMe);
       } else {
         return null;
       }

@@ -24,5 +24,5 @@ class TestData {
   static const String WS_ERR_DUPLICATE_STRING = '{"description":"duplicate"}';
 
   static const String EMOTE_STRING =
-      '[{"prefix":"EMOTE","image":[{"url":"example.com/EMOTE"}]},{"prefix":"EMOTE2","image":[{"url":"example.com/EMOTE2"}]},{"prefix":"oooo","image":[{"url":"example.com/oooo"}]}]';
+      '[{"prefix":"EMOTE","image":[{"url":"example.com/EMOTE","mime":"image/png","width":82}]},{"prefix":"EMOTE2","image":[{"url":"example.com/EMOTE2","mime":"image/png","width":82}]},{"prefix":"oooo","image":[{"url":"example.com/oooo","mime":"image/png","width":82}]}]';
 }

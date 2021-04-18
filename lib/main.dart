@@ -6,8 +6,8 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:stacked_themes/stacked_themes.dart';
 
-import 'app/locator.dart';
-import 'app/router.gr.dart';
+import 'app/app.locator.dart';
+import 'app/app.router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,8 +42,8 @@ class App extends StatelessWidget {
       ],
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(
         title: 'Dgg',
-        onGenerateRoute: AutoRouter().onGenerateRoute,
         navigatorKey: StackedService.navigatorKey,
+        onGenerateRoute: StackedRouter().onGenerateRoute,
         theme: regularTheme,
       ),
     );

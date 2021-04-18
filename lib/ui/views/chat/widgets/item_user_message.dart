@@ -12,9 +12,9 @@ class ItemUserMessage extends StatelessWidget {
   final UserMessage message;
 
   const ItemUserMessage({
-    Key key,
-    this.model,
-    this.message,
+    Key? key,
+    required this.model,
+    required this.message,
   }) : super(key: key);
 
   @override
@@ -40,7 +40,7 @@ class ItemUserMessage extends StatelessWidget {
     );
   }
 
-  Color _getBackgroundColor() {
+  Color? _getBackgroundColor() {
     if (message.isMentioned) {
       return Color(0xBF06263E);
     } else if (message.isOwn) {
@@ -57,7 +57,7 @@ class ItemUserMessage extends StatelessWidget {
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: message.color == null ? null : Color(message.color),
+          color: message.color == null ? null : Color(message.color!),
         ),
       ),
       TextSpan(

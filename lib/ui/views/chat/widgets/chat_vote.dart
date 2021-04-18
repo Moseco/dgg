@@ -5,10 +5,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 class ChatVote extends StatelessWidget {
   final ChatViewModel model;
 
-  const ChatVote({
-    Key key,
-    this.model,
-  }) : super(key: key);
+  const ChatVote({Key? key, required this.model}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +25,11 @@ class ChatVote extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              model.currentVote.question,
+              model.currentVote!.question,
               style: TextStyle(fontSize: 24),
             ),
             Text(
-              "Winning option: ${model.currentVote.getWinningOption()}",
+              "Winning option: ${model.currentVote!.getWinningOption()}",
               maxLines: 1,
             ),
             IconButton(
@@ -43,7 +40,7 @@ class ChatVote extends StatelessWidget {
         ),
       );
     } else {
-      int voteTotal = model.currentVote.getTotalVotes();
+      int voteTotal = model.currentVote!.getTotalVotes();
       int adjustedVoteTotal = voteTotal == 0 ? 1 : voteTotal;
       return Container(
         width: double.infinity,
@@ -60,25 +57,25 @@ class ChatVote extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              model.currentVote.question,
+              model.currentVote!.question,
               style: TextStyle(fontSize: 24),
             ),
             Text(
-              model.currentVote.time - model.voteTimePassed > 0
-                  ? "Voting time remaining: ${(model.currentVote.time - model.voteTimePassed)}"
+              model.currentVote!.time - model.voteTimePassed > 0
+                  ? "Voting time remaining: ${(model.currentVote!.time - model.voteTimePassed)}"
                   : "Voting finished",
             ),
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: model.currentVote.options.length,
+              itemCount: model.currentVote!.options.length,
               itemBuilder: (context, index) {
                 double percent =
-                    model.currentVote.voteCount[index] / adjustedVoteTotal;
+                    model.currentVote!.voteCount[index] / adjustedVoteTotal;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${index + 1}: ${model.currentVote.options[index]}"),
+                    Text("${index + 1}: ${model.currentVote!.options[index]}"),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: LinearPercentIndicator(

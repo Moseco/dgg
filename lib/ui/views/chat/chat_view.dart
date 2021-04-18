@@ -8,14 +8,14 @@ import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
 class ChatView extends StatefulWidget {
-  const ChatView({Key key}) : super(key: key);
+  const ChatView({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ChatViewState();
 }
 
 class _ChatViewState extends State<ChatView> {
-  ScrollController _scrollController;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _ChatViewState extends State<ChatView> {
                     Expanded(
                       child: extendedNestedScrollView.NestedScrollView(
                         headerSliverBuilder:
-                            (BuildContext context, bool innerBoxIsScrolled) {
+                            (BuildContext context, bool? innerBoxIsScrolled) {
                           return <Widget>[
                             SliverToBoxAdapter(
                               child: Column(

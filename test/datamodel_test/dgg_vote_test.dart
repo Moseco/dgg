@@ -4,11 +4,11 @@ import 'package:dgg/datamodels/dgg_vote.dart';
 void main() {
   group('MessageTest', () {
     test('Valid vote with time in seconds', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote 45s Question here? option1 or option2");
 
       expect(dggVote == null, false);
-      expect(dggVote.question, 'Question here?');
+      expect(dggVote!.question, 'Question here?');
       expect(dggVote.options[0], 'option1');
       expect(dggVote.options[1], 'option2');
       expect(dggVote.voteCount.length, 2);
@@ -17,11 +17,11 @@ void main() {
     });
 
     test('Valid vote with time in minutes', () {
-      DggVote dggVote = DggVote.fromString(
+      DggVote? dggVote = DggVote.fromString(
           "/vote 1m Question here? option1 is here or option2 is over here");
 
       expect(dggVote == null, false);
-      expect(dggVote.question, 'Question here?');
+      expect(dggVote!.question, 'Question here?');
       expect(dggVote.options[0], 'option1 is here');
       expect(dggVote.options[1], 'option2 is over here');
       expect(dggVote.voteCount.length, 2);
@@ -30,11 +30,11 @@ void main() {
     });
 
     test('Valid vote without time', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote Question? option1 or option2");
 
       expect(dggVote == null, false);
-      expect(dggVote.question, 'Question?');
+      expect(dggVote!.question, 'Question?');
       expect(dggVote.options[0], 'option1');
       expect(dggVote.options[1], 'option2');
       expect(dggVote.voteCount.length, 2);
@@ -43,11 +43,11 @@ void main() {
     });
 
     test('Valid subvote', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/svote Question? option1 or option2");
 
       expect(dggVote == null, false);
-      expect(dggVote.question, 'Question?');
+      expect(dggVote!.question, 'Question?');
       expect(dggVote.options[0], 'option1');
       expect(dggVote.options[1], 'option2');
       expect(dggVote.voteCount.length, 2);
@@ -56,10 +56,10 @@ void main() {
     });
 
     test('Valid vote, default options', () {
-      DggVote dggVote = DggVote.fromString("/vote Question?");
+      DggVote? dggVote = DggVote.fromString("/vote Question?");
 
       expect(dggVote == null, false);
-      expect(dggVote.question, 'Question?');
+      expect(dggVote!.question, 'Question?');
       expect(dggVote.options[0], 'Yes');
       expect(dggVote.options[1], 'No');
       expect(dggVote.voteCount.length, 2);
@@ -68,29 +68,30 @@ void main() {
     });
 
     test('Invalid vote, no question', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote invalid thing or invalid other thing");
 
       expect(dggVote == null, true);
     });
 
     test('Invalid vote, not enough options', () {
-      DggVote dggVote = DggVote.fromString("/vote Invalid? optionsor");
+      DggVote? dggVote = DggVote.fromString("/vote Invalid? optionsor");
 
       expect(dggVote == null, true);
     });
 
     test('Invalid vote, empty last option', () {
-      DggVote dggVote = DggVote.fromString("/vote Invalid? options or");
+      DggVote? dggVote = DggVote.fromString("/vote Invalid? options or");
 
       expect(dggVote == null, true);
     });
 
     test('Cast valid votes', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote 45s Question here? option1 or option2");
 
-      expect(dggVote.voteCount[0], 0);
+      expect(dggVote == null, false);
+      expect(dggVote!.voteCount[0], 0);
       expect(dggVote.voteCount[1], 0);
 
       dggVote.castVote("Name", 1, []);
@@ -110,10 +111,11 @@ void main() {
     });
 
     test('Cast multiple votes', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote 45s Question here? option1 or option2");
 
-      expect(dggVote.voteCount[0], 0);
+      expect(dggVote == null, false);
+      expect(dggVote!.voteCount[0], 0);
       expect(dggVote.voteCount[1], 0);
 
       dggVote.castVote("Name", 1, []);
@@ -133,10 +135,11 @@ void main() {
     });
 
     test('Cast vote in subvote', () {
-      DggVote dggVote = DggVote.fromString(
+      DggVote? dggVote = DggVote.fromString(
           "/svote Question here? option1 or option2 or option3 or option4 or option5");
 
-      expect(dggVote.voteCount[0], 0);
+      expect(dggVote == null, false);
+      expect(dggVote!.voteCount[0], 0);
       expect(dggVote.voteCount[1], 0);
       expect(dggVote.voteCount[2], 0);
       expect(dggVote.voteCount[3], 0);
@@ -156,10 +159,11 @@ void main() {
     });
 
     test('Vote total', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote Question here? option1 or option2");
 
-      expect(dggVote.getTotalVotes(), 0);
+      expect(dggVote == null, false);
+      expect(dggVote!.getTotalVotes(), 0);
 
       dggVote.castVote("Name1", 1, []);
 
@@ -171,10 +175,11 @@ void main() {
     });
 
     test('Get winning option', () {
-      DggVote dggVote =
+      DggVote? dggVote =
           DggVote.fromString("/vote Question here? option1 or option2");
 
-      dggVote.castVote("Name1", 1, []);
+      expect(dggVote == null, false);
+      dggVote!.castVote("Name1", 1, []);
 
       expect(dggVote.getWinningOption(), "option1");
     });

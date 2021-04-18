@@ -1,7 +1,7 @@
 class AuthInfo {
-  final String sid;
-  final String rememberMe;
-  final String loginKey;
+  final String? sid;
+  final String? rememberMe;
+  final String? loginKey;
 
   const AuthInfo({
     this.sid,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
@@ -9,44 +10,47 @@ import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
-import 'package:injectable/injectable.dart';
-import 'package:dgg/app/locator.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
-@lazySingleton
 class DggService {
-  static const String sessionInfoUrl = "https://www.destiny.gg/api/chat/me";
-  static const String userInfoUrl = "https://www.destiny.gg/api/userinfo";
-  static const String webSocketUrl = "wss://chat.destiny.gg/ws";
-  static const String chatUrl = "https://www.destiny.gg/embed/chat";
-  static const String cdnBaseUrl = "https://cdn.destiny.gg";
-  static const String flairsPath = "/flairs/flairs.json";
-  static const String emotesPath = "/emotes/emotes.json";
-  static const String emotesCssPath = "/emotes/emotes.css";
+  // Base urls
+  static const String dggBase = r"destiny.gg";
+  static const String dggCdnBase = r"cdn.destiny.gg";
+  // Url endpoints
+  static const String sessionInfoPath = r"/api/chat/me";
+  static const String userInfoPath = r"/api/userinfo";
+  static const String chatPath = r"/embed/chat";
+  static const String flairsPath = r"/flairs/flairs.json";
+  static const String emotesPath = r"/emotes/emotes.json";
+  static const String emotesCssPath = r"/emotes/emotes.css";
+
+  // Dgg websocket url
+  static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _userMessageElementsService = locator<UserMessageElementsService>();
   final _imageService = locator<ImageService>();
 
   //Authentication information
-  AuthInfo _authInfo;
-  SessionInfo _sessionInfo;
-  SessionInfo get sessionInfo => _sessionInfo;
-  String _currentNick;
+  AuthInfo? _authInfo;
+  SessionInfo? _sessionInfo;
+  SessionInfo? get sessionInfo => _sessionInfo;
+  String? _currentNick;
   bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
-  String _dggCacheKey;
-  bool get isAssetsLoaded => flairs != null && emotes != null;
-  Flairs flairs;
-  Emotes emotes;
+  String? _dggCacheKey;
+  bool _assetsLoaded = false;
+  bool get assetsLoaded => _assetsLoaded;
+  late Flairs flairs;
+  late Emotes emotes;
 
   //Dgg chat websocket
-  WebSocketChannel _webSocketChannel;
+  WebSocketChannel? _webSocketChannel;
 
   //RegEx
   final RegExp numberRegex = RegExp(r"\d*\.?\d*");
@@ -60,17 +64,19 @@ class DggService {
       return;
     }
 
-    String urlToUse;
-    if (_authInfo.loginKey != null) {
-      urlToUse = "$userInfoUrl?token=${_authInfo.loginKey}";
+    Uri uri;
+    if (_authInfo!.loginKey != null) {
+      uri = Uri.https(dggBase, userInfoPath, {
+        "token": _authInfo!.loginKey,
+      });
     } else {
-      urlToUse = sessionInfoUrl;
+      uri = Uri.https(dggBase, sessionInfoPath);
     }
 
     final response = await http.get(
-      urlToUse,
-      headers: _authInfo.sid != null
-          ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
+      uri,
+      headers: _authInfo!.sid != null
+          ? {HttpHeaders.cookieHeader: _authInfo!.toHeaderString()}
           : null,
     );
 
@@ -92,19 +98,19 @@ class DggService {
     _webSocketChannel = IOWebSocketChannel.connect(
       webSocketUrl,
       headers: _sessionInfo is Available
-          ? {HttpHeaders.cookieHeader: _authInfo.toHeaderString()}
+          ? {HttpHeaders.cookieHeader: _authInfo!.toHeaderString()}
           : null,
     );
 
-    return _webSocketChannel;
+    return _webSocketChannel!;
   }
 
   Future<void> closeWebSocketConnection() async {
-    await _webSocketChannel?.sink?.close(status.goingAway);
+    await _webSocketChannel?.sink.close(status.goingAway);
     _webSocketChannel = null;
   }
 
-  Message parseWebSocketData(String data) {
+  Message? parseWebSocketData(String? data) {
     String dataString = data.toString();
     int spaceIndex = dataString.indexOf(' ');
     String key = dataString.substring(0, spaceIndex);
@@ -156,68 +162,63 @@ class DggService {
 
   Future<void> getAssets() async {
     //First get cache key
-    if (_dggCacheKey == null) {
-      final response = await http.get(chatUrl);
+    final response = await http.get(Uri.https(dggBase, chatPath));
 
-      if (response.statusCode == 200) {
-        int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
-        int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
-        _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
-      }
+    if (response.statusCode == 200) {
+      int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
+      int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
+      _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
-    String flairsUrl = cdnBaseUrl + flairsPath;
-    String emotesUrl = cdnBaseUrl + emotesPath;
-    String emotesCssUrl = cdnBaseUrl + emotesCssPath;
+    Uri flairsUri = Uri.https(dggCdnBase, flairsPath);
+    Uri emotesUri = Uri.https(dggCdnBase, emotesPath);
+    Uri emotesCssUri = Uri.https(dggCdnBase, emotesCssPath);
 
     if (_dggCacheKey != null) {
-      flairsUrl = flairsUrl + "?_=" + _dggCacheKey;
-      emotesUrl = emotesUrl + "?_=" + _dggCacheKey;
-      emotesCssUrl = emotesCssUrl + "?_=" + _dggCacheKey;
+      flairsUri.replace(queryParameters: {"_": _dggCacheKey});
+      emotesUri.replace(queryParameters: {"_": _dggCacheKey});
+      emotesCssUri.replace(queryParameters: {"_": _dggCacheKey});
     }
 
     //Get assets based on url
-    await getFlairs(flairsUrl);
-    await getEmotes(emotesUrl, emotesCssUrl);
+    await getFlairs(flairsUri);
+    await getEmotes(emotesUri, emotesCssUri);
+    _assetsLoaded = true;
   }
 
-  Future<void> getFlairs(String flairsUrl) async {
-    if (flairs == null) {
-      final response = await http.get(flairsUrl);
-
-      if (response.statusCode == 200) {
-        flairs = Flairs.fromJson(response.body);
-      } else {
-        flairs = Flairs([]);
-      }
-    }
-  }
-
-  Future<void> getEmotes(String emotesUrl, String emotesCssUrl) async {
-    if (emotes == null) {
-      final response = await http.get(emotesUrl);
-
-      if (response.statusCode == 200) {
-        Emotes emoteList = Emotes.fromJson(response.body);
-        await _getEmoteCss(emotesCssUrl, emoteList);
-      } else {
-        emotes = Emotes();
-      }
-    }
-  }
-
-  Future<void> _getEmoteCss(String emotesCssUrl, Emotes emoteList) async {
-    final response = await http.get(emotesCssUrl);
+  Future<void> getFlairs(Uri flairsUri) async {
+    final response = await http.get(flairsUri);
 
     if (response.statusCode == 200) {
-      parseCss(response.body, emoteList);
-      emotes = emoteList;
+      flairs = Flairs.fromJson(response.body);
     } else {
-      emotes = emoteList;
+      flairs = Flairs.empty();
     }
   }
 
-  void parseCss(String source, Emotes emoteList) {
+  Future<void> getEmotes(Uri emotesUri, Uri emotesCssUri) async {
+    final response = await http.get(emotesUri);
+
+    if (response.statusCode == 200) {
+      emotes = Emotes.fromJson(response.body);
+
+      await _getEmoteCss(emotesCssUri);
+    } else {
+      emotes = Emotes.empty();
+    }
+  }
+
+  Future<void> _getEmoteCss(Uri emotesCssUri) async {
+    if (emotes.emoteMap.length > 0) {
+      final response = await http.get(emotesCssUri);
+
+      if (response.statusCode == 200) {
+        _parseCss(response.body);
+      }
+    }
+  }
+
+  void _parseCss(String source) {
     //Split css file by lines
     List<String> lines = LineSplitter().convert(source);
 
@@ -237,8 +238,8 @@ class DggService {
           if (currentLineTrimmed.startsWith("animation:")) {
             if (currentLineTrimmed.contains("steps(")) {
               //If animation has steps, parse the duration and number of repeats
-              parseEmoteSteps(
-                emoteList.emoteMap[emoteName],
+              _parseEmoteSteps(
+                emotes.emoteMap[emoteName]!,
                 currentLineTrimmed,
               );
             }
@@ -251,9 +252,9 @@ class DggService {
 
             //Keep lowest width found
             //  If we find a lower width, then it is step animated
-            if (emoteList.emoteMap[emoteName].width > width) {
-              emoteList.emoteMap[emoteName].width = width;
-              emoteList.emoteMap[emoteName].animated = true;
+            if (emotes.emoteMap[emoteName]!.width > width) {
+              emotes.emoteMap[emoteName]!.width = width;
+              emotes.emoteMap[emoteName]!.animated = true;
             }
           }
           currentLineTrimmed = lines[++i].trim();
@@ -262,9 +263,9 @@ class DggService {
     }
   }
 
-  void parseEmoteSteps(Emote emote, String line) {
-    _StepParam _stepParam1;
-    _StepParam _stepParam2;
+  void _parseEmoteSteps(Emote emote, String line) {
+    _StepParam? _stepParam1;
+    _StepParam? _stepParam2;
 
     //Remove the last character which will be ';'
     //  Makes things easier later
@@ -300,22 +301,22 @@ class DggService {
     }
   }
 
-  _StepParam _parseStepParam(String param) {
-    RegExpMatch match = numberRegex.firstMatch(param);
+  _StepParam? _parseStepParam(String param) {
+    RegExpMatch? match = numberRegex.firstMatch(param);
     if (param.endsWith("ms")) {
       //Duration in milliseconds
       return _StepParam(
-        double.parse(param.substring(0, match.end)).toInt(),
+        double.parse(param.substring(0, match!.end)).toInt(),
         _StepParamType.duration,
       );
     } else if (param.endsWith("s")) {
       //Duration in seconds
       return _StepParam(
-        (double.parse(param.substring(0, match.end)) * 1000).toInt(),
+        (double.parse(param.substring(0, match!.end)) * 1000).toInt(),
         _StepParamType.duration,
       );
     } else {
-      if (match.end != 0) {
+      if (match!.end != 0) {
         //Number of repeats
         return _StepParam(
           int.parse(param.substring(0, match.end)),
@@ -330,8 +331,7 @@ class DggService {
 
   Future<void> clearAssets() async {
     await closeWebSocketConnection();
-    flairs = null;
-    emotes = null;
+    _assetsLoaded = false;
   }
 
   Future<void> loadEmote(Emote emote) async {
@@ -343,7 +343,7 @@ class DggService {
 
   void sendChatMessage(String message) {
     try {
-      _webSocketChannel.sink.add('MSG {"data": "$message"}');
+      _webSocketChannel?.sink.add('MSG {"data": "$message"}');
     } catch (_) {
       print("Message failed to send");
     }

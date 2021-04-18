@@ -1,5 +1,5 @@
-import 'package:dgg/app/locator.dart';
-import 'package:dgg/app/router.gr.dart';
+import 'package:dgg/app/app.locator.dart';
+import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -17,7 +17,7 @@ class SettingsViewModel extends BaseViewModel {
   final _themeService = locator<ThemeService>();
 
   bool get isSignedIn => _dggService.sessionInfo is Available;
-  String get username => (_dggService.sessionInfo as Available).nick;
+  String? get username => (_dggService.sessionInfo as Available).nick;
   bool get isCrashlyticsCollectionEnabled =>
       FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
   bool _isAnalyticsEnabled = false;

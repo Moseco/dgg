@@ -1,5 +1,5 @@
-import 'package:dgg/app/locator.dart';
-import 'package:dgg/app/router.gr.dart';
+import 'package:dgg/app/app.locator.dart';
+import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -18,8 +18,8 @@ class OnboardingViewModel extends BaseViewModel {
   bool _isAnalyticsEnabled = true;
   bool get isAnalyticsEnabled => _isAnalyticsEnabled;
   bool get isSignedIn => _dggService.isSignedIn;
-  String _nickname;
-  String get nickname => _nickname;
+  String? _nickname;
+  String? get nickname => _nickname;
 
   Future<void> toggleCrashlyticsCollection(bool value) async {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(value);

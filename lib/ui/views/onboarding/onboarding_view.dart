@@ -5,7 +5,7 @@ import 'package:stacked/stacked.dart';
 import 'onboarding_viewmodel.dart';
 
 class OnboardingView extends StatelessWidget {
-  const OnboardingView({Key key}) : super(key: key);
+  const OnboardingView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class OnboardingView extends StatelessWidget {
             "Done",
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          skip: const Text("Skip"),
+          skip: const Text("Skip", style: TextStyle(color: Colors.white)),
           next: const Text("Next"),
           onDone: model.finishOnboarding,
           onSkip: model.finishOnboarding,
@@ -116,10 +116,12 @@ class OnboardingView extends StatelessWidget {
         textAlign: TextAlign.center,
       );
     } else {
-      return RaisedButton(
-        color: Theme.of(context).primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+      return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: Theme.of(context).primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         child: Text("Sign in"),
         onPressed: () => model.navigateToAuth(),

@@ -1,4 +1,4 @@
-import 'package:dgg/app/locator.dart';
+import 'package:dgg/app/app.locator.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
 
@@ -27,9 +27,9 @@ class _MessageActionBottomSheet extends StatelessWidget {
   final Function(SheetResponse) completer;
 
   const _MessageActionBottomSheet({
-    Key key,
-    this.request,
-    this.completer,
+    Key? key,
+    required this.request,
+    required this.completer,
   }) : super(key: key);
 
   @override

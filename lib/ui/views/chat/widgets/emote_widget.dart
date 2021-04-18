@@ -4,10 +4,7 @@ import 'package:dgg/datamodels/emotes.dart';
 class EmoteWidget extends StatelessWidget {
   final Emote emote;
 
-  EmoteWidget({
-    Key key,
-    @required this.emote,
-  }) : super(key: key);
+  EmoteWidget({Key? key, required this.emote}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +30,7 @@ class EmoteWidget extends StatelessWidget {
 class _AnimatedEmote extends StatefulWidget {
   final Emote emote;
 
-  const _AnimatedEmote({Key key, this.emote}) : super(key: key);
+  const _AnimatedEmote({Key? key, required this.emote}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AnimatedEmoteState();
@@ -41,8 +38,8 @@ class _AnimatedEmote extends StatefulWidget {
 
 class _AnimatedEmoteState extends State<_AnimatedEmote>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<int> _animation;
+  late AnimationController _controller;
+  late Animation<int> _animation;
 
   @override
   void initState() {
@@ -51,12 +48,12 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
     _controller = AnimationController(
       vsync: this,
       duration: Duration(
-        milliseconds: widget.emote.duration * widget.emote.repeatCount,
+        milliseconds: widget.emote.duration! * widget.emote.repeatCount!,
       ),
     );
     _animation = IntTween(
       begin: 0,
-      end: widget.emote.frames.length * widget.emote.repeatCount,
+      end: widget.emote.frames!.length * widget.emote.repeatCount!,
     ).animate(_controller);
     _controller.forward();
   }
@@ -69,7 +66,7 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
         return Container(
           height: 30,
           child: widget
-              .emote.frames[_animation.value % widget.emote.frames.length],
+              .emote.frames![_animation.value % widget.emote.frames!.length],
         );
       },
     );

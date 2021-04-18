@@ -5,7 +5,7 @@ import 'package:stacked/stacked.dart';
 import 'settings_viewmodel.dart';
 
 class SettingsView extends StatelessWidget {
-  const SettingsView({Key key}) : super(key: key);
+  const SettingsView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -129,8 +129,8 @@ class SettingsView extends StatelessWidget {
                 value: 0,
                 groupValue: model.themeIndex,
                 activeColor: Theme.of(context).primaryColor,
-                onChanged: (int value) {
-                  model.setTheme(value);
+                onChanged: (int? value) {
+                  model.setTheme(value!);
                   Navigator.of(c).pop();
                 },
               ),
@@ -139,8 +139,8 @@ class SettingsView extends StatelessWidget {
                 value: 1,
                 groupValue: model.themeIndex,
                 activeColor: Theme.of(context).primaryColor,
-                onChanged: (int value) {
-                  model.setTheme(value);
+                onChanged: (int? value) {
+                  model.setTheme(value!);
                   Navigator.of(c).pop();
                 },
               ),
@@ -148,8 +148,8 @@ class SettingsView extends StatelessWidget {
           ),
         ),
         actions: [
-          FlatButton(
-            child: Text("Cancel"),
+          TextButton(
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
           )
         ],

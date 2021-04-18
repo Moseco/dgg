@@ -21,14 +21,14 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 4),
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     child: Text("Yes"),
                     onPressed: () => model.setShowStreamEmbed(true),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: RaisedButton(
+                  child: ElevatedButton(
                     child: Text("No"),
                     onPressed: () => model.setShowStreamEmbed(false),
                   ),

@@ -281,7 +281,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "This is example text",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 1);
@@ -293,7 +293,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "#twitch/name",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 1);
@@ -307,7 +307,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "Watching #twitch/name now",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 3);
@@ -325,7 +325,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "#twitc/name",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 1);
@@ -336,7 +336,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "#twitch",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 1);
@@ -347,7 +347,7 @@ void main() {
       List<UserMessageElement> elements =
           _userMessageElementsService.createMessageElements(
         "#youtube/name.",
-        Emotes(emoteMap: {}),
+        Emotes(emoteMap: {}, emoteRegex: RegExp("")),
       );
 
       expect(elements.length, 2);
