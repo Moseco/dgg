@@ -17,6 +17,10 @@ class Flairs {
     });
     return Flairs(flairs);
   }
+
+  factory Flairs.empty() {
+    return Flairs([]);
+  }
 }
 
 class Flair {

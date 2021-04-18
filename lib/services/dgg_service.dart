@@ -44,9 +44,10 @@ class DggService {
 
   //Assets
   String? _dggCacheKey;
-  bool get isAssetsLoaded => flairs != null && emotes != null;
-  Flairs? flairs;
-  Emotes? emotes;
+  bool _assetsLoaded = false;
+  bool get assetsLoaded => _assetsLoaded;
+  late Flairs flairs;
+  late Emotes emotes;
 
   //Dgg chat websocket
   WebSocketChannel? _webSocketChannel;
@@ -121,7 +122,7 @@ class DggService {
       case "MSG":
         return UserMessage.fromJson(
           jsonString,
-          flairs!,
+          flairs,
           emotes,
           _userMessageElementsService.createMessageElements,
           currentNick: _currentNick,
@@ -161,14 +162,12 @@ class DggService {
 
   Future<void> getAssets() async {
     //First get cache key
-    if (_dggCacheKey == null) {
-      final response = await http.get(Uri.https(dggBase, chatPath));
+    final response = await http.get(Uri.https(dggBase, chatPath));
 
-      if (response.statusCode == 200) {
-        int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
-        int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
-        _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
-      }
+    if (response.statusCode == 200) {
+      int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
+      int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
+      _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
     Uri flairsUri = Uri.https(dggCdnBase, flairsPath);
@@ -184,44 +183,42 @@ class DggService {
     //Get assets based on url
     await getFlairs(flairsUri);
     await getEmotes(emotesUri, emotesCssUri);
+    _assetsLoaded = true;
   }
 
   Future<void> getFlairs(Uri flairsUri) async {
-    if (flairs == null) {
-      final response = await http.get(flairsUri);
+    final response = await http.get(flairsUri);
 
-      if (response.statusCode == 200) {
-        flairs = Flairs.fromJson(response.body);
-      } else {
-        flairs = Flairs([]);
-      }
+    if (response.statusCode == 200) {
+      flairs = Flairs.fromJson(response.body);
+    } else {
+      flairs = Flairs.empty();
     }
   }
 
   Future<void> getEmotes(Uri emotesUri, Uri emotesCssUri) async {
-    if (emotes == null) {
-      final response = await http.get(emotesUri);
+    final response = await http.get(emotesUri);
 
-      if (response.statusCode == 200) {
-        Emotes? emoteList = Emotes.fromJson(response.body);
+    if (response.statusCode == 200) {
+      emotes = Emotes.fromJson(response.body);
 
-        await _getEmoteCss(emotesCssUri, emoteList);
-      }
+      await _getEmoteCss(emotesCssUri);
+    } else {
+      emotes = Emotes.empty();
     }
   }
 
-  Future<void> _getEmoteCss(Uri emotesCssUri, Emotes? emoteList) async {
-    if (emoteList != null) {
+  Future<void> _getEmoteCss(Uri emotesCssUri) async {
+    if (emotes.emoteMap.length > 0) {
       final response = await http.get(emotesCssUri);
 
       if (response.statusCode == 200) {
-        _parseCss(response.body, emoteList);
+        _parseCss(response.body);
       }
     }
-    emotes = emoteList;
   }
 
-  void _parseCss(String source, Emotes emoteList) {
+  void _parseCss(String source) {
     //Split css file by lines
     List<String> lines = LineSplitter().convert(source);
 
@@ -242,7 +239,7 @@ class DggService {
             if (currentLineTrimmed.contains("steps(")) {
               //If animation has steps, parse the duration and number of repeats
               _parseEmoteSteps(
-                emoteList.emoteMap[emoteName]!,
+                emotes.emoteMap[emoteName]!,
                 currentLineTrimmed,
               );
             }
@@ -255,9 +252,9 @@ class DggService {
 
             //Keep lowest width found
             //  If we find a lower width, then it is step animated
-            if (emoteList.emoteMap[emoteName]!.width > width) {
-              emoteList.emoteMap[emoteName]!.width = width;
-              emoteList.emoteMap[emoteName]!.animated = true;
+            if (emotes.emoteMap[emoteName]!.width > width) {
+              emotes.emoteMap[emoteName]!.width = width;
+              emotes.emoteMap[emoteName]!.animated = true;
             }
           }
           currentLineTrimmed = lines[++i].trim();
@@ -334,8 +331,7 @@ class DggService {
 
   Future<void> clearAssets() async {
     await closeWebSocketConnection();
-    flairs = null;
-    emotes = null;
+    _assetsLoaded = false;
   }
 
   Future<void> loadEmote(Emote emote) async {

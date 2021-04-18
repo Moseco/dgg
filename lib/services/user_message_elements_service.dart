@@ -11,13 +11,13 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
 
-  List<UserMessageElement> createMessageElements(String text, Emotes? emotes) {
+  List<UserMessageElement> createMessageElements(String text, Emotes emotes) {
     if (text.isEmpty) {
       return [];
     }
 
     List<UserMessageElement> elements = parseUrls([TextElement(text)]);
-    if (emotes != null && emotes.emoteMap.length > 0) {
+    if (emotes.emoteMap.length > 0) {
       elements = parseEmotes(elements, emotes);
     }
     elements = parseEmbedUrls(elements);

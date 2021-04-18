@@ -31,8 +31,8 @@ class UserMessage extends Message {
   static UserMessage fromJson(
     String jsonString,
     Flairs flairs,
-    Emotes? emotes,
-    Function(String, Emotes?) createElements, {
+    Emotes emotes,
+    Function(String, Emotes) createElements, {
     String? currentNick,
   }) {
     Map<String, dynamic> map = jsonDecode(jsonString);

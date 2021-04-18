@@ -6,7 +6,7 @@ import 'package:dgg/datamodels/user_message_element.dart';
 import '../setup/test_data.dart';
 
 void main() {
-  Emotes exampleEmotes = Emotes.fromJson(TestData.EMOTE_STRING)!;
+  Emotes exampleEmotes = Emotes.fromJson(TestData.EMOTE_STRING);
 
   group('UserMessageElementsServiceTest', () {
     final _userMessageElementsService = UserMessageElementsService();

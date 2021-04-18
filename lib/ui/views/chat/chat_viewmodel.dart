@@ -36,7 +36,7 @@ class ChatViewModel extends BaseViewModel {
 
   bool get isLoading => isAuthenticating || !isAssetsLoaded;
   bool get isAuthenticating => _dggService.sessionInfo == null;
-  bool get isAssetsLoaded => _dggService.isAssetsLoaded;
+  bool get isAssetsLoaded => _dggService.assetsLoaded;
   bool get isSignedIn => _dggService.isSignedIn;
 
   StreamSubscription? _chatSubscription;
@@ -405,7 +405,7 @@ class ChatViewModel extends BaseViewModel {
         RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
 
         //check emotes
-        _dggService.emotes!.emoteMap.forEach((k, v) {
+        _dggService.emotes.emoteMap.forEach((k, v) {
           if (k.startsWith(lastWordRegex)) {
             newSuggestions.add(k);
           }

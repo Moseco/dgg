@@ -11,7 +11,7 @@ class Emotes {
     required this.emoteRegex,
   });
 
-  static Emotes? fromJson(String jsonString) {
+  static Emotes fromJson(String jsonString) {
     List<dynamic> emoteList = jsonDecode(jsonString);
 
     Map<String, Emote> emoteMap = Map();
@@ -36,14 +36,16 @@ class Emotes {
       stringBuffer.write("\\b");
       stringBuffer.write(keyList.last);
       stringBuffer.write("\\b");
-    } else {
-      return null;
     }
 
     return Emotes(
       emoteMap: emoteMap,
       emoteRegex: RegExp(stringBuffer.toString()),
     );
+  }
+
+  factory Emotes.empty() {
+    return Emotes(emoteMap: {}, emoteRegex: RegExp(''));
   }
 }
 
