@@ -19,8 +19,8 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [x] Allow clicking in chat embed messages
     - [x] Support "#twitch/channel" format
     - [x] Support "#youtube/channel" format
-    - [ ] Support "#twitch-vod/id" format
-    - [ ] Support "#twitch-clip/id" format
+    - [x] Support "#twitch-vod/id" format
+    - [x] Support "#twitch-clip/id" format
 - [x] Chat voting
 - [ ] Animated emotes 
     - [x] Emotes in gif format

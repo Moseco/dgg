@@ -55,16 +55,19 @@ class ChatViewModel extends BaseViewModel {
   List<String> get suggestions => _suggestions;
   String _previousLastWord = '';
 
-  String get twitchUrlBase =>
-      'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&channel=';
+  static const String twitchStreamUrlBase =
+      r'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&channel=';
+  static const String twitchVodUrlBase =
+      r'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&video=';
+  static const String twitchClipUrlBase =
+      r'https://clips.twitch.tv/embed?parent=dev.moseco.dgg&autoplay=true&muted=false&clip=';
   String _currentEmbedId = 'destiny';
-  String get currentEmbedId => _currentEmbedId;
   bool _showStreamPrompt = false;
   bool get showStreamPrompt => _showStreamPrompt;
-  bool _showStreamEmbed = false;
-  bool get showStreamEmbed => _showStreamEmbed;
-  EmbedType _streamEmbedType = EmbedType.twitch;
-  EmbedType get streamEmbedType => _streamEmbedType;
+  bool _showEmbed = false;
+  bool get showEmbed => _showEmbed;
+  EmbedType _embedType = EmbedType.TWITCH_STREAM;
+  EmbedType get embedType => _embedType;
 
   DggVote? _currentVote;
   DggVote? get currentVote => _currentVote;
@@ -463,37 +466,36 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  void setShowStreamEmbed(bool value) {
+  void setShowEmbed(bool value) {
     _showStreamPrompt = false;
-    _showStreamEmbed = value;
+    _showEmbed = value;
     notifyListeners();
   }
 
   void setStreamChannelManual(List<String>? channel) {
     if (channel != null && channel[0].trim().isNotEmpty) {
-      setStreamChannel(channel[0], "twitch");
+      setEmbed(channel[0], "twitch");
     }
   }
 
-  void setStreamChannel(String embedId, String embedType) {
+  void setEmbed(String embedId, String embedType) {
     //Set new channel name
     _currentEmbedId = embedId.trim();
     //Set values based on embed type and current embed state
     switch (embedType) {
       case "twitch":
-        if (_showStreamEmbed && _streamEmbedType == EmbedType.twitch) {
+        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
           //Embed already shown, use controller to load new stream
-          webViewController.loadUrl(twitchUrlBase + _currentEmbedId);
-        } else {
-          _streamEmbedType = EmbedType.twitch;
+          webViewController.loadUrl(twitchStreamUrlBase + _currentEmbedId);
         }
+        _embedType = EmbedType.TWITCH_STREAM;
         break;
       case "youtube":
-        if (_showStreamEmbed && _streamEmbedType == EmbedType.youtube) {
+        if (_showEmbed && _embedType == EmbedType.YOUTUBE) {
           //Embed already shown, use controller to load new stream
           youtubePlayerController!.load(_currentEmbedId);
         } else {
-          _streamEmbedType = EmbedType.youtube;
+          _embedType = EmbedType.YOUTUBE;
           youtubePlayerController?.close();
           youtubePlayerController = YoutubePlayerController(
             initialVideoId: _currentEmbedId,
@@ -504,11 +506,38 @@ class ChatViewModel extends BaseViewModel {
           );
         }
         break;
+      case "twitch-vod":
+        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+          //Embed already shown, use controller to load new stream
+          webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
+        }
+        _embedType = EmbedType.TWITCH_VOD;
+        break;
+      case "twitch-clip":
+        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+          //Embed already shown, use controller to load new stream
+          webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
+        }
+        _embedType = EmbedType.TWITCH_CLIP;
+        break;
       default:
         break;
     }
     //Show the stream embed
-    setShowStreamEmbed(true);
+    setShowEmbed(true);
+  }
+
+  String getTwitchEmbedUrl() {
+    switch (_embedType) {
+      case EmbedType.TWITCH_STREAM:
+        return twitchStreamUrlBase + _currentEmbedId;
+      case EmbedType.TWITCH_VOD:
+        return twitchVodUrlBase + _currentEmbedId;
+      case EmbedType.TWITCH_CLIP:
+        return twitchClipUrlBase + _currentEmbedId;
+      default:
+        return 'https://destiny.gg';
+    }
   }
 
   void handleVoteTimer(Timer timer) {
@@ -580,6 +609,8 @@ class ChatViewModel extends BaseViewModel {
 }
 
 enum EmbedType {
-  twitch,
-  youtube,
+  TWITCH_STREAM,
+  TWITCH_VOD,
+  TWITCH_CLIP,
+  YOUTUBE,
 }

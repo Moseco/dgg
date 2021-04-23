@@ -7,7 +7,7 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
   final RegExp _embedUrlRegex = RegExp(
-    r"#(twitch|youtube)\/(?:[A-z0-9_\-]{3,64})",
+    r"#(twitch|twitch-vod|twitch-clip|youtube)\/(?:[A-z0-9_\-]{3,64})",
     caseSensitive: false,
   );
 

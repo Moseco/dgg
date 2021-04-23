@@ -35,11 +35,11 @@ class _ChatViewState extends State<ChatView> {
           actions: model.isAssetsLoaded
               ? <Widget>[
                   IconButton(
-                    icon: model.showStreamEmbed
+                    icon: model.showEmbed
                         ? Icon(Icons.desktop_access_disabled)
                         : Icon(Icons.desktop_windows),
                     onPressed: () =>
-                        model.setShowStreamEmbed(!model.showStreamEmbed),
+                        model.setShowEmbed(!model.showEmbed),
                   ),
                   PopupMenuButton<int>(
                     onSelected: (int selected) => selected == 3

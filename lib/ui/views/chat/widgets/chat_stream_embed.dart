@@ -23,14 +23,14 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
                   padding: const EdgeInsets.only(right: 4),
                   child: ElevatedButton(
                     child: Text("Yes"),
-                    onPressed: () => model.setShowStreamEmbed(true),
+                    onPressed: () => model.setShowEmbed(true),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: ElevatedButton(
                     child: Text("No"),
-                    onPressed: () => model.setShowStreamEmbed(false),
+                    onPressed: () => model.setShowEmbed(false),
                   ),
                 ),
               ],
@@ -39,28 +39,26 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
         ),
       );
     } else {
-      if (model.showStreamEmbed) {
-        switch (model.streamEmbedType) {
-          case EmbedType.twitch:
-            return Container(
-              height: 9 / 16 * MediaQuery.of(context).size.width,
-              child: WebView(
-                initialUrl: model.twitchUrlBase + model.currentEmbedId,
-                javascriptMode: JavascriptMode.unrestricted,
-                initialMediaPlaybackPolicy:
-                    AutoMediaPlaybackPolicy.always_allow,
-                onWebViewCreated: (WebViewController webViewController) {
-                  model.webViewController = webViewController;
-                },
-              ),
-            );
-          case EmbedType.youtube:
-            return YoutubePlayerIFrame(
-              controller: model.youtubePlayerController,
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-            );
-          default:
-            return Container();
+      if (model.showEmbed) {
+        if (model.embedType == EmbedType.YOUTUBE) {
+          // Show youtube
+          return YoutubePlayerIFrame(
+            controller: model.youtubePlayerController,
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+          );
+        } else {
+          // Show webview and display correct twitch page
+          return Container(
+            height: 9 / 16 * MediaQuery.of(context).size.width,
+            child: WebView(
+              initialUrl: model.getTwitchEmbedUrl(),
+              javascriptMode: JavascriptMode.unrestricted,
+              initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+              onWebViewCreated: (WebViewController webViewController) {
+                model.webViewController = webViewController;
+              },
+            ),
+          );
         }
       } else {
         return Container();

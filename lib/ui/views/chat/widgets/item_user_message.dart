@@ -109,8 +109,8 @@ class ItemUserMessage extends StatelessWidget {
                 color: Colors.blue,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () =>
-                    model.setStreamChannel(element.embedId, element.embedType),
+                ..onTap =
+                    () => model.setEmbed(element.embedId, element.embedType),
             ),
           );
         } else {
