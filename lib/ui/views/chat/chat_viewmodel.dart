@@ -48,6 +48,8 @@ class ChatViewModel extends BaseViewModel {
   bool _isListAtBottom = true;
   bool get isListAtBottom => _isListAtBottom;
   List<Message> _pausedMessages = [];
+  bool _showReconnectButton = false;
+  bool get showReconnectButton => _showReconnectButton;
 
   String _draft = '';
   String get draft => _draft;
@@ -103,8 +105,10 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void _connectChat() {
+    _showReconnectButton = false;
     _messages.add(StatusMessage(data: "Connecting..."));
     notifyListeners();
+    _chatSubscription?.cancel();
     _chatSubscription = _dggService.openWebSocketConnection().stream.listen(
       (data) {
         Message? currentMessage = _dggService.parseWebSocketData(data);
@@ -293,6 +297,7 @@ class ChatViewModel extends BaseViewModel {
       _messages.add(StatusMessage(data: "Disconnected"));
     }
     _isChatConnected = false;
+    _showReconnectButton = true;
     notifyListeners();
     _chatSubscription?.cancel();
     _chatSubscription = null;
@@ -608,6 +613,12 @@ class ChatViewModel extends BaseViewModel {
         default:
           break;
       }
+    }
+  }
+
+  void onReconnectButtonPressed() {
+    if (_showReconnectButton) {
+      _connectChat();
     }
   }
 

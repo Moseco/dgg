@@ -38,8 +38,7 @@ class _ChatViewState extends State<ChatView> {
                     icon: model.showEmbed
                         ? Icon(Icons.desktop_access_disabled)
                         : Icon(Icons.desktop_windows),
-                    onPressed: () =>
-                        model.setShowEmbed(!model.showEmbed),
+                    onPressed: () => model.setShowEmbed(!model.showEmbed),
                   ),
                   PopupMenuButton<int>(
                     onSelected: (int selected) => selected == 3
@@ -118,6 +117,18 @@ class _ChatViewState extends State<ChatView> {
                               ),
                             ),
                           ),
+                    model.showReconnectButton
+                        ? ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: Theme.of(context).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text("Reconnect"),
+                            onPressed: () => model.onReconnectButtonPressed(),
+                          )
+                        : Container(),
                     ChatInput(model: model),
                   ],
                 ),
