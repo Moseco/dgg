@@ -256,6 +256,15 @@ class ChatViewModel extends BaseViewModel {
                 data: "You are temporarily muted!",
                 isError: true,
               ));
+            } else if (errorMessage.description == "needlogin") {
+              // Server thinks user is not logged in
+              //    Can try reconnecting to fix it
+              _messages.add(StatusMessage(
+                data:
+                    "Message failed to send due to an authentication failure.\nAutomatically reconnecting...",
+                isError: true,
+              ));
+              _delayedReconnect();
             } else {
               _messages.add(StatusMessage(
                 data: errorMessage.description,
@@ -288,6 +297,13 @@ class ChatViewModel extends BaseViewModel {
     _chatSubscription?.cancel();
     _chatSubscription = null;
     await _dggService.closeWebSocketConnection();
+  }
+
+  Future<void> _delayedReconnect() async {
+    await _disconnectChat();
+    await Future.delayed(Duration(seconds: 3));
+    await _getSessionInfo();
+    _connectChat();
   }
 
   Future<void> _loadEmote(Emote emote) async {
