@@ -27,7 +27,10 @@ import 'package:stacked_themes/stacked_themes.dart';
     LazySingleton(classType: UserMessageElementsService),
     LazySingleton(classType: NavigationService),
     LazySingleton(classType: SnackbarService),
-    LazySingleton(classType: ThemeService),
+    LazySingleton(
+      classType: ThemeService,
+      resolveUsing: ThemeService.getInstance,
+    ),
     LazySingleton(classType: BottomSheetService),
   ],
 )

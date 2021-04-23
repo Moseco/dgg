@@ -26,12 +26,15 @@ class SettingsViewModel extends BaseViewModel {
   bool get isWakelockEnabled => _isWakelockEnabled;
   int _themeIndex = 0;
   int get themeIndex => _themeIndex;
+  int _appBarTheme = 0;
+  int get appBarTheme => _appBarTheme;
 
   Future<void> initialize() async {
     await _sharedPreferencesService.initialize();
     _isAnalyticsEnabled = _sharedPreferencesService.getAnalyticsEnabled();
     _isWakelockEnabled = _sharedPreferencesService.getWakelockEnabled();
     _themeIndex = _sharedPreferencesService.getThemeIndex();
+    _appBarTheme = _sharedPreferencesService.getAppBarTheme();
     notifyListeners();
   }
 
@@ -78,6 +81,12 @@ class SettingsViewModel extends BaseViewModel {
   void setTheme(int value) {
     _themeService.selectThemeAtIndex(value);
     _themeIndex = value;
+    notifyListeners();
+  }
+
+  void setAppBarTheme(int value) {
+    _sharedPreferencesService.setAppBarTheme(value);
+    _appBarTheme = value;
     notifyListeners();
   }
 }

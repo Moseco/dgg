@@ -28,6 +28,6 @@ void setupLocator() {
   locator.registerLazySingleton(() => UserMessageElementsService());
   locator.registerLazySingleton(() => NavigationService());
   locator.registerLazySingleton(() => SnackbarService());
-  locator.registerLazySingleton(() => ThemeService());
+  locator.registerLazySingleton(() => ThemeService.getInstance());
   locator.registerLazySingleton(() => BottomSheetService());
 }

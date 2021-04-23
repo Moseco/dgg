@@ -8,6 +8,7 @@ class SharedPreferencesService {
   static const String KEY_ANALYTICS_ENABLED = "KEY_ANALYTICS_ENABLED";
   static const String KEY_WAKELOCK_ENABLED = "KEY_WAKELOCK_ENABLED";
   static const String KEY_ONBOARDING = "KEY_ONBOARDING";
+  static const String KEY_APP_BAR_THEME = "KEY_APP_BAR_THEME";
 
   SharedPreferences? _sharedPreferences;
 
@@ -41,7 +42,8 @@ class SharedPreferencesService {
     }
     // Check and store rememberme
     if (authInfo.rememberMe != null) {
-      await _sharedPreferences!.setString(KEY_REMEMBER_ME, authInfo.rememberMe!);
+      await _sharedPreferences!
+          .setString(KEY_REMEMBER_ME, authInfo.rememberMe!);
     }
     // Check and store loginKey
     if (authInfo.loginKey != null) {
@@ -79,6 +81,14 @@ class SharedPreferencesService {
 
   Future<void> setOnboarding() async {
     await _sharedPreferences!.setBool(KEY_ONBOARDING, true);
+  }
+
+  int getAppBarTheme() {
+    return _sharedPreferences!.getInt(KEY_APP_BAR_THEME) ?? 0;
+  }
+
+  Future<void> setAppBarTheme(int value) async {
+    await _sharedPreferences!.setInt(KEY_APP_BAR_THEME, value);
   }
 
   int getThemeIndex() {

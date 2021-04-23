@@ -78,16 +78,20 @@ class ChatViewModel extends BaseViewModel {
   bool _isVoteCollapsed = false;
   bool get isVoteCollapsed => _isVoteCollapsed;
 
+  int _appBarTheme = 0;
+  int get appBarTheme => _appBarTheme;
+
   Future<void> initialize() async {
     await _sharedPreferencesService.initialize();
     await _checkOnboarding();
     if (_sharedPreferencesService.getWakelockEnabled()) {
       Wakelock.enable();
     }
+    _appBarTheme = _sharedPreferencesService.getAppBarTheme();
+    notifyListeners();
     await _getSessionInfo();
     _getStreamStatus();
     await _dggService.getAssets();
-    notifyListeners();
     _connectChat();
   }
 
@@ -352,6 +356,7 @@ class ChatViewModel extends BaseViewModel {
         }
         _disconnectChat();
         await _navigationService.navigateTo(Routes.settingsView);
+        _appBarTheme = _sharedPreferencesService.getAppBarTheme();
         if (_sharedPreferencesService.getWakelockEnabled()) {
           Wakelock.enable();
         }

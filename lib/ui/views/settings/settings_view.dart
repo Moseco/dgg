@@ -16,6 +16,8 @@ class SettingsView extends StatelessWidget {
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: Text("Settings"),
+          backgroundColor: model.appBarTheme == 1 ? Colors.transparent : null,
+          elevation: model.appBarTheme == 1 ? 0 : null,
         ),
         body: SettingsList(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -52,12 +54,16 @@ class SettingsView extends StatelessWidget {
               title: 'General',
               tiles: [
                 SettingsTile(
-                  title: 'Theme',
-                  subtitle: 'Select app theme',
-                  subtitleMaxLines: 1,
+                  title: 'Select app theme',
                   leading: Icon(Icons.color_lens),
                   onPressed: (BuildContext context) =>
                       _showThemeDialog(context, model),
+                ),
+                SettingsTile(
+                  title: 'Select app bar theme',
+                  leading: Icon(Icons.line_style),
+                  onPressed: (BuildContext context) =>
+                      _showAppBarThemeDialog(context, model),
                 ),
               ],
             ),
@@ -141,6 +147,47 @@ class SettingsView extends StatelessWidget {
                 activeColor: Theme.of(context).primaryColor,
                 onChanged: (int? value) {
                   model.setTheme(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            onPressed: () => Navigator.of(c).pop(),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showAppBarThemeDialog(BuildContext context, SettingsViewModel model) {
+    showDialog(
+      context: context,
+      builder: (BuildContext c) => AlertDialog(
+        title: Text("Select app bar theme"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              RadioListTile<int>(
+                title: Text("Default"),
+                value: 0,
+                groupValue: model.appBarTheme,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int? value) {
+                  model.setAppBarTheme(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
+              RadioListTile<int>(
+                title: Text("Match background"),
+                value: 1,
+                groupValue: model.appBarTheme,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int? value) {
+                  model.setAppBarTheme(value!);
                   Navigator.of(c).pop();
                 },
               ),

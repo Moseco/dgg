@@ -32,6 +32,8 @@ class _ChatViewState extends State<ChatView> {
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: Text("Chat"),
+          backgroundColor: model.appBarTheme == 1 ? Colors.transparent : null,
+          elevation: model.appBarTheme == 1 ? 0 : null,
           actions: model.isAssetsLoaded
               ? <Widget>[
                   IconButton(
