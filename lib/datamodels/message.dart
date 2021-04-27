@@ -16,6 +16,9 @@ class UserMessage extends Message {
   final int? color;
   final bool isMentioned;
   final bool isOwn;
+  final bool isGreenText;
+  final bool isNsfw;
+  final bool isNsfl;
   bool isCensored;
 
   UserMessage({
@@ -25,6 +28,9 @@ class UserMessage extends Message {
     this.color,
     this.isMentioned = false,
     this.isOwn = false,
+    this.isGreenText = false,
+    this.isNsfw = false,
+    this.isNsfl = false,
     this.isCensored = false,
   });
 
@@ -40,9 +46,12 @@ class UserMessage extends Message {
     String data = map['data'] as String;
     User user = User.fromJson(map);
 
-    //Check if current user is mentioned in message
+    // Check message contents for how message is displayed
     bool isMentioned = data.contains(RegExp("(\\@?)\\b$currentNick\\b"));
     bool isOwn = user.nick == currentNick;
+    bool isGreenText = data.startsWith('>');
+    bool isNsfw = data.contains(RegExp("\\bnsfw\\b", caseSensitive: false));
+    bool isNsfl = data.contains(RegExp("\\bnsfl\\b", caseSensitive: false));
 
     return UserMessage(
       user: user,
@@ -51,6 +60,9 @@ class UserMessage extends Message {
       elements: createElements(data, emotes),
       isMentioned: isMentioned,
       isOwn: isOwn,
+      isGreenText: isGreenText,
+      isNsfw: isNsfw,
+      isNsfl: isNsfl,
     );
   }
 

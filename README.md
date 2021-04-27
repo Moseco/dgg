@@ -22,13 +22,18 @@ Currently only Android is confirmed to be working, so some setup might be requir
     - [x] Support "#twitch-vod/id" format
     - [x] Support "#twitch-clip/id" format
 - [x] Chat voting
+- [x] Chat text color changes
+    - [x] Green text when text has leading '>'
+    - [x] Red underline when text contains 'nsfw'
+    - [x] Yellow underline when text contains 'nsfl'
 - [ ] Animated emotes 
     - [x] Emotes in gif format
     - [x] Emotes with frames in a single png
     - [ ] Emotes with extra effects
-- [ ] Context sensitive  emotes (e.g. sword direction)
+- [ ] Context sensitive  emotes
+    - [ ] Blade: direction based on other emotes
+    - [ ] MonkaVirus: Color change and multiple causes one to 'die'
 - [ ] Private messages
-- [ ] Chat text color changes (e.g. '>' causes green text for subs)
 - [ ] Allow user to set default stream embed platform (Twitch or YouTube)
 - [ ] Probably more?
 

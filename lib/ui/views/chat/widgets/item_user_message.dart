@@ -26,14 +26,12 @@ class ItemUserMessage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         color: _getBackgroundColor(),
         child: ExcludeSemantics(
-          //There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
-          //  Problem only happens on iOS so need different approach on Android/iOS
-          //  https://github.com/flutter/flutter/issues/51936
+          // There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+          //    Problem only happens on iOS so need different approach on Android/iOS
+          //    https://github.com/flutter/flutter/issues/51936
           excluding: Platform.isIOS,
           child: RichText(
-            text: TextSpan(
-              children: getMessageTextSpans(context),
-            ),
+            text: TextSpan(children: getMessageTextSpans(context)),
           ),
         ),
       ),
@@ -60,22 +58,14 @@ class ItemUserMessage extends StatelessWidget {
           color: message.color == null ? null : Color(message.color!),
         ),
       ),
-      TextSpan(
-        text: ": ",
-        style: TextStyle(
-          fontSize: 16,
-        ),
-      ),
+      TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
     ];
 
     if (message.isCensored) {
       textSpans.add(
         TextSpan(
           text: "<censored>",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.blue,
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.blue),
           recognizer: TapGestureRecognizer()
             ..onTap = () => model.uncensorMessage(message),
         ),
@@ -89,25 +79,23 @@ class ItemUserMessage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.blue,
+                decoration: message.isNsfw || message.isNsfl
+                    ? TextDecoration.underline
+                    : null,
+                decorationColor: message.isNsfw ? Colors.red : Colors.yellow,
+                decorationThickness: 2,
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () => model.openUrl(element.text),
             ),
           );
         } else if (element is EmoteElement) {
-          textSpans.add(
-            WidgetSpan(
-              child: EmoteWidget(emote: element.emote),
-            ),
-          );
+          textSpans.add(WidgetSpan(child: EmoteWidget(emote: element.emote)));
         } else if (element is EmbedUrlElement) {
           textSpans.add(
             TextSpan(
               text: element.text,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.blue,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.blue),
               recognizer: TapGestureRecognizer()
                 ..onTap =
                     () => model.setEmbed(element.embedId, element.embedType),
@@ -119,6 +107,7 @@ class ItemUserMessage extends StatelessWidget {
               text: element.text,
               style: TextStyle(
                 fontSize: 16,
+                color: message.isGreenText ? Color(0xFF6CA528) : null,
               ),
             ),
           );
