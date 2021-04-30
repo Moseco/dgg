@@ -328,29 +328,8 @@ class ChatViewModel extends BaseViewModel {
   Future<void> menuItemClick(int selected) async {
     switch (selected) {
       case 0:
-        //Disconnect
-        _disconnectChat();
-        break;
-      case 1:
-        //Reconnect
-        await _disconnectChat();
-        _connectChat();
-        break;
-      case 2:
-        //Refresh assets
-        //First disconnect from chat
-        await _disconnectChat();
-        //Then clear assets
-        await _dggService.clearAssets();
-        //Finally fetch assets
-        await _dggService.getAssets();
-        notifyListeners();
-        //Re-open chat
-        _connectChat();
-        break;
-      case 4:
-        //Navigate to settings
-        //  Disconnect chat/turn off wakelock while in settings
+        // Navigate to settings
+        //    Disconnect chat/turn off wakelock while in settings
         if (_sharedPreferencesService.getWakelockEnabled()) {
           Wakelock.disable();
         }
@@ -361,6 +340,29 @@ class ChatViewModel extends BaseViewModel {
           Wakelock.enable();
         }
         _connectChat();
+        break;
+      case 1:
+        // Disconnect or reconnect
+        if (_isChatConnected) {
+          _disconnectChat();
+        } else if (_showReconnectButton) {
+          _connectChat();
+        }
+        break;
+      case 2:
+        // Refresh assets
+        // First disconnect from chat
+        await _disconnectChat();
+        // Then clear assets
+        await _dggService.clearAssets();
+        // Finally fetch assets
+        await _dggService.getAssets();
+        notifyListeners();
+        // Re-open chat
+        _connectChat();
+        break;
+      case 3:
+        _openDestinyStream();
         break;
       default:
         print("ERROR: Invalid chat menu item");
@@ -504,6 +506,23 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<void> _getYouTubeStreamStatus() async {
+    String? videoId = await _getYouTubeStreamId();
+
+    if (videoId != null && !_showEmbed) {
+      // Stream is online
+      _currentEmbedId = videoId;
+      _showStreamPrompt = true;
+      _embedType = EmbedType.YOUTUBE;
+      youtubePlayerController?.close();
+      youtubePlayerController = YoutubePlayerController(
+        initialVideoId: _currentEmbedId,
+        params: YoutubePlayerParams(autoPlay: true, showControls: false),
+      );
+      notifyListeners();
+    }
+  }
+
+  Future<String?> _getYouTubeStreamId() async {
     String youTubeApiKey = await _remoteConfigService.getYouTubeApiKey();
 
     if (youTubeApiKey.isNotEmpty) {
@@ -529,22 +548,12 @@ class ChatViewModel extends BaseViewModel {
         Map<String, dynamic> json = jsonDecode(response.body);
 
         if (json['items'] != null && json['items'].length > 0) {
-          String? videoId = json['items'][0]['id']?['videoId'];
-          if (videoId != null && !_showEmbed) {
-            // Stream is online
-            _currentEmbedId = videoId;
-            _showStreamPrompt = true;
-            _embedType = EmbedType.YOUTUBE;
-            youtubePlayerController?.close();
-            youtubePlayerController = YoutubePlayerController(
-              initialVideoId: _currentEmbedId,
-              params: YoutubePlayerParams(autoPlay: true, showControls: false),
-            );
-            notifyListeners();
-          }
+          return json['items'][0]['id']?['videoId'];
         }
       }
     }
+
+    return null;
   }
 
   void setShowEmbed(bool value) {
@@ -679,6 +688,23 @@ class ChatViewModel extends BaseViewModel {
   void onReconnectButtonPressed() {
     if (_showReconnectButton) {
       _connectChat();
+    }
+  }
+
+  Future<void> _openDestinyStream() async {
+    // Open default stream platform
+    if (_sharedPreferencesService.getDefaultStream() == 0) {
+      // Open Destiny's stream on Twitch
+      setStreamChannelManual(["destiny"]);
+    } else {
+      // Open Destiny's stream on YouTube
+      String? streamId = await _getYouTubeStreamId();
+      if (streamId == null) {
+        _snackbarService.showSnackbar(
+            message: "Destiny's YouTube stream is offline");
+      } else {
+        setEmbed(streamId, "youtube");
+      }
     }
   }
 

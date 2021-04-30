@@ -43,17 +43,30 @@ class _ChatViewState extends State<ChatView> {
                     onPressed: () => model.setShowEmbed(!model.showEmbed),
                   ),
                   PopupMenuButton<int>(
-                    onSelected: (int selected) => selected == 3
+                    onSelected: (int selected) => selected == 4
                         ? showStreamSelectDialog(model)
                         : model.menuItemClick(selected),
                     itemBuilder: (BuildContext context) {
                       return [
-                        PopupMenuItem<int>(value: 4, child: Text('Settings')),
-                        PopupMenuItem<int>(value: 0, child: Text('Disconnect')),
-                        PopupMenuItem<int>(value: 1, child: Text('Reconnect')),
+                        PopupMenuItem<int>(value: 0, child: Text('Settings')),
                         PopupMenuItem<int>(
-                            value: 2, child: Text('Refresh assets')),
-                        PopupMenuItem<int>(value: 3, child: Text('Set stream')),
+                          value: 1,
+                          child: Text(
+                            model.isChatConnected ? 'Disconnect' : 'Reconnect',
+                          ),
+                        ),
+                        PopupMenuItem<int>(
+                          value: 2,
+                          child: Text('Refresh emotes'),
+                        ),
+                        PopupMenuItem<int>(
+                          value: 3,
+                          child: Text('Open Destiny\'s steam'),
+                        ),
+                        PopupMenuItem<int>(
+                          value: 4,
+                          child: Text('Set Twitch stream'),
+                        ),
                       ];
                     },
                   ),
