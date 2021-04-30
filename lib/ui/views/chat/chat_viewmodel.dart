@@ -467,11 +467,21 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<void> _getStreamStatus() async {
+    if (_sharedPreferencesService.getDefaultStream() == 0) {
+      // Twitch is default
+      _getTwitchStreamStatus();
+    } else {
+      // YouTube is default
+      _getYouTubeStreamStatus();
+    }
+  }
+
+  Future<void> _getTwitchStreamStatus() async {
     String twitchClientId = await _remoteConfigService.getTwitchClientId();
 
     if (twitchClientId.isNotEmpty) {
-      //Twitch api to check status of a channel
-      //  Hardcoded to Destiny's stream
+      // Twitch api to check status of a channel
+      //    Hardcoded to Destiny's stream
       final response = await http.get(
         Uri.https("api.twitch.tv", "/kraken/streams/18074328"),
         headers: {
@@ -483,10 +493,55 @@ class ChatViewModel extends BaseViewModel {
       if (response.statusCode == 200) {
         Map<String, dynamic> json = jsonDecode(response.body);
 
-        if (json['stream'] != null) {
-          //Stream is online
+        if (json['stream'] != null && !_showEmbed) {
+          // Stream is online
           _showStreamPrompt = true;
+          _embedType = EmbedType.TWITCH_STREAM;
           notifyListeners();
+        }
+      }
+    }
+  }
+
+  Future<void> _getYouTubeStreamStatus() async {
+    String youTubeApiKey = await _remoteConfigService.getYouTubeApiKey();
+
+    if (youTubeApiKey.isNotEmpty) {
+      // YouTube api to get channel's live streams
+      //    Hardcoded to Destiny's channel
+      final response = await http.get(
+        Uri.https(
+          "youtube.googleapis.com",
+          "/youtube/v3/search",
+          {
+            "part": "snippet",
+            "channelId": "UC554eY5jNUfDq3yDOJYirOQ",
+            "eventType": "live",
+            "maxResults": "25",
+            "type": "video",
+            "key": youTubeApiKey,
+          },
+        ),
+        headers: {'Accept': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> json = jsonDecode(response.body);
+
+        if (json['items'] != null && json['items'].length > 0) {
+          String? videoId = json['items'][0]['id']?['videoId'];
+          if (videoId != null && !_showEmbed) {
+            // Stream is online
+            _currentEmbedId = videoId;
+            _showStreamPrompt = true;
+            _embedType = EmbedType.YOUTUBE;
+            youtubePlayerController?.close();
+            youtubePlayerController = YoutubePlayerController(
+              initialVideoId: _currentEmbedId,
+              params: YoutubePlayerParams(autoPlay: true, showControls: false),
+            );
+            notifyListeners();
+          }
         }
       }
     }

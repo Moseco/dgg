@@ -79,6 +79,12 @@ class SettingsView extends StatelessWidget {
                   switchValue: model.isWakelockEnabled,
                   onToggle: model.toggleWakelockEnabled,
                 ),
+                SettingsTile(
+                  title: 'Set default stream platform',
+                  leading: Icon(Icons.desktop_windows),
+                  onPressed: (BuildContext context) =>
+                      _showDefaultStreamDialog(context, model),
+                ),
               ],
             ),
             SettingsSection(
@@ -188,6 +194,47 @@ class SettingsView extends StatelessWidget {
                 activeColor: Theme.of(context).primaryColor,
                 onChanged: (int? value) {
                   model.setAppBarTheme(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            onPressed: () => Navigator.of(c).pop(),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showDefaultStreamDialog(BuildContext context, SettingsViewModel model) {
+    showDialog(
+      context: context,
+      builder: (BuildContext c) => AlertDialog(
+        title: Text("Set default stream platform"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              RadioListTile<int>(
+                title: Text("Twitch"),
+                value: 0,
+                groupValue: model.defaultStream,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int? value) {
+                  model.setDefaultStream(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
+              RadioListTile<int>(
+                title: Text("YouTube"),
+                value: 1,
+                groupValue: model.defaultStream,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (int? value) {
+                  model.setDefaultStream(value!);
                   Navigator.of(c).pop();
                 },
               ),
