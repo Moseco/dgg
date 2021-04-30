@@ -26,6 +26,7 @@ Currently only Android is confirmed to be working, so some setup might be requir
     - [x] Green text when text has leading '>'
     - [x] Red underline when text contains 'nsfw'
     - [x] Yellow underline when text contains 'nsfl'
+- [x] Allow user to set default stream embed platform (Twitch or YouTube)
 - [ ] Animated emotes 
     - [x] Emotes in gif format
     - [x] Emotes with frames in a single png
@@ -34,7 +35,6 @@ Currently only Android is confirmed to be working, so some setup might be requir
     - [ ] Blade: direction based on other emotes
     - [ ] MonkaVirus: Color change and multiple causes one to 'die'
 - [ ] Private messages
-- [ ] Allow user to set default stream embed platform (Twitch or YouTube)
 - [ ] Probably more?
 
 ## Building

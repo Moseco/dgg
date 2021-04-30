@@ -29,6 +29,7 @@ class ChatViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
+  final _dialogService = locator<DialogService>();
 
   late WebViewController webViewController;
   YoutubePlayerController? youtubePlayerController;
@@ -93,6 +94,7 @@ class ChatViewModel extends BaseViewModel {
     _getStreamStatus();
     await _dggService.getAssets();
     _connectChat();
+    _showChangelog();
   }
 
   Future<void> _checkOnboarding() async {
@@ -705,6 +707,17 @@ class ChatViewModel extends BaseViewModel {
       } else {
         setEmbed(streamId, "youtube");
       }
+    }
+  }
+
+  Future<void> _showChangelog() async {
+    bool showChangelog = await _sharedPreferencesService.shouldShowChangelog();
+    if (showChangelog) {
+      _dialogService.showDialog(
+        title: "What's new",
+        description:
+            "•You can now choose whether Destiny's YouTube or Twitch stream is used by default.\n•Green text chat messages are now supported.\n•NSFW and NSFL links are now underlined in red and yellow respectively.\n•You can now open Destiny's stream directly from the menu in the top right of the chat screen.",
+      );
     }
   }
 

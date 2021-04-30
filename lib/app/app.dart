@@ -32,6 +32,7 @@ import 'package:stacked_themes/stacked_themes.dart';
       resolveUsing: ThemeService.getInstance,
     ),
     LazySingleton(classType: BottomSheetService),
+    LazySingleton(classType: DialogService),
   ],
 )
 class AppSetup {

@@ -10,6 +10,7 @@ class SharedPreferencesService {
   static const String KEY_ONBOARDING = "KEY_ONBOARDING";
   static const String KEY_APP_BAR_THEME = "KEY_APP_BAR_THEME";
   static const String KEY_DEFAULT_STREAM = "KEY_DEFAULT_STREAM";
+  static const String KEY_CHANGELOG = "KEY_CHANGELOG";
 
   SharedPreferences? _sharedPreferences;
 
@@ -98,6 +99,16 @@ class SharedPreferencesService {
 
   Future<void> setDefaultStream(int value) async {
     await _sharedPreferences!.setInt(KEY_DEFAULT_STREAM, value);
+  }
+
+  Future<bool> shouldShowChangelog() async {
+    int value = _sharedPreferences!.getInt(KEY_CHANGELOG) ?? 0;
+    if (value != 9) {
+      await _sharedPreferences!.setInt(KEY_CHANGELOG, 9);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   int getThemeIndex() {
