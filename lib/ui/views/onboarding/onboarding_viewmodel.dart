@@ -35,6 +35,8 @@ class OnboardingViewModel extends BaseViewModel {
 
   Future<void> finishOnboarding() async {
     _sharedPreferencesService.setOnboarding();
+    // Call this here so that changelog is not shown to new users
+    _sharedPreferencesService.shouldShowChangelog();
     _navigationService.back();
   }
 
