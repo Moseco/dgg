@@ -648,7 +648,7 @@ class ChatViewModel extends BaseViewModel {
   Future<void> openUrl(String url) async {
     String urlToOpen = url;
     if (!url.startsWith("http")) {
-      urlToOpen = "http://" + url;
+      urlToOpen = "https://" + url;
     }
 
     if (await canLaunch(urlToOpen)) {
