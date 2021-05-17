@@ -15,7 +15,7 @@ class ImageService {
     if (emote.mime == "image/gif") {
       return Image.memory(bytes);
     } else {
-      if (emote.animated) {
+      if (emote.needsCutting) {
         imglib.Image? image = imglib.decodeImage(bytes);
 
         if (image != null) {

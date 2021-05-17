@@ -170,14 +170,18 @@ class DggService {
       _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
-    Uri flairsUri = Uri.https(dggCdnBase, flairsPath);
-    Uri emotesUri = Uri.https(dggCdnBase, emotesPath);
-    Uri emotesCssUri = Uri.https(dggCdnBase, emotesCssPath);
+    late Uri flairsUri;
+    late Uri emotesUri;
+    late Uri emotesCssUri;
 
     if (_dggCacheKey != null) {
-      flairsUri.replace(queryParameters: {"_": _dggCacheKey});
-      emotesUri.replace(queryParameters: {"_": _dggCacheKey});
-      emotesCssUri.replace(queryParameters: {"_": _dggCacheKey});
+      flairsUri = Uri.https(dggCdnBase, flairsPath, {"_": _dggCacheKey});
+      emotesUri = Uri.https(dggCdnBase, emotesPath, {"_": _dggCacheKey});
+      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath, {"_": _dggCacheKey});
+    } else {
+      flairsUri = Uri.https(dggCdnBase, flairsPath);
+      emotesUri = Uri.https(dggCdnBase, emotesPath);
+      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath);
     }
 
     //Get assets based on url
@@ -232,9 +236,9 @@ class DggService {
         String trimmed = lines[i].trim();
         String emoteName = trimmed.substring(7, trimmed.indexOf('{')).trim();
         //go through attributes
-        String currentLineTrimmed = lines[++i].trim();
-        while (!currentLineTrimmed.startsWith("}")) {
-          // //Check if body has animation attribute
+        String currentLineTrimmed = lines[i].trim();
+        while (!currentLineTrimmed.endsWith("}")) {
+          //Check if body has animation attribute
           if (currentLineTrimmed.startsWith("animation:")) {
             if (currentLineTrimmed.contains("steps(")) {
               //If animation has steps, parse the duration and number of repeats
@@ -251,10 +255,10 @@ class DggService {
                 currentLineTrimmed.substring(startIndex + 1, endIndex).trim());
 
             //Keep lowest width found
-            //  If we find a lower width, then it is step animated
+            //  If we find a lower width, then it needs cutting and is probably step animated
             if (emotes.emoteMap[emoteName]!.width > width) {
               emotes.emoteMap[emoteName]!.width = width;
-              emotes.emoteMap[emoteName]!.animated = true;
+              emotes.emoteMap[emoteName]!.needsCutting = true;
             }
           }
           currentLineTrimmed = lines[++i].trim();
@@ -267,20 +271,20 @@ class DggService {
     _StepParam? _stepParam1;
     _StepParam? _stepParam2;
 
-    //Remove the last character which will be ';'
-    //  Makes things easier later
+    // Remove the last character which will be ';'
+    //    Makes things easier later
     List<String> words = line.substring(0, line.length - 1).split(' ');
     for (int i = 0; i < words.length; i++) {
       if (words[i].startsWith("steps(")) {
-        //Found steps
-        //Check before: i-1
+        // Found steps
+        // Check before: i-1
         _stepParam1 = _parseStepParam(words[i - 1]);
         if (_stepParam1 == null && words.length > i + 2) {
-          //All params come after, do i+2 here
+          // All params come after, do i+2 here
           _stepParam1 = _parseStepParam(words[i + 2]);
         }
 
-        //Make sure there is an after, if there is check it: i+1
+        // Make sure there is an after, if there is check it: i+1
         if (words.length > i + 1) {
           _stepParam2 = _parseStepParam(words[i + 1]);
         }
@@ -295,9 +299,14 @@ class DggService {
         ? _stepParam1?.value
         : _stepParam2?.value;
 
-    //Some emotes have duration in a different line, force 1 second in this case
+    // Some emotes have duration in a different line, force 1 second in this case
     if (emote.duration == null) {
       emote.duration = 1000;
+    }
+
+    // Set animated to true if repeatCount also found correctly
+    if (emote.repeatCount != null) {
+      emote.animated = true;
     }
   }
 

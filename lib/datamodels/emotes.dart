@@ -54,6 +54,7 @@ class Emote {
   final String url;
   final String mime;
   int width;
+  bool needsCutting;
   bool animated;
   bool loading;
   Image? image;
@@ -66,6 +67,7 @@ class Emote {
     required this.url,
     required this.mime,
     required this.width,
+    this.needsCutting = false,
     this.animated = false,
     this.loading = false,
     this.image,

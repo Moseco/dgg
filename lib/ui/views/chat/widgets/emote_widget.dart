@@ -15,7 +15,7 @@ class EmoteWidget extends StatelessWidget {
         child: CircularProgressIndicator(),
       );
     } else {
-      if (emote.animated && emote.duration != null) {
+      if (emote.animated) {
         return _AnimatedEmote(emote: emote);
       } else {
         return Container(
