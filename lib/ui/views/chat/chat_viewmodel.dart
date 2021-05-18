@@ -725,7 +725,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "•You can now choose whether Destiny's YouTube or Twitch stream is used by default.\n•Green text chat messages are now supported.\n•NSFW and NSFL links are now underlined in red and yellow respectively.\n•You can now open Destiny's stream directly from the menu in the top right of the chat screen.",
+            "Features:\n•You can now customize text and emote size. Check it out in the settings.\n\nBug fixes:\n•Opening links when a native app is installed now works correctly.\n•Some animated emotes that did not display correctly are now fixed.\n•Emote size is now more consistent.",
       );
     }
   }
