@@ -3,8 +3,15 @@ import 'package:dgg/datamodels/message.dart';
 
 class ItemStatusMessage extends StatelessWidget {
   final StatusMessage message;
+  final double textFontSize;
+  final double iconSize;
 
-  const ItemStatusMessage({Key? key, required this.message}) : super(key: key);
+  const ItemStatusMessage({
+    Key? key,
+    required this.message,
+    required this.textFontSize,
+    required this.iconSize,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +23,14 @@ class ItemStatusMessage extends StatelessWidget {
             WidgetSpan(
               child: Icon(
                 Icons.info_outline,
-                size: 20,
+                size: iconSize,
                 color: message.isError ? Colors.red : null,
               ),
             ),
             TextSpan(
               text: " ${message.data}",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: textFontSize,
                 fontWeight: FontWeight.bold,
                 color: message.isError ? Colors.red : null,
               ),

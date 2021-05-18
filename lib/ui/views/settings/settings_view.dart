@@ -85,6 +85,12 @@ class SettingsView extends StatelessWidget {
                   onPressed: (BuildContext context) =>
                       _showDefaultStreamDialog(context, model),
                 ),
+                SettingsTile(
+                  title: 'Text and emote size',
+                  leading: Icon(Icons.format_size),
+                  onPressed: (BuildContext context) =>
+                      model.navigateToChatSize(),
+                ),
               ],
             ),
             SettingsSection(
@@ -163,7 +169,7 @@ class SettingsView extends StatelessWidget {
           TextButton(
             child: Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
-          )
+          ),
         ],
       ),
     );
@@ -204,7 +210,7 @@ class SettingsView extends StatelessWidget {
           TextButton(
             child: Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
-          )
+          ),
         ],
       ),
     );
@@ -245,7 +251,7 @@ class SettingsView extends StatelessWidget {
           TextButton(
             child: Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
-          )
+          ),
         ],
       ),
     );

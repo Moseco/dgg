@@ -46,16 +46,21 @@ class ChatList extends ViewModelWidget<ChatViewModel> {
             } else if (currentMessage is StatusMessage) {
               return ItemStatusMessage(
                 message: currentMessage,
+                textFontSize: model.textFontSize,
+                iconSize: model.iconSize,
                 key: ValueKey<int>(messageIndex),
               );
             } else if (currentMessage is BroadcastMessage) {
               return ItemBroadcastMessage(
                 message: currentMessage,
+                textFontSize: model.textFontSize,
                 key: ValueKey<int>(messageIndex),
               );
             } else if (currentMessage is ComboMessage) {
               return ItemComboMessage(
                 message: currentMessage,
+                textFontSize: model.textFontSize,
+                emoteHeight: model.emoteHeight,
                 key: ValueKey<int>(messageIndex),
               );
             } else {

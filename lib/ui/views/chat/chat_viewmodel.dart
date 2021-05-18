@@ -82,6 +82,13 @@ class ChatViewModel extends BaseViewModel {
   int _appBarTheme = 0;
   int get appBarTheme => _appBarTheme;
 
+  double _textFontSize = 16;
+  double get textFontSize => _textFontSize;
+  double _iconSize = 20;
+  double get iconSize => _iconSize;
+  double _emoteHeight = 30;
+  double get emoteHeight => _emoteHeight;
+
   Future<void> initialize() async {
     await _sharedPreferencesService.initialize();
     await _checkOnboarding();
@@ -89,6 +96,7 @@ class ChatViewModel extends BaseViewModel {
       Wakelock.enable();
     }
     _appBarTheme = _sharedPreferencesService.getAppBarTheme();
+    _setChatSize();
     notifyListeners();
     await _getSessionInfo();
     _getStreamStatus();
@@ -338,6 +346,7 @@ class ChatViewModel extends BaseViewModel {
         _disconnectChat();
         await _navigationService.navigateTo(Routes.settingsView);
         _appBarTheme = _sharedPreferencesService.getAppBarTheme();
+        _setChatSize();
         if (_sharedPreferencesService.getWakelockEnabled()) {
           Wakelock.enable();
         }
@@ -718,6 +727,30 @@ class ChatViewModel extends BaseViewModel {
         description:
             "•You can now choose whether Destiny's YouTube or Twitch stream is used by default.\n•Green text chat messages are now supported.\n•NSFW and NSFL links are now underlined in red and yellow respectively.\n•You can now open Destiny's stream directly from the menu in the top right of the chat screen.",
       );
+    }
+  }
+
+  void _setChatSize() {
+    int textSize = _sharedPreferencesService.getChatTextSize();
+    int emoteSize = _sharedPreferencesService.getChatEmoteSize();
+    // Set text and icon size
+    if (textSize == 0) {
+      _textFontSize = 12;
+      _iconSize = 14;
+    } else if (textSize == 1) {
+      _textFontSize = 16;
+      _iconSize = 20;
+    } else if (textSize == 2) {
+      _textFontSize = 20;
+      _iconSize = 24;
+    }
+    // Set emote size
+    if (emoteSize == 0) {
+      _emoteHeight = 20;
+    } else if (emoteSize == 1) {
+      _emoteHeight = 30;
+    } else if (emoteSize == 2) {
+      _emoteHeight = 40;
     }
   }
 

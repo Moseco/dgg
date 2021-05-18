@@ -13,7 +13,7 @@ class ImageService {
     Uint8List bytes = req.bodyBytes;
 
     if (emote.mime == "image/gif") {
-      return Image.memory(bytes);
+      return Image.memory(bytes, fit: BoxFit.fitHeight);
     } else {
       if (emote.needsCutting) {
         imglib.Image? image = imglib.decodeImage(bytes);
@@ -33,6 +33,7 @@ class ImageService {
             emote.frames!.add(Image.memory(
               imglib.encodePng(frame) as Uint8List,
               gaplessPlayback: true,
+              fit: BoxFit.fitHeight,
             ));
           }
 
@@ -41,7 +42,7 @@ class ImageService {
           return null;
         }
       } else {
-        return Image.memory(bytes);
+        return Image.memory(bytes, fit: BoxFit.fitHeight);
       }
     }
   }

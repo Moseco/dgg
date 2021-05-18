@@ -98,4 +98,8 @@ class SettingsViewModel extends BaseViewModel {
     _defaultStream = value;
     notifyListeners();
   }
+
+  void navigateToChatSize() {
+    _navigationService.navigateTo(Routes.chatSizeView);
+  }
 }

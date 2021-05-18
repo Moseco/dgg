@@ -3,23 +3,31 @@ import 'package:dgg/datamodels/emotes.dart';
 
 class EmoteWidget extends StatelessWidget {
   final Emote emote;
+  final double emoteHeight;
 
-  EmoteWidget({Key? key, required this.emote}) : super(key: key);
+  EmoteWidget({
+    Key? key,
+    required this.emote,
+    required this.emoteHeight,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (emote.image == null) {
       return SizedBox(
-        height: 30,
-        width: 30,
+        height: emoteHeight,
+        width: emoteHeight,
         child: CircularProgressIndicator(),
       );
     } else {
       if (emote.animated) {
-        return _AnimatedEmote(emote: emote);
+        return _AnimatedEmote(
+          emote: emote,
+          emoteHeight: emoteHeight,
+        );
       } else {
         return Container(
-          height: 30,
+          height: emoteHeight,
           child: emote.image,
         );
       }
@@ -29,8 +37,13 @@ class EmoteWidget extends StatelessWidget {
 
 class _AnimatedEmote extends StatefulWidget {
   final Emote emote;
+  final double emoteHeight;
 
-  const _AnimatedEmote({Key? key, required this.emote}) : super(key: key);
+  const _AnimatedEmote({
+    Key? key,
+    required this.emote,
+    required this.emoteHeight,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AnimatedEmoteState();
@@ -64,7 +77,7 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
       animation: _animation,
       builder: (_, __) {
         return Container(
-          height: 30,
+          height: widget.emoteHeight,
           child: widget
               .emote.frames![_animation.value % widget.emote.frames!.length],
         );

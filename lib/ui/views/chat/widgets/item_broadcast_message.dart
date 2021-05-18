@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 class ItemBroadcastMessage extends StatelessWidget {
   final BroadcastMessage message;
+  final double textFontSize;
 
   const ItemBroadcastMessage({
     Key? key,
     required this.message,
+    required this.textFontSize,
   }) : super(key: key);
 
   @override
@@ -16,10 +18,7 @@ class ItemBroadcastMessage extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           text: message.data,
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFFEDEA12),
-          ),
+          style: TextStyle(fontSize: textFontSize, color: Color(0xFFEDEA12)),
         ),
       ),
     );

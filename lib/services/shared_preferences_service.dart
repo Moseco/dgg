@@ -11,6 +11,8 @@ class SharedPreferencesService {
   static const String KEY_APP_BAR_THEME = "KEY_APP_BAR_THEME";
   static const String KEY_DEFAULT_STREAM = "KEY_DEFAULT_STREAM";
   static const String KEY_CHANGELOG = "KEY_CHANGELOG";
+  static const String KEY_CHAT_TEXT_SIZE = "KEY_CHAT_TEXT_SIZE";
+  static const String KEY_CHAT_EMOTE_SIZE = "KEY_CHAT_EMOTE_SIZE";
 
   SharedPreferences? _sharedPreferences;
 
@@ -109,6 +111,22 @@ class SharedPreferencesService {
     } else {
       return false;
     }
+  }
+
+  int getChatTextSize() {
+    return _sharedPreferences!.getInt(KEY_CHAT_TEXT_SIZE) ?? 1;
+  }
+
+  Future<void> setChatTextSize(int value) async {
+    await _sharedPreferences!.setInt(KEY_CHAT_TEXT_SIZE, value);
+  }
+
+  int getChatEmoteSize() {
+    return _sharedPreferences!.getInt(KEY_CHAT_EMOTE_SIZE) ?? 1;
+  }
+
+  Future<void> setChatEmoteSize(int value) async {
+    await _sharedPreferences!.setInt(KEY_CHAT_EMOTE_SIZE, value);
   }
 
   int getThemeIndex() {

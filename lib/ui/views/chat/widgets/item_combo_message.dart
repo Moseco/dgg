@@ -4,8 +4,15 @@ import 'package:dgg/datamodels/message.dart';
 
 class ItemComboMessage extends StatelessWidget {
   final ComboMessage message;
+  final double textFontSize;
+  final double emoteHeight;
 
-  const ItemComboMessage({Key? key, required this.message}) : super(key: key);
+  const ItemComboMessage({
+    Key? key,
+    required this.message,
+    required this.textFontSize,
+    required this.emoteHeight,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +22,15 @@ class ItemComboMessage extends StatelessWidget {
         text: TextSpan(
           children: <InlineSpan>[
             WidgetSpan(
-              child: EmoteWidget(emote: message.emote),
+              child: EmoteWidget(
+                emote: message.emote,
+                emoteHeight: emoteHeight,
+              ),
             ),
             TextSpan(
               text: " ${message.comboCount} X C-C-C-COMBO",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: textFontSize,
                 fontWeight: FontWeight.bold,
               ),
             ),

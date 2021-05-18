@@ -31,7 +31,10 @@ class ItemUserMessage extends StatelessWidget {
           //    https://github.com/flutter/flutter/issues/51936
           excluding: Platform.isIOS,
           child: RichText(
-            text: TextSpan(children: getMessageTextSpans(context)),
+            text: TextSpan(
+              style: TextStyle(fontSize: model.textFontSize),
+              children: getMessageTextSpans(context),
+            ),
           ),
         ),
       ),
@@ -53,7 +56,6 @@ class ItemUserMessage extends StatelessWidget {
       TextSpan(
         text: message.user.nick,
         style: TextStyle(
-          fontSize: 16,
           fontWeight: FontWeight.bold,
           color: message.color == null ? null : Color(message.color!),
         ),
@@ -65,7 +67,7 @@ class ItemUserMessage extends StatelessWidget {
       textSpans.add(
         TextSpan(
           text: "<censored>",
-          style: TextStyle(fontSize: 16, color: Colors.blue),
+          style: TextStyle(color: Colors.blue),
           recognizer: TapGestureRecognizer()
             ..onTap = () => model.uncensorMessage(message),
         ),
@@ -77,7 +79,6 @@ class ItemUserMessage extends StatelessWidget {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                fontSize: 16,
                 color: Colors.blue,
                 decoration: message.isNsfw || message.isNsfl
                     ? TextDecoration.underline
@@ -90,12 +91,19 @@ class ItemUserMessage extends StatelessWidget {
             ),
           );
         } else if (element is EmoteElement) {
-          textSpans.add(WidgetSpan(child: EmoteWidget(emote: element.emote)));
+          textSpans.add(
+            WidgetSpan(
+              child: EmoteWidget(
+                emote: element.emote,
+                emoteHeight: model.emoteHeight,
+              ),
+            ),
+          );
         } else if (element is EmbedUrlElement) {
           textSpans.add(
             TextSpan(
               text: element.text,
-              style: TextStyle(fontSize: 16, color: Colors.blue),
+              style: TextStyle(color: Colors.blue),
               recognizer: TapGestureRecognizer()
                 ..onTap =
                     () => model.setEmbed(element.embedId, element.embedType),
@@ -106,7 +114,6 @@ class ItemUserMessage extends StatelessWidget {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                fontSize: 16,
                 color: message.isGreenText ? Color(0xFF6CA528) : null,
               ),
             ),
