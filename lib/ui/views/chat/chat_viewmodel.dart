@@ -731,7 +731,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "Features:\n•You can now customize text and emote size. Check it out in the settings.\n\nBug fixes:\n•Opening links when a native app is installed now works correctly.\n•Some animated emotes that did not display correctly are now fixed.\n•Emote size is now more consistent.",
+            "Bug fixes:\n•Fixed a bug where typing certain special characters would cause the suggestion feature to crash.\n•Fixed a bug where sent messages would be rejected by the server if they contained certain special characters.",
       );
     }
   }
