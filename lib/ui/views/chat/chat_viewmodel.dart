@@ -415,7 +415,7 @@ class ChatViewModel extends BaseViewModel {
 
   void _updateSuggestions() {
     String lastWord;
-    //Find last occurance of whitespace
+    //Find last occurrence of whitespace
     int lastWhiteSpace = _draft.lastIndexOf(RegExp(r'\s'));
     if (lastWhiteSpace != -1) {
       //Draft contains at least one whitespace
@@ -433,7 +433,10 @@ class ChatViewModel extends BaseViewModel {
           _previousLastWord.isNotEmpty) {
         //Continued typing of previous last word
         //  Base new suggestions on current suggestion list
-        RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
+        RegExp lastWordRegex = RegExp(
+          RegExp.escape(lastWord),
+          caseSensitive: false,
+        );
 
         _suggestions.forEach((element) {
           if (element.startsWith(lastWordRegex)) {
@@ -442,9 +445,12 @@ class ChatViewModel extends BaseViewModel {
         });
       } else {
         //Current last word does not start with previous last word
-        //  Backspace, new word, or something similar happaned
+        //  Backspace, new word, or something similar happened
         //  Start suggestion generation from beginning
-        RegExp lastWordRegex = RegExp(lastWord, caseSensitive: false);
+        RegExp lastWordRegex = RegExp(
+          RegExp.escape(lastWord),
+          caseSensitive: false,
+        );
 
         //check emotes
         _dggService.emotes.emoteMap.forEach((k, v) {
