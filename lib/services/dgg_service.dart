@@ -352,7 +352,8 @@ class DggService {
 
   void sendChatMessage(String message) {
     try {
-      _webSocketChannel?.sink.add('MSG {"data": "$message"}');
+      String escapedMsg = message.replaceAll(r"\", r"\\");
+      _webSocketChannel?.sink.add('MSG {"data": "$escapedMsg"}');
     } catch (_) {
       print("Message failed to send");
     }
