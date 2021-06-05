@@ -34,6 +34,8 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [ ] Context sensitive  emotes
     - [ ] Blade: direction based on other emotes
     - [ ] MonkaVirus: Color change and multiple causes one to 'die'
+- [ ] Load previous messages when user connects
+- [ ] User flairs
 - [ ] Private messages
 - [ ] Probably more?
 
@@ -49,6 +51,6 @@ This project uses Firebase for analytics/crashlytics. To get a build working you
 
 If you want to remove Firebase, here is a rough list of what you need to do (at least for Android).
 
-* Remove `classpath 'com.google.gms:google-services:4.3.3'` and `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.2.0'` from `android/build.gradle`
+* Remove `classpath 'com.google.gms:google-services:4.3.5'` and `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'` from `android/build.gradle`
 * Remove `apply plugin: 'com.google.gms.google-services'` and `apply plugin: 'com.google.firebase.crashlytics'` from `android/app/build.gradle`
 * Remove `firebase_core` and `firebase_remote_config` and `firebase_crashlytics:` and `firebase_analytics` from `pubspec.yaml`. Then go through `lib/` and delete any code that the editor now doesn't recognize.
