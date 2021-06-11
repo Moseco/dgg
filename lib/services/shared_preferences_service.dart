@@ -13,6 +13,7 @@ class SharedPreferencesService {
   static const String KEY_CHANGELOG = "KEY_CHANGELOG";
   static const String KEY_CHAT_TEXT_SIZE = "KEY_CHAT_TEXT_SIZE";
   static const String KEY_CHAT_EMOTE_SIZE = "KEY_CHAT_EMOTE_SIZE";
+  static const String KEY_CACHE_VERSION = "KEY_CACHE_VERSION";
 
   SharedPreferences? _sharedPreferences;
 
@@ -127,6 +128,14 @@ class SharedPreferencesService {
 
   Future<void> setChatEmoteSize(int value) async {
     await _sharedPreferences!.setInt(KEY_CHAT_EMOTE_SIZE, value);
+  }
+
+  String? getCacheVersion() {
+    return _sharedPreferences!.getString(KEY_CACHE_VERSION);
+  }
+
+  Future<void> setCacheVersion(String value) async {
+    await _sharedPreferences!.setString(KEY_CACHE_VERSION, value);
   }
 
   int getThemeIndex() {

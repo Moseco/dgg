@@ -43,7 +43,6 @@ class DggService {
   bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
-  String? _dggCacheKey;
   bool _assetsLoaded = false;
   bool get assetsLoaded => _assetsLoaded;
   late Flairs flairs;
@@ -162,22 +161,23 @@ class DggService {
 
   Future<void> getAssets() async {
     //First get cache key
+    String? dggCacheKey;
     final response = await http.get(Uri.https(dggBase, chatPath));
 
     if (response.statusCode == 200) {
       int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
       int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
-      _dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
+      dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
     late Uri flairsUri;
     late Uri emotesUri;
     late Uri emotesCssUri;
 
-    if (_dggCacheKey != null) {
-      flairsUri = Uri.https(dggCdnBase, flairsPath, {"_": _dggCacheKey});
-      emotesUri = Uri.https(dggCdnBase, emotesPath, {"_": _dggCacheKey});
-      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath, {"_": _dggCacheKey});
+    if (dggCacheKey != null) {
+      flairsUri = Uri.https(dggCdnBase, flairsPath, {"_": dggCacheKey});
+      emotesUri = Uri.https(dggCdnBase, emotesPath, {"_": dggCacheKey});
+      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath, {"_": dggCacheKey});
     } else {
       flairsUri = Uri.https(dggCdnBase, flairsPath);
       emotesUri = Uri.https(dggCdnBase, emotesPath);
@@ -187,6 +187,7 @@ class DggService {
     //Get assets based on url
     await getFlairs(flairsUri);
     await getEmotes(emotesUri, emotesCssUri);
+    await _imageService.validateCache(dggCacheKey);
     _assetsLoaded = true;
   }
 
@@ -344,10 +345,13 @@ class DggService {
   }
 
   Future<void> loadEmote(Emote emote) async {
-    //TODO do some kind of caching
     emote.loading = true;
     emote.image = await _imageService.downloadAndProcessEmote(emote);
-    emote.loading = false;
+    // Only set loading to false if emote download worked
+    //    Allows it to try again next time emote is seen
+    if (emote.image != null) {
+      emote.loading = false;
+    }
   }
 
   void sendChatMessage(String message) {
