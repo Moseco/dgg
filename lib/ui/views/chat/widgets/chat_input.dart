@@ -83,6 +83,9 @@ class ChatInput extends StatelessWidget {
       maxLines: 3,
       onChanged: model.updateChatDraft,
       textCapitalization: TextCapitalization.sentences,
+      textInputAction: TextInputAction.send,
+      onSubmitted: (_) => model.sendChatMessage(),
+      onEditingComplete: () {},
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         hintText: 'Type a message...',
