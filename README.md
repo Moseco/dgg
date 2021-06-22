@@ -34,7 +34,7 @@ Currently only Android is confirmed to be working, so some setup might be requir
 - [ ] Context sensitive  emotes
     - [ ] Blade: direction based on other emotes
     - [ ] MonkaVirus: Color change and multiple causes one to 'die'
-- [ ] Load previous messages when user connects
+- [x] Load chat history when user connects
 - [ ] User flairs
 - [ ] Private messages
 - [ ] Probably more?
