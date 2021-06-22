@@ -101,6 +101,7 @@ class ChatViewModel extends BaseViewModel {
     await _getSessionInfo();
     _getStreamStatus();
     await _dggService.getAssets();
+    await _getChatHistory();
     _connectChat();
     _showChangelog();
   }
@@ -118,192 +119,198 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  Future<void> _getChatHistory() async {
+    List<dynamic> rawHistoryMessages = await _dggService.getChatHistory();
+
+    for (int i = 100; i < rawHistoryMessages.length; i++) {
+      _processMessage(rawHistoryMessages[i].toString());
+    }
+  }
+
   void _connectChat() {
     _showReconnectButton = false;
     _messages.add(StatusMessage(data: "Connecting..."));
     notifyListeners();
     _chatSubscription?.cancel();
     _chatSubscription = _dggService.openWebSocketConnection().stream.listen(
-      (data) {
-        Message? currentMessage = _dggService.parseWebSocketData(data);
+          (data) => _processMessage(data),
+          onDone: () => _disconnectChat(),
+          onError: (error) => print("STREAM REPORTED ERROR"),
+        );
+  }
 
-        switch (currentMessage.runtimeType) {
-          case NamesMessage:
-            _isChatConnected = true;
-            _users = (currentMessage as NamesMessage).users;
-            _messages.add(
-                StatusMessage(data: "Connected with ${_users.length} users"));
-            break;
-          case UserMessage:
-            UserMessage userMessage = currentMessage as UserMessage;
-            //for each emote, check if needs to be loaded
-            userMessage.elements.forEach((element) {
-              if (element is EmoteElement) {
-                if (!element.emote.loading && element.emote.image == null) {
-                  _loadEmote(element.emote);
-                }
-              }
-            });
-            //Check if new message is part of a combo
-            if (userMessage.elements.length == 1 &&
-                userMessage.elements[0] is EmoteElement) {
-              //Current message only has one emote in it
-              EmoteElement currentEmote =
-                  userMessage.elements[0] as EmoteElement;
-              Message recentMessage = _messages[_messages.length - 1];
-              if (recentMessage is ComboMessage) {
-                //Most recent is combo
-                if (recentMessage.emote.name == currentEmote.emote.name) {
-                  //Same emote, increment combo
-                  _messages[_messages.length - 1] =
-                      recentMessage.incrementCombo();
-                  break;
-                }
-              } else {
-                //Most recent is not combo
-                if (recentMessage is UserMessage &&
-                    recentMessage.elements.length == 1 &&
-                    recentMessage.elements[0] is EmoteElement &&
-                    (recentMessage.elements[0] as EmoteElement).emote.name ==
-                        currentEmote.emote.name) {
-                  //Most recent is UserMessage and only has the same emote
-                  //  Replace recent message with combo
-                  _messages[_messages.length - 1] =
-                      ComboMessage(emote: currentEmote.emote);
-                  break;
-                }
-              }
-            }
-            //Check if message is starting a vote
-            if (userMessage.data.startsWith(DggVote.voteStartRegex)) {
-              if (_dggService.hasVotePermission(userMessage.user.features)) {
-                DggVote? dggVote = DggVote.fromString(userMessage.data);
-                if (dggVote != null) {
-                  _currentVote = dggVote;
-                  _voteTimer?.cancel();
-                  _voteTimer =
-                      Timer.periodic(Duration(seconds: 1), handleVoteTimer);
-                }
-              }
-            }
-            //Check if message is stoping a vote
-            if (userMessage.data.startsWith(DggVote.voteStopRegex)) {
-              if (_dggService.hasVotePermission(userMessage.user.features)) {
-                _currentVote = null;
-                _voteTimer?.cancel();
-              }
-            }
-            //Check if message is a vote
-            if (_currentVote != null && _currentVote!.time > voteTimePassed) {
-              String temp =
-                  userMessage.data.replaceFirst(DggVote.voteValidRegex, '');
-              //Check if message is a vote and restrict length to prevent max int error
-              if (temp.isEmpty && userMessage.data.length < 3) {
-                int vote = int.parse(userMessage.data);
-                if (vote > 0 && vote <= _currentVote!.options.length) {
-                  _currentVote!.castVote(
-                      userMessage.user.nick, vote, userMessage.user.features);
-                }
-              }
-            }
+  void _processMessage(String? data) {
+    Message? currentMessage = _dggService.parseWebSocketData(data);
 
-            //Add message normally
-            _messages.add(userMessage);
-            break;
-          case JoinMessage:
-            _users.add((currentMessage as JoinMessage).user);
-            break;
-          case QuitMessage:
-            _users.remove((currentMessage as QuitMessage).user);
-            break;
-          case BroadcastMessage:
-            _messages.add(currentMessage!);
-            break;
-          case MuteMessage:
-            //Go through up to previous 10 messages and censor messages from muted user
-            MuteMessage muteMessage = currentMessage as MuteMessage;
-            int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
-            for (int i = 1; i < lengthToCheck; i++) {
-              Message msg = _messages[_messages.length - i];
-              if (msg is UserMessage) {
-                if (msg.user.nick == muteMessage.data) {
-                  msg.isCensored = true;
-                }
-              }
+    switch (currentMessage.runtimeType) {
+      case NamesMessage:
+        _isChatConnected = true;
+        _users = (currentMessage as NamesMessage).users;
+        _messages
+            .add(StatusMessage(data: "Connected with ${_users.length} users"));
+        break;
+      case UserMessage:
+        UserMessage userMessage = currentMessage as UserMessage;
+        //for each emote, check if needs to be loaded
+        userMessage.elements.forEach((element) {
+          if (element is EmoteElement) {
+            if (!element.emote.loading && element.emote.image == null) {
+              _loadEmote(element.emote);
             }
-            _messages.add(StatusMessage(
-                data: "${muteMessage.data} muted by ${muteMessage.nick}"));
-            break;
-          case UnmuteMessage:
-            UnmuteMessage unmuteMessage = currentMessage as UnmuteMessage;
-            _messages.add(StatusMessage(
-                data:
-                    "${unmuteMessage.data} unmuted by ${unmuteMessage.nick}"));
-            break;
-          case BanMessage:
-            BanMessage banMessage = currentMessage as BanMessage;
-            _messages.add(StatusMessage(
-                data: "${banMessage.data} banned by ${banMessage.nick}"));
-            break;
-          case UnbanMessage:
-            UnbanMessage unbanMessage = currentMessage as UnbanMessage;
-            _messages.add(StatusMessage(
-                data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
-            break;
-          case StatusMessage:
-            _messages.add(currentMessage!);
-            break;
-          case SubOnlyMessage:
-            SubOnlyMessage subOnlyMessage = currentMessage as SubOnlyMessage;
-            String subMode =
-                subOnlyMessage.data == 'on' ? 'enabled' : 'disabled';
-            _messages.add(StatusMessage(
-                data:
-                    "Subscriber only mode $subMode by ${subOnlyMessage.nick}"));
-            break;
-          case ErrorMessage:
-            ErrorMessage errorMessage = currentMessage as ErrorMessage;
-            if (errorMessage.description == "banned") {
-              _messages.add(StatusMessage(
-                data:
-                    "You have been banned! Check your profile on destiny.gg for more information.",
-                isError: true,
-              ));
-            } else if (errorMessage.description == "muted") {
-              _messages.add(StatusMessage(
-                data: "You are temporarily muted!",
-                isError: true,
-              ));
-            } else if (errorMessage.description == "needlogin") {
-              // Server thinks user is not logged in
-              //    Can try reconnecting to fix it
-              _messages.add(StatusMessage(
-                data:
-                    "Message failed to send due to an authentication failure.\nAutomatically reconnecting...",
-                isError: true,
-              ));
-              _delayedReconnect();
-            } else {
-              _messages.add(StatusMessage(
-                data: errorMessage.description,
-                isError: true,
-              ));
+          }
+        });
+        //Check if new message is part of a combo
+        if (_messages.length > 0 &&
+            userMessage.elements.length == 1 &&
+            userMessage.elements[0] is EmoteElement) {
+          //Current message only has one emote in it
+          EmoteElement currentEmote = userMessage.elements[0] as EmoteElement;
+          Message recentMessage = _messages[_messages.length - 1];
+          if (recentMessage is ComboMessage) {
+            //Most recent is combo
+            if (recentMessage.emote.name == currentEmote.emote.name) {
+              //Same emote, increment combo
+              _messages[_messages.length - 1] = recentMessage.incrementCombo();
+              break;
             }
-            break;
-          default:
-            break;
+          } else {
+            //Most recent is not combo
+            if (recentMessage is UserMessage &&
+                recentMessage.elements.length == 1 &&
+                recentMessage.elements[0] is EmoteElement &&
+                (recentMessage.elements[0] as EmoteElement).emote.name ==
+                    currentEmote.emote.name) {
+              //Most recent is UserMessage and only has the same emote
+              //  Replace recent message with combo
+              _messages[_messages.length - 1] =
+                  ComboMessage(emote: currentEmote.emote);
+              break;
+            }
+          }
+        }
+        //Check if message is starting a vote
+        if (userMessage.data.startsWith(DggVote.voteStartRegex)) {
+          if (_dggService.hasVotePermission(userMessage.user.features)) {
+            DggVote? dggVote = DggVote.fromString(userMessage.data);
+            if (dggVote != null) {
+              _currentVote = dggVote;
+              _voteTimer?.cancel();
+              _voteTimer =
+                  Timer.periodic(Duration(seconds: 1), handleVoteTimer);
+            }
+          }
+        }
+        //Check if message is stoping a vote
+        if (userMessage.data.startsWith(DggVote.voteStopRegex)) {
+          if (_dggService.hasVotePermission(userMessage.user.features)) {
+            _currentVote = null;
+            _voteTimer?.cancel();
+          }
+        }
+        //Check if message is a vote
+        if (_currentVote != null && _currentVote!.time > voteTimePassed) {
+          String temp =
+              userMessage.data.replaceFirst(DggVote.voteValidRegex, '');
+          //Check if message is a vote and restrict length to prevent max int error
+          if (temp.isEmpty && userMessage.data.length < 3) {
+            int vote = int.parse(userMessage.data);
+            if (vote > 0 && vote <= _currentVote!.options.length) {
+              _currentVote!.castVote(
+                  userMessage.user.nick, vote, userMessage.user.features);
+            }
+          }
         }
 
-        //When messages length grows to 300, shrink to 150
-        if (_messages.length > 300) {
-          _messages.removeRange(0, 150);
+        //Add message normally
+        _messages.add(userMessage);
+        break;
+      case JoinMessage:
+        _users.add((currentMessage as JoinMessage).user);
+        break;
+      case QuitMessage:
+        _users.remove((currentMessage as QuitMessage).user);
+        break;
+      case BroadcastMessage:
+        _messages.add(currentMessage!);
+        break;
+      case MuteMessage:
+        //Go through up to previous 10 messages and censor messages from muted user
+        MuteMessage muteMessage = currentMessage as MuteMessage;
+        int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
+        for (int i = 1; i < lengthToCheck; i++) {
+          Message msg = _messages[_messages.length - i];
+          if (msg is UserMessage) {
+            if (msg.user.nick == muteMessage.data) {
+              msg.isCensored = true;
+            }
+          }
         }
+        _messages.add(StatusMessage(
+            data: "${muteMessage.data} muted by ${muteMessage.nick}"));
+        break;
+      case UnmuteMessage:
+        UnmuteMessage unmuteMessage = currentMessage as UnmuteMessage;
+        _messages.add(StatusMessage(
+            data: "${unmuteMessage.data} unmuted by ${unmuteMessage.nick}"));
+        break;
+      case BanMessage:
+        BanMessage banMessage = currentMessage as BanMessage;
+        _messages.add(StatusMessage(
+            data: "${banMessage.data} banned by ${banMessage.nick}"));
+        break;
+      case UnbanMessage:
+        UnbanMessage unbanMessage = currentMessage as UnbanMessage;
+        _messages.add(StatusMessage(
+            data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
+        break;
+      case StatusMessage:
+        _messages.add(currentMessage!);
+        break;
+      case SubOnlyMessage:
+        SubOnlyMessage subOnlyMessage = currentMessage as SubOnlyMessage;
+        String subMode = subOnlyMessage.data == 'on' ? 'enabled' : 'disabled';
+        _messages.add(StatusMessage(
+            data: "Subscriber only mode $subMode by ${subOnlyMessage.nick}"));
+        break;
+      case ErrorMessage:
+        ErrorMessage errorMessage = currentMessage as ErrorMessage;
+        if (errorMessage.description == "banned") {
+          _messages.add(StatusMessage(
+            data:
+                "You have been banned! Check your profile on destiny.gg for more information.",
+            isError: true,
+          ));
+        } else if (errorMessage.description == "muted") {
+          _messages.add(StatusMessage(
+            data: "You are temporarily muted!",
+            isError: true,
+          ));
+        } else if (errorMessage.description == "needlogin") {
+          // Server thinks user is not logged in
+          //    Can try reconnecting to fix it
+          _messages.add(StatusMessage(
+            data:
+                "Message failed to send due to an authentication failure.\nAutomatically reconnecting...",
+            isError: true,
+          ));
+          _delayedReconnect();
+        } else {
+          _messages.add(StatusMessage(
+            data: errorMessage.description,
+            isError: true,
+          ));
+        }
+        break;
+      default:
+        break;
+    }
 
-        notifyListeners();
-      },
-      onDone: () => _disconnectChat(),
-      onError: (error) => print("STREAM REPORTED ERROR"),
-    );
+    //When messages length grows to 300, shrink to 150
+    if (_messages.length > 300) {
+      _messages.removeRange(0, 150);
+    }
+
+    notifyListeners();
   }
 
   Future<void> _disconnectChat() async {

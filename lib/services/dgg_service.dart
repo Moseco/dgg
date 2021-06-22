@@ -27,6 +27,7 @@ class DggService {
   static const String flairsPath = r"/flairs/flairs.json";
   static const String emotesPath = r"/emotes/emotes.json";
   static const String emotesCssPath = r"/emotes/emotes.css";
+  static const String historyPath = r"/api/chat/history";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
@@ -412,6 +413,16 @@ class DggService {
     _sessionInfo = Unauthenticated();
     _currentNick = null;
     _sharedPreferencesService.clearAuthInfo();
+  }
+
+  Future<List<dynamic>> getChatHistory() async {
+    final response = await http.get(Uri.https(dggBase, historyPath));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return [];
+    }
   }
 }
 
