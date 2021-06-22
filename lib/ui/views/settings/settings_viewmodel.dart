@@ -31,8 +31,7 @@ class SettingsViewModel extends BaseViewModel {
   int _defaultStream = 0;
   int get defaultStream => _defaultStream;
 
-  Future<void> initialize() async {
-    await _sharedPreferencesService.initialize();
+  void initialize() {
     _isAnalyticsEnabled = _sharedPreferencesService.getAnalyticsEnabled();
     _isWakelockEnabled = _sharedPreferencesService.getWakelockEnabled();
     _themeIndex = _sharedPreferencesService.getThemeIndex();

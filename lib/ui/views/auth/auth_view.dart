@@ -12,8 +12,6 @@ class AuthView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<AuthViewModel>.reactive(
       viewModelBuilder: () => AuthViewModel(),
-      fireOnModelReadyOnce: true,
-      onModelReady: (model) => model.initialize(),
       builder: (context, model, child) => WillPopScope(
         onWillPop: model.handleOnWillPop,
         child: Scaffold(

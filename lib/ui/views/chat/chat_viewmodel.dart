@@ -90,7 +90,6 @@ class ChatViewModel extends BaseViewModel {
   double get emoteHeight => _emoteHeight;
 
   Future<void> initialize() async {
-    await _sharedPreferencesService.initialize();
     await _checkOnboarding();
     if (_sharedPreferencesService.getWakelockEnabled()) {
       Wakelock.enable();
@@ -503,7 +502,7 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<void> _getTwitchStreamStatus() async {
-    String twitchClientId = await _remoteConfigService.getTwitchClientId();
+    String twitchClientId = _remoteConfigService.getTwitchClientId();
 
     if (twitchClientId.isNotEmpty) {
       // Twitch api to check status of a channel
@@ -547,7 +546,7 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<String?> _getYouTubeStreamId() async {
-    String youTubeApiKey = await _remoteConfigService.getYouTubeApiKey();
+    String youTubeApiKey = _remoteConfigService.getYouTubeApiKey();
 
     if (youTubeApiKey.isNotEmpty) {
       // YouTube api to get channel's live streams

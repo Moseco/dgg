@@ -33,10 +33,6 @@ class AuthViewModel extends BaseViewModel {
   bool _isClipboardError = false;
   bool get isClipboardError => _isClipboardError;
 
-  Future<void> initialize() async {
-    await _sharedPreferencesService.initialize();
-  }
-
   void setAuthMethod(int? method) {
     _authMethod = method;
     notifyListeners();
