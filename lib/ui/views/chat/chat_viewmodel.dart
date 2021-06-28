@@ -755,7 +755,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "Bug fixes:\n•Fixed a bug where typing certain special characters would cause the suggestion feature to crash.\n•Fixed a bug where sent messages would be rejected by the server if they contained certain special characters.",
+            "•Previous messages are now loaded when a user connects to the chat.\n•User flairs are now shown in chat.\n•Emotes and flairs are now cached between sessions.•Emote loading should now be more stable in general.",
       );
     }
   }
