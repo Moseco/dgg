@@ -32,6 +32,19 @@ class ChatSizeView extends StatelessWidget {
                                 fontSize: viewModel.textFontSize,
                               ),
                               children: [
+                                WidgetSpan(
+                                  child: viewModel.flairEnabled
+                                      ? Container(
+                                          height: viewModel.flairHeight,
+                                          padding:
+                                              const EdgeInsets.only(right: 5),
+                                          child: Image.asset(
+                                            "assets/images/dgg_icon.png",
+                                            fit: BoxFit.fitHeight,
+                                          ),
+                                        )
+                                      : Container(),
+                                ),
                                 TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -62,6 +75,19 @@ class ChatSizeView extends StatelessWidget {
                                 fontSize: viewModel.textFontSize,
                               ),
                               children: [
+                                WidgetSpan(
+                                  child: viewModel.flairEnabled
+                                      ? Container(
+                                          height: viewModel.flairHeight,
+                                          padding:
+                                              const EdgeInsets.only(right: 5),
+                                          child: Image.asset(
+                                            "assets/images/dgg_icon.png",
+                                            fit: BoxFit.fitHeight,
+                                          ),
+                                        )
+                                      : Container(),
+                                ),
                                 TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -117,6 +143,19 @@ class ChatSizeView extends StatelessWidget {
                                 fontSize: viewModel.textFontSize,
                               ),
                               children: [
+                                WidgetSpan(
+                                  child: viewModel.flairEnabled
+                                      ? Container(
+                                          height: viewModel.flairHeight,
+                                          padding:
+                                              const EdgeInsets.only(right: 5),
+                                          child: Image.asset(
+                                            "assets/images/dgg_icon.png",
+                                            fit: BoxFit.fitHeight,
+                                          ),
+                                        )
+                                      : Container(),
+                                ),
                                 TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -196,7 +235,7 @@ class ChatSizeView extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      "Customize text and emote size",
+                      "Customize the look of the chat",
                       style: TextStyle(fontSize: 24),
                     ),
                     Text(
@@ -224,6 +263,26 @@ class ChatSizeView extends StatelessWidget {
                                 value: viewModel.emoteSize,
                                 label: viewModel.emoteSizeLabel,
                                 onChanged: viewModel.updateEmoteSize,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Enable flairs"),
+                                  Switch(
+                                    value: viewModel.flairEnabled,
+                                    activeColor: Theme.of(context).primaryColor,
+                                    onChanged: viewModel.updateFlairEnabled,
+                                  ),
+                                ],
+                              ),
+                              Text("Flair size"),
+                              Slider(
+                                min: 0,
+                                max: 2,
+                                divisions: 2,
+                                value: viewModel.flairSize,
+                                label: viewModel.flairSizeLabel,
+                                onChanged: viewModel.updateFlairSize,
                               ),
                             ],
                           ),

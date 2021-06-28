@@ -86,7 +86,7 @@ class SettingsView extends StatelessWidget {
                       _showDefaultStreamDialog(context, model),
                 ),
                 SettingsTile(
-                  title: 'Text and emote size',
+                  title: 'Customize chat style',
                   leading: Icon(Icons.format_size),
                   onPressed: (BuildContext context) =>
                       model.navigateToChatSize(),

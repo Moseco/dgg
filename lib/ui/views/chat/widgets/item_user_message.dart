@@ -4,17 +4,20 @@ import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/ui/views/chat/chat_viewmodel.dart';
 import 'package:dgg/ui/views/chat/widgets/emote_widget.dart';
+import 'package:dgg/ui/views/chat/widgets/flair_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ItemUserMessage extends StatelessWidget {
   final ChatViewModel model;
   final UserMessage message;
+  final bool flairEnabled;
 
   const ItemUserMessage({
     Key? key,
     required this.model,
     required this.message,
+    required this.flairEnabled,
   }) : super(key: key);
 
   @override
@@ -52,7 +55,24 @@ class ItemUserMessage extends StatelessWidget {
   }
 
   List<InlineSpan> getMessageTextSpans(BuildContext context) {
-    List<InlineSpan> textSpans = [
+    List<InlineSpan> textSpans = [];
+
+    // Add flairs if enabled
+    if (flairEnabled) {
+      for (int i = 0; i < message.visibleFlairs.length; i++) {
+        textSpans.add(
+          WidgetSpan(
+            child: FlairWidget(
+              flair: message.visibleFlairs[i],
+              flairHeight: model.flairHeight,
+            ),
+          ),
+        );
+      }
+    }
+
+    // Add username and colon
+    textSpans.addAll([
       TextSpan(
         text: message.user.nick,
         style: TextStyle(
@@ -61,7 +81,7 @@ class ItemUserMessage extends StatelessWidget {
         ),
       ),
       TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
-    ];
+    ]);
 
     if (message.isCensored) {
       textSpans.add(

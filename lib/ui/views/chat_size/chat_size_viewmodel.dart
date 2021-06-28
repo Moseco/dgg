@@ -9,6 +9,10 @@ class ChatSizeViewModel extends BaseViewModel {
   double get textSize => _textSize;
   double _emoteSize = 1;
   double get emoteSize => _emoteSize;
+  bool _flairEnabled = true;
+  bool get flairEnabled => _flairEnabled;
+  double _flairSize = 1;
+  double get flairSize => _flairSize;
 
   double _textFontSize = 16;
   double get textFontSize => _textFontSize;
@@ -16,17 +20,23 @@ class ChatSizeViewModel extends BaseViewModel {
   double get iconSize => _iconSize;
   double _emoteHeight = 30;
   double get emoteHeight => _emoteHeight;
+  double _flairHeight = 20;
+  double get flairHeight => _flairHeight;
 
   String get textSizeLabel => _getLabel(_textSize);
   String get emoteSizeLabel => _getLabel(_emoteSize);
+  String get flairSizeLabel => _getLabel(_flairSize);
 
   void initialize() {
     // Get raw values
     _textSize = _sharedPreferencesService.getChatTextSize().toDouble();
     _emoteSize = _sharedPreferencesService.getChatEmoteSize().toDouble();
+    _flairEnabled = _sharedPreferencesService.getFlairEnabled();
+    _flairSize = _sharedPreferencesService.getChatFlairSize().toDouble();
     // Translate values
     _updateTextFontSize();
     _updateEmoteHeight();
+    _updateFlairHeight();
 
     notifyListeners();
   }
@@ -79,10 +89,33 @@ class ChatSizeViewModel extends BaseViewModel {
     }
   }
 
+  void updateFlairEnabled(bool value) {
+    _flairEnabled = value;
+    notifyListeners();
+  }
+
+  void updateFlairSize(double value) {
+    _flairSize = value;
+    _updateFlairHeight();
+    notifyListeners();
+  }
+
+  void _updateFlairHeight() {
+    if (_flairSize == 0) {
+      _flairHeight = 15;
+    } else if (_flairSize == 1) {
+      _flairHeight = 20;
+    } else if (_flairSize == 2) {
+      _flairHeight = 25;
+    }
+  }
+
   @override
   void dispose() {
     _sharedPreferencesService.setChatTextSize(_textSize.toInt());
     _sharedPreferencesService.setChatEmoteSize(_emoteSize.toInt());
+    _sharedPreferencesService.setFlairEnabled(_flairEnabled);
+    _sharedPreferencesService.setChatFlairSize(_flairSize.toInt());
     super.dispose();
   }
 }

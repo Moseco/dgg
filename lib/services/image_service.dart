@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/datamodels/emotes.dart';
+import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -27,10 +28,11 @@ class ImageService {
     }
   }
 
-  Future<Image?> downloadAndProcessEmote(Emote emote) async {
+  Future<Image?> loadAndProcessEmote(Emote emote) async {
     // Check if emote is in the cache
+    String emoteCacheKey = "emote_${emote.name}";
     FileInfo? fileInfo =
-        await DefaultCacheManager().getFileFromCache(emote.name);
+        await DefaultCacheManager().getFileFromCache(emoteCacheKey);
 
     late Uint8List emoteBytes;
 
@@ -45,7 +47,7 @@ class ImageService {
       if (response.statusCode == 200) {
         // Download successful, put in the cache
         emoteBytes = response.bodyBytes;
-        await DefaultCacheManager().putFile(emote.name, emoteBytes);
+        await DefaultCacheManager().putFile(emoteCacheKey, emoteBytes);
       } else {
         // Download was not successful, return null
         return null;
@@ -85,5 +87,34 @@ class ImageService {
         return Image.memory(emoteBytes, fit: BoxFit.fitHeight);
       }
     }
+  }
+
+  Future<Image?> loadAndProcessFlair(Flair flair) async {
+    // Check if flair is in the cache
+    String flairCacheKey = "flair_${flair.name}";
+    FileInfo? fileInfo =
+        await DefaultCacheManager().getFileFromCache(flairCacheKey);
+
+    late Uint8List flairBytes;
+
+    if (fileInfo != null) {
+      // Flair is in the cache, use cached version
+      flairBytes = await fileInfo.file.readAsBytes();
+    } else {
+      // Flair is not in the cache, download it
+      http.Client client = new http.Client();
+      http.Response response = await client.get(Uri.parse(flair.url!));
+
+      if (response.statusCode == 200) {
+        // Download successful, put in the cache
+        flairBytes = response.bodyBytes;
+        await DefaultCacheManager().putFile(flairCacheKey, flairBytes);
+      } else {
+        // Download was not successful, return null
+        return null;
+      }
+    }
+
+    return Image.memory(flairBytes, fit: BoxFit.fitHeight);
   }
 }

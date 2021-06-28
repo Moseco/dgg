@@ -50,6 +50,8 @@ class DggService {
   late Emotes emotes;
   bool _loadingEmote = false;
   List<Emote> _emoteLoadQueue = [];
+  bool _loadingFlair = false;
+  List<Flair> _flairLoadQueue = [];
 
   //Dgg chat websocket
   WebSocketChannel? _webSocketChannel;
@@ -358,8 +360,8 @@ class DggService {
         _loadingEmote = true;
 
         emote.loading = true;
-        emote.image = await _imageService.downloadAndProcessEmote(emote);
-        // Only set loading to false if emote download worked
+        emote.image = await _imageService.loadAndProcessEmote(emote);
+        // Only set loading to false if emote load worked
         //    Allows it to try again next time emote is seen
         if (emote.image != null) {
           emote.loading = false;
@@ -384,6 +386,47 @@ class DggService {
         Emote nextToLoad = _emoteLoadQueue[0];
         _emoteLoadQueue.removeAt(0);
         loadEmote(nextToLoad);
+      }
+    }
+  }
+
+  Future<void> loadFlair(Flair flair) async {
+    // Check if flair has already been loaded before trying to load it
+    if (flair.image == null) {
+      if (_loadingFlair) {
+        // Another flair is already being loaded, add current to the queue
+        _flairLoadQueue.add(flair);
+      } else {
+        // Load flair
+        _loadingFlair = true;
+
+        flair.loading = true;
+        flair.image = await _imageService.loadAndProcessFlair(flair);
+        // Only set loading to false if flair load worked
+        //    Allows it to try again next time flair is seen
+        if (flair.image != null) {
+          flair.loading = false;
+        }
+
+        _loadingFlair = false;
+        if (_flairLoadQueue.isNotEmpty) {
+          // Remove the next flair from the queue and start loading it
+          Flair nextToLoad = _flairLoadQueue[0];
+          _flairLoadQueue.removeAt(0);
+          loadFlair(nextToLoad);
+        }
+      }
+    } else if (_flairLoadQueue.isNotEmpty) {
+      if (flair.name == _flairLoadQueue[0].name) {
+        // Current flair is already loaded and is next in the queue, remove it
+        _flairLoadQueue.removeAt(0);
+      }
+
+      if (_flairLoadQueue.isNotEmpty) {
+        // Remove the next flair from the queue and start loading it
+        Flair nextToLoad = _flairLoadQueue[0];
+        _flairLoadQueue.removeAt(0);
+        loadFlair(nextToLoad);
       }
     }
   }

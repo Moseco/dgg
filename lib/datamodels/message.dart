@@ -13,6 +13,7 @@ class UserMessage extends Message {
   final User user;
   final String data;
   final List<UserMessageElement> elements;
+  final List<Flair> visibleFlairs;
   final int? color;
   final bool isMentioned;
   final bool isOwn;
@@ -25,6 +26,7 @@ class UserMessage extends Message {
     required this.user,
     required this.data,
     required this.elements,
+    required this.visibleFlairs,
     this.color,
     this.isMentioned = false,
     this.isOwn = false,
@@ -56,8 +58,9 @@ class UserMessage extends Message {
     return UserMessage(
       user: user,
       data: data,
-      color: getColor(user.features, flairs),
       elements: createElements(data, emotes),
+      visibleFlairs: getVisibleFlairs(user.features, flairs),
+      color: getColor(user.features, flairs),
       isMentioned: isMentioned,
       isOwn: isOwn,
       isGreenText: isGreenText,
@@ -75,6 +78,18 @@ class UserMessage extends Message {
       }
     }
     return null;
+  }
+
+  static List<Flair> getVisibleFlairs(List<String> features, Flairs flairs) {
+    List<Flair> visibleFlairs = [];
+    for (int i = 0; i < features.length; i++) {
+      Flair? current = flairs.flairMap[features[i]];
+      if (current != null && !current.hidden) {
+        visibleFlairs.add(current);
+      }
+    }
+
+    return visibleFlairs;
   }
 }
 

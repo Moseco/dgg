@@ -14,6 +14,8 @@ class SharedPreferencesService {
   static const String KEY_CHAT_TEXT_SIZE = "KEY_CHAT_TEXT_SIZE";
   static const String KEY_CHAT_EMOTE_SIZE = "KEY_CHAT_EMOTE_SIZE";
   static const String KEY_CACHE_VERSION = "KEY_CACHE_VERSION";
+  static const String KEY_CHAT_FLAIR_ENABLED = "KEY_CHAT_FLAIR_ENABLED";
+  static const String KEY_CHAT_FLAIR_SIZE = "KEY_CHAT_FLAIR_SIZE";
 
   SharedPreferences? _sharedPreferences;
 
@@ -136,6 +138,22 @@ class SharedPreferencesService {
 
   Future<void> setCacheVersion(String value) async {
     await _sharedPreferences!.setString(KEY_CACHE_VERSION, value);
+  }
+
+  bool getFlairEnabled() {
+    return _sharedPreferences!.getBool(KEY_CHAT_FLAIR_ENABLED) ?? true;
+  }
+
+  Future<void> setFlairEnabled(bool value) async {
+    await _sharedPreferences!.setBool(KEY_CHAT_FLAIR_ENABLED, value);
+  }
+
+  int getChatFlairSize() {
+    return _sharedPreferences!.getInt(KEY_CHAT_FLAIR_SIZE) ?? 1;
+  }
+
+  Future<void> setChatFlairSize(int value) async {
+    await _sharedPreferences!.setInt(KEY_CHAT_FLAIR_SIZE, value);
   }
 
   int getThemeIndex() {

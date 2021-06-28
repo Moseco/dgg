@@ -41,6 +41,7 @@ class ChatList extends ViewModelWidget<ChatViewModel> {
               return ItemUserMessage(
                 model: model,
                 message: currentMessage,
+                flairEnabled: model.flairEnabled,
                 key: ValueKey<int>(messageIndex),
               );
             } else if (currentMessage is StatusMessage) {

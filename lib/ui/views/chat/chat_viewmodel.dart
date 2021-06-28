@@ -5,6 +5,7 @@ import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
 import 'package:dgg/datamodels/emotes.dart';
+import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
@@ -88,6 +89,10 @@ class ChatViewModel extends BaseViewModel {
   double get iconSize => _iconSize;
   double _emoteHeight = 30;
   double get emoteHeight => _emoteHeight;
+  bool _flairEnabled = true;
+  bool get flairEnabled => _flairEnabled;
+  double _flairHeight = 20;
+  double get flairHeight => _flairHeight;
 
   Future<void> initialize() async {
     await _checkOnboarding();
@@ -150,6 +155,14 @@ class ChatViewModel extends BaseViewModel {
         break;
       case UserMessage:
         UserMessage userMessage = currentMessage as UserMessage;
+        if (_flairEnabled) {
+          //for each flair, check if it needs to be loaded
+          userMessage.visibleFlairs.forEach((flair) {
+            if (!flair.loading && flair.image == null) {
+              _loadFlair(flair);
+            }
+          });
+        }
         //for each emote, check if needs to be loaded
         userMessage.elements.forEach((element) {
           if (element is EmoteElement) {
@@ -333,6 +346,11 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> _loadEmote(Emote emote) async {
     await _dggService.loadEmote(emote);
+    notifyListeners();
+  }
+
+  Future<void> _loadFlair(Flair flair) async {
+    await _dggService.loadFlair(flair);
     notifyListeners();
   }
 
@@ -745,6 +763,8 @@ class ChatViewModel extends BaseViewModel {
   void _setChatSize() {
     int textSize = _sharedPreferencesService.getChatTextSize();
     int emoteSize = _sharedPreferencesService.getChatEmoteSize();
+    _flairEnabled = _sharedPreferencesService.getFlairEnabled();
+    int flairSize = _sharedPreferencesService.getChatFlairSize();
     // Set text and icon size
     if (textSize == 0) {
       _textFontSize = 12;
@@ -763,6 +783,14 @@ class ChatViewModel extends BaseViewModel {
       _emoteHeight = 30;
     } else if (emoteSize == 2) {
       _emoteHeight = 40;
+    }
+    // Set flair size
+    if (flairSize == 0) {
+      _flairHeight = 15;
+    } else if (flairSize == 1) {
+      _flairHeight = 20;
+    } else if (flairSize == 2) {
+      _flairHeight = 25;
     }
   }
 
