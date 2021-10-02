@@ -755,7 +755,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "•Previous messages are now loaded when a user connects to the chat.\n•User flairs are now shown in chat.\n•Emotes and flairs are now cached between sessions.•Emote loading should now be more stable in general.",
+            "•Fixed a bug that caused the app to get stuck when initially loading assets.",
       );
     }
   }
