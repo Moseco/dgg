@@ -237,12 +237,12 @@ class DggService {
 
     for (int i = 0; i < lines.length; i++) {
       //Check if starts with emote
-      if (lines[i].startsWith(emoteStart)) {
+      String trimmed = lines[i].trim();
+      if (trimmed.startsWith(emoteStart)) {
         //get emote name
-        String trimmed = lines[i].trim();
         String emoteName = trimmed.substring(7, trimmed.indexOf('{')).trim();
         //go through attributes
-        String currentLineTrimmed = lines[i].trim();
+        String currentLineTrimmed = trimmed;
         while (!currentLineTrimmed.endsWith("}")) {
           //Check if body has animation attribute
           if (currentLineTrimmed.startsWith("animation:")) {
@@ -317,30 +317,35 @@ class DggService {
   }
 
   _StepParam? _parseStepParam(String param) {
-    RegExpMatch? match = numberRegex.firstMatch(param);
-    if (param.endsWith("ms")) {
-      //Duration in milliseconds
-      return _StepParam(
-        double.parse(param.substring(0, match!.end)).toInt(),
-        _StepParamType.duration,
-      );
-    } else if (param.endsWith("s")) {
-      //Duration in seconds
-      return _StepParam(
-        (double.parse(param.substring(0, match!.end)) * 1000).toInt(),
-        _StepParamType.duration,
-      );
-    } else {
-      if (match!.end != 0) {
-        //Number of repeats
+    try {
+      RegExpMatch? match = numberRegex.firstMatch(param);
+      if (param.endsWith("ms") || param.endsWith("ms,")) {
+        //Duration in milliseconds
         return _StepParam(
-          int.parse(param.substring(0, match.end)),
-          _StepParamType.repeatCount,
+          double.parse(param.substring(0, match!.end)).toInt(),
+          _StepParamType.duration,
+        );
+      } else if (param.endsWith("s") || param.endsWith("s,")) {
+        //Duration in seconds
+        return _StepParam(
+          (double.parse(param.substring(0, match!.end)) * 1000).toInt(),
+          _StepParamType.duration,
         );
       } else {
-        //Some other parameter we do not care about
-        return null;
+        if (match!.end != 0) {
+          //Number of repeats
+          return _StepParam(
+            int.parse(param.substring(0, match.end)),
+            _StepParamType.repeatCount,
+          );
+        } else {
+          //Some other parameter we do not care about
+          return null;
+        }
       }
+    } catch (_) {
+      // Most likely encountered a double or int parse error
+      return null;
     }
   }
 
