@@ -409,12 +409,18 @@ class ChatViewModel extends BaseViewModel {
     _updateSuggestions();
   }
 
-  void sendChatMessage() {
+  void sendChatMessage({bool commandCheck = true}) {
     String draftTrim = _draft.trim();
     if (draftTrim.isNotEmpty && isChatConnected) {
-      _dggService.sendChatMessage(draftTrim);
-      updateChatDraft('');
-      chatInputController.clear();
+      if (commandCheck && draftTrim.startsWith("/")) {
+        // Message is probably a command, verify with user before sending
+        verifyMessageBeforeSending();
+      } else {
+        // Send message normally
+        _dggService.sendChatMessage(draftTrim);
+        updateChatDraft('');
+        chatInputController.clear();
+      }
     }
   }
 
@@ -791,6 +797,21 @@ class ChatViewModel extends BaseViewModel {
       _flairHeight = 20;
     } else if (flairSize == 2) {
       _flairHeight = 25;
+    }
+  }
+
+  Future<void> verifyMessageBeforeSending() async {
+    DialogResponse? response = await _dialogService.showConfirmationDialog(
+      title: "Confirm message",
+      description:
+          "Looks like you are sending a message with a command.\n\nNot all commands are implemented in the app, for example private messages do not work and are sent as a normal chat message.\n\nIf you want to send the message anyway, make sure it is something you are okay with being sent as a regular message just in case.",
+      confirmationTitle: "Send",
+      cancelTitle: "Cancel",
+    );
+
+    if (response != null && response.confirmed) {
+      // User wants to send the message anyway
+      sendChatMessage(commandCheck: false);
     }
   }
 
