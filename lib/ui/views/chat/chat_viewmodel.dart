@@ -761,7 +761,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "•Fixed a bug that caused the app to get stuck when initially loading assets.",
+            "•Fixed a bug that caused the app to get stuck when initially loading assets.\n•Fixed a bug that caused messages with certain characters to not be sent.\n•Messages with commands are now verified before sending. This was added to prevent users from accidentally leaking private information using unimplemented commands.",
       );
     }
   }
