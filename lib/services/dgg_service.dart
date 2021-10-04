@@ -438,8 +438,8 @@ class DggService {
 
   void sendChatMessage(String message) {
     try {
-      String escapedMsg = message.replaceAll(r"\", r"\\");
-      _webSocketChannel?.sink.add('MSG {"data": "$escapedMsg"}');
+      String dataString = jsonEncode({"data": message});
+      _webSocketChannel?.sink.add('MSG $dataString');
     } catch (_) {
       print("Message failed to send");
     }
