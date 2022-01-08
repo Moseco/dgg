@@ -33,11 +33,11 @@ class OnboardingViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> finishOnboarding() async {
+  void finishOnboarding() {
     _sharedPreferencesService.setOnboarding();
     // Call this here so that changelog is not shown to new users
     _sharedPreferencesService.shouldShowChangelog();
-    _navigationService.back();
+    _navigationService.clearStackAndShow(Routes.chatView);
   }
 
   Future<void> navigateToAuth() async {

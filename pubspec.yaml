@@ -14,9 +14,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   
   # State management
-  stacked: ^2.0.4
-  stacked_services: ^0.8.3
-  stacked_themes: ^0.3.2
+  stacked: ^2.2.7+1
+  stacked_services: ^0.8.16
+  stacked_themes: ^0.3.8+1
 
   # Firebase
   firebase_core: ^1.0.3
@@ -26,7 +26,7 @@ dependencies:
 
   # UI
   flutter_staggered_animations: ^1.0.0
-  settings_ui: ^1.0.0
+  flutter_settings_ui: ^2.0.1
   adaptive_dialog: ^0.10.0+5
   percent_indicator: ^3.0.1
   extended_nested_scroll_view: ^3.0.0
@@ -40,7 +40,7 @@ dependencies:
   web_socket_channel: ^2.0.0
   url_launcher: ^6.0.3
   image: ^3.0.2
-  wakelock: ^0.5.0+2
+  wakelock: ^0.5.6
   youtube_player_iframe: ^2.0.0
   flutter_cache_manager: ^3.1.1
 
@@ -49,7 +49,7 @@ dev_dependencies:
     sdk: flutter
 
   build_runner:
-  stacked_generator: ^0.3.3
+  stacked_generator: ^0.5.6
 
   flutter_launcher_icons: ^0.9.0
 

@@ -12,6 +12,7 @@ import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stacked/stacked.dart';
@@ -95,7 +96,11 @@ class ChatViewModel extends BaseViewModel {
   double get flairHeight => _flairHeight;
 
   Future<void> initialize() async {
-    await _checkOnboarding();
+    if (!_sharedPreferencesService.getOnboarding()) {
+      SchedulerBinding.instance?.addPostFrameCallback(
+          (_) => _navigationService.clearStackAndShow(Routes.onboardingView));
+      return;
+    }
     if (_sharedPreferencesService.getWakelockEnabled()) {
       Wakelock.enable();
     }
@@ -108,14 +113,6 @@ class ChatViewModel extends BaseViewModel {
     await _getChatHistory();
     _connectChat();
     _showChangelog();
-  }
-
-  Future<void> _checkOnboarding() async {
-    bool onboardingFinished = _sharedPreferencesService.getOnboarding();
-
-    if (!onboardingFinished) {
-      await _navigationService.navigateTo(Routes.onboardingView);
-    }
   }
 
   Future<void> _getSessionInfo() async {

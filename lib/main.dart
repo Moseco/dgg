@@ -33,15 +33,23 @@ class App extends StatelessWidget {
     return ThemeBuilder(
       themes: [
         ThemeData(
-          brightness: Brightness.dark,
-          primaryColor: Color(0xFF538CC6),
-          accentColor: Color(0xFF538CC6),
+          colorScheme: ColorScheme.fromSwatch().copyWith(
+            brightness: Brightness.dark,
+            primary: Color(0xFF538CC6),
+            secondary: Color(0xFF538CC6),
+            surface: Color(0xFF538CC6),
+            onSurface: Colors.white,
+          ),
         ),
         ThemeData(
-          brightness: Brightness.dark,
           scaffoldBackgroundColor: Colors.black,
-          primaryColor: Color(0xFF538CC6),
-          accentColor: Color(0xFF538CC6),
+          colorScheme: ColorScheme.fromSwatch().copyWith(
+            brightness: Brightness.dark,
+            primary: Color(0xFF538CC6),
+            secondary: Color(0xFF538CC6),
+            surface: Colors.black,
+            onSurface: Colors.white,
+          ),
         ),
       ],
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(

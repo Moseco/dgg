@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
+import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:stacked/stacked.dart';
 
 import 'settings_viewmodel.dart';
@@ -75,7 +75,7 @@ class SettingsView extends StatelessWidget {
                   subtitle: 'Prevent screen from turning off while in chat',
                   subtitleMaxLines: 2,
                   leading: Icon(Icons.lightbulb),
-                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isWakelockEnabled,
                   onToggle: model.toggleWakelockEnabled,
                 ),
@@ -99,14 +99,14 @@ class SettingsView extends StatelessWidget {
                 SettingsTile.switchTile(
                   title: 'Send crash reports',
                   leading: Icon(Icons.bug_report),
-                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isCrashlyticsCollectionEnabled,
                   onToggle: model.toggleCrashlyticsCollection,
                 ),
                 SettingsTile.switchTile(
                   title: 'Analytics collection',
                   leading: Icon(Icons.analytics),
-                  switchActiveColor: Theme.of(context).primaryColor,
+                  switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isAnalyticsEnabled,
                   onToggle: model.toggleAnalyticsCollection,
                 ),
