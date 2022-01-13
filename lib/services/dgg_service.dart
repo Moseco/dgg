@@ -49,9 +49,9 @@ class DggService {
   late Flairs flairs;
   late Emotes emotes;
   bool _loadingEmote = false;
-  List<Emote> _emoteLoadQueue = [];
+  final List<Emote> _emoteLoadQueue = [];
   bool _loadingFlair = false;
-  List<Flair> _flairLoadQueue = [];
+  final List<Flair> _flairLoadQueue = [];
 
   //Dgg chat websocket
   WebSocketChannel? _webSocketChannel;
@@ -87,7 +87,7 @@ class DggService {
     if (response.statusCode == 200) {
       if (response.body.startsWith('{"error"')) {
         //Token is not valid, or some other error
-        _sessionInfo = Unavailable();
+        _sessionInfo = const Unavailable();
       } else {
         //token or sid is valid
         _sessionInfo = Available.fromJson(response.body);
@@ -146,7 +146,7 @@ class DggService {
       case "UNBAN":
         return UnbanMessage.fromJson(jsonString);
       case "REFRESH":
-        return StatusMessage(data: "Being disconnected by server...");
+        return const StatusMessage(data: "Being disconnected by server...");
       case "SUBONLY":
         return SubOnlyMessage.fromJson(jsonString);
       case "ERR":
@@ -171,7 +171,7 @@ class DggService {
 
     if (response.statusCode == 200) {
       int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
-      int cacheIndexEnd = response.body.indexOf('\"', cacheIndexStart);
+      int cacheIndexEnd = response.body.indexOf('"', cacheIndexStart);
       dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
@@ -219,7 +219,7 @@ class DggService {
   }
 
   Future<void> _getEmoteCss(Uri emotesCssUri) async {
-    if (emotes.emoteMap.length > 0) {
+    if (emotes.emoteMap.isNotEmpty) {
       final response = await http.get(emotesCssUri);
 
       if (response.statusCode == 200) {
@@ -230,7 +230,7 @@ class DggService {
 
   void _parseCss(String source) {
     //Split css file by lines
-    List<String> lines = LineSplitter().convert(source);
+    List<String> lines = const LineSplitter().convert(source);
 
     //Regex to match the following: .emote.EMOTE {
     RegExp emoteStart = RegExp(r'\.emote\.\w+ ?\{');
@@ -306,9 +306,7 @@ class DggService {
         : _stepParam2?.value;
 
     // Some emotes have duration in a different line, force 1 second in this case
-    if (emote.duration == null) {
-      emote.duration = 1000;
-    }
+    emote.duration ??= 1000;
 
     // Set animated to true if repeatCount also found correctly
     if (emote.repeatCount != null) {

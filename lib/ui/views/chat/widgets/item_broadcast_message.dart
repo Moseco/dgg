@@ -18,7 +18,7 @@ class ItemBroadcastMessage extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           text: message.data,
-          style: TextStyle(fontSize: textFontSize, color: Color(0xFFEDEA12)),
+          style: TextStyle(fontSize: textFontSize, color: const Color(0xFFEDEA12)),
         ),
       ),
     );

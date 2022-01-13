@@ -13,7 +13,7 @@ class ChatSizeView extends StatelessWidget {
       onModelReady: (viewModel) => viewModel.initialize(),
       fireOnModelReadyOnce: true,
       builder: (context, viewModel, child) => Scaffold(
-        appBar: AppBar(title: Text("Chat Size")),
+        appBar: AppBar(title: const Text("Chat Size")),
         body: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -45,14 +45,14 @@ class ChatSizeView extends StatelessWidget {
                                         )
                                       : Container(),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                TextSpan(text: ": "),
-                                TextSpan(text: " This is a message"),
+                                const TextSpan(text: ": "),
+                                const TextSpan(text: " This is a message"),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/godstiny.png",
@@ -88,14 +88,14 @@ class ChatSizeView extends StatelessWidget {
                                         )
                                       : Container(),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                TextSpan(text: ": "),
-                                TextSpan(text: " This is a wide emote"),
+                                const TextSpan(text: ": "),
+                                const TextSpan(text: " This is a wide emote"),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/gameofthrows.png",
@@ -124,7 +124,7 @@ class ChatSizeView extends StatelessWidget {
                                     size: viewModel.iconSize,
                                   ),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: " This is a status message",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
@@ -156,14 +156,14 @@ class ChatSizeView extends StatelessWidget {
                                         )
                                       : Container(),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: "Name",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                TextSpan(text: ": "),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: ": "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/gameofthrows.png",
@@ -171,9 +171,9 @@ class ChatSizeView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/godstiny.png",
@@ -181,9 +181,9 @@ class ChatSizeView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/gameofthrows.png",
@@ -191,9 +191,9 @@ class ChatSizeView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/godstiny.png",
@@ -201,9 +201,9 @@ class ChatSizeView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/gameofthrows.png",
@@ -211,9 +211,9 @@ class ChatSizeView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                TextSpan(text: " This is emote spam "),
+                                const TextSpan(text: " This is emote spam "),
                                 WidgetSpan(
-                                  child: Container(
+                                  child: SizedBox(
                                     height: viewModel.emoteHeight,
                                     child: Image.asset(
                                       "assets/images/godstiny.png",
@@ -230,15 +230,15 @@ class ChatSizeView extends StatelessWidget {
                   ),
                 ),
               ),
-              Divider(color: Colors.white54),
+              const Divider(color: Colors.white54),
               Expanded(
                 child: Column(
                   children: [
-                    Text(
+                    const Text(
                       "Customize the look of the chat",
                       style: TextStyle(fontSize: 24),
                     ),
-                    Text(
+                    const Text(
                       "Use the sliders below and see what it will look like above.",
                     ),
                     Expanded(
@@ -246,7 +246,7 @@ class ChatSizeView extends StatelessWidget {
                         child: SingleChildScrollView(
                           child: Column(
                             children: [
-                              Text("Text size"),
+                              const Text("Text size"),
                               Slider(
                                 min: 0,
                                 max: 2,
@@ -255,7 +255,7 @@ class ChatSizeView extends StatelessWidget {
                                 label: viewModel.textSizeLabel,
                                 onChanged: viewModel.updateTextSize,
                               ),
-                              Text("Emote size"),
+                              const Text("Emote size"),
                               Slider(
                                 min: 0,
                                 max: 2,
@@ -267,7 +267,7 @@ class ChatSizeView extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text("Enable flairs"),
+                                  const Text("Enable flairs"),
                                   Switch(
                                     value: viewModel.flairEnabled,
                                     activeColor: Theme.of(context).primaryColor,
@@ -275,7 +275,7 @@ class ChatSizeView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Text("Flair size"),
+                              const Text("Flair size"),
                               Slider(
                                 min: 0,
                                 max: 2,

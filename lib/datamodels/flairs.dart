@@ -13,18 +13,18 @@ class Flairs {
 
     List<Flair> flairs = [];
     Map<String, Flair> flairMap = {};
-    json.forEach((map) {
+    for (var map in json) {
       Flair? flair = Flair.fromJson(map);
       if (flair != null) {
         flairs.add(flair);
         flairMap[flair.name] = flair;
       }
-    });
+    }
     return Flairs(flairs, flairMap);
   }
 
   factory Flairs.empty() {
-    return Flairs([], {});
+    return const Flairs([], {});
   }
 }
 

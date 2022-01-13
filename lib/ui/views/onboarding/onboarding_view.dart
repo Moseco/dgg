@@ -29,7 +29,7 @@ class OnboardingView extends StatelessWidget {
               title: "Analytics",
               body:
                   "By default this app collects general usage analytics while you use the app. No specific identifying information is collected. If you want to turn analytics on or off you can do so now or in the app settings later on.",
-              image: Center(
+              image: const Center(
                 child: Icon(
                   Icons.analytics,
                   size: 200,
@@ -42,7 +42,7 @@ class OnboardingView extends StatelessWidget {
               body: model.isSignedIn
                   ? ""
                   : "To send messages in chat you must sign in, if you want to you can do that now. If not, you can always do it later in the settings.",
-              image: Center(
+              image: const Center(
                 child: Icon(
                   Icons.account_circle,
                   size: 200,
@@ -75,7 +75,7 @@ class OnboardingView extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Text(
                 "Analytics collection",
                 maxLines: 1,
@@ -91,7 +91,7 @@ class OnboardingView extends StatelessWidget {
         ),
         Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Text(
                 "Send crash reports",
                 maxLines: 1,
@@ -123,7 +123,7 @@ class OnboardingView extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        child: Text("Sign in"),
+        child: const Text("Sign in"),
         onPressed: () => model.navigateToAuth(),
       );
     }

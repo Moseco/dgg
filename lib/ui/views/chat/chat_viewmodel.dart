@@ -43,7 +43,7 @@ class ChatViewModel extends BaseViewModel {
   bool get isSignedIn => _dggService.isSignedIn;
 
   StreamSubscription? _chatSubscription;
-  List<Message> _messages = [];
+  final List<Message> _messages = [];
   List<Message> get messages => _isListAtBottom ? _messages : _pausedMessages;
   List<User> _users = [];
   bool _isChatConnected = false;
@@ -130,7 +130,7 @@ class ChatViewModel extends BaseViewModel {
 
   void _connectChat() {
     _showReconnectButton = false;
-    _messages.add(StatusMessage(data: "Connecting..."));
+    _messages.add(const StatusMessage(data: "Connecting..."));
     notifyListeners();
     _chatSubscription?.cancel();
     _chatSubscription = _dggService.openWebSocketConnection().stream.listen(
@@ -154,22 +154,22 @@ class ChatViewModel extends BaseViewModel {
         UserMessage userMessage = currentMessage as UserMessage;
         if (_flairEnabled) {
           //for each flair, check if it needs to be loaded
-          userMessage.visibleFlairs.forEach((flair) {
+          for (var flair in userMessage.visibleFlairs) {
             if (!flair.loading && flair.image == null) {
               _loadFlair(flair);
             }
-          });
+          }
         }
         //for each emote, check if needs to be loaded
-        userMessage.elements.forEach((element) {
+        for (var element in userMessage.elements) {
           if (element is EmoteElement) {
             if (!element.emote.loading && element.emote.image == null) {
               _loadEmote(element.emote);
             }
           }
-        });
+        }
         //Check if new message is part of a combo
-        if (_messages.length > 0 &&
+        if (_messages.isNotEmpty &&
             userMessage.elements.length == 1 &&
             userMessage.elements[0] is EmoteElement) {
           //Current message only has one emote in it
@@ -205,7 +205,7 @@ class ChatViewModel extends BaseViewModel {
               _currentVote = dggVote;
               _voteTimer?.cancel();
               _voteTimer =
-                  Timer.periodic(Duration(seconds: 1), handleVoteTimer);
+                  Timer.periodic(const Duration(seconds: 1), handleVoteTimer);
             }
           }
         }
@@ -284,20 +284,20 @@ class ChatViewModel extends BaseViewModel {
       case ErrorMessage:
         ErrorMessage errorMessage = currentMessage as ErrorMessage;
         if (errorMessage.description == "banned") {
-          _messages.add(StatusMessage(
+          _messages.add(const StatusMessage(
             data:
                 "You have been banned! Check your profile on destiny.gg for more information.",
             isError: true,
           ));
         } else if (errorMessage.description == "muted") {
-          _messages.add(StatusMessage(
+          _messages.add(const StatusMessage(
             data: "You are temporarily muted!",
             isError: true,
           ));
         } else if (errorMessage.description == "needlogin") {
           // Server thinks user is not logged in
           //    Can try reconnecting to fix it
-          _messages.add(StatusMessage(
+          _messages.add(const StatusMessage(
             data:
                 "Message failed to send due to an authentication failure.\nAutomatically reconnecting...",
             isError: true,
@@ -324,7 +324,7 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> _disconnectChat() async {
     if (_isChatConnected) {
-      _messages.add(StatusMessage(data: "Disconnected"));
+      _messages.add(const StatusMessage(data: "Disconnected"));
     }
     _isChatConnected = false;
     _showReconnectButton = true;
@@ -336,7 +336,7 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> _delayedReconnect() async {
     await _disconnectChat();
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
     await _getSessionInfo();
     _connectChat();
   }
@@ -465,11 +465,11 @@ class ChatViewModel extends BaseViewModel {
           caseSensitive: false,
         );
 
-        _suggestions.forEach((element) {
+        for (var element in _suggestions) {
           if (element.startsWith(lastWordRegex)) {
             newSuggestions.add(element);
           }
-        });
+        }
       } else {
         //Current last word does not start with previous last word
         //  Backspace, new word, or something similar happened
@@ -487,11 +487,11 @@ class ChatViewModel extends BaseViewModel {
         });
 
         //check user names
-        _users.forEach((user) {
+        for (var user in _users) {
           if (user.nick.startsWith(lastWordRegex)) {
             newSuggestions.add(user.nick);
           }
-        });
+        }
       }
     }
 
@@ -560,7 +560,7 @@ class ChatViewModel extends BaseViewModel {
       youtubePlayerController?.close();
       youtubePlayerController = YoutubePlayerController(
         initialVideoId: _currentEmbedId,
-        params: YoutubePlayerParams(autoPlay: true, showControls: false),
+        params: const YoutubePlayerParams(autoPlay: true, showControls: false),
       );
       notifyListeners();
     }
@@ -633,7 +633,7 @@ class ChatViewModel extends BaseViewModel {
           youtubePlayerController?.close();
           youtubePlayerController = YoutubePlayerController(
             initialVideoId: _currentEmbedId,
-            params: YoutubePlayerParams(
+            params: const YoutubePlayerParams(
               autoPlay: true,
               showControls: false,
             ),

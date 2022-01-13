@@ -46,9 +46,9 @@ class ItemUserMessage extends StatelessWidget {
 
   Color? _getBackgroundColor() {
     if (message.isMentioned) {
-      return Color(0xBF06263E);
+      return const Color(0xBF06263E);
     } else if (message.isOwn) {
-      return Color(0x409e9e9e);
+      return const Color(0x409e9e9e);
     } else {
       return null;
     }
@@ -80,20 +80,20 @@ class ItemUserMessage extends StatelessWidget {
           color: message.color == null ? null : Color(message.color!),
         ),
       ),
-      TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
+      const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
     ]);
 
     if (message.isCensored) {
       textSpans.add(
         TextSpan(
           text: "<censored>",
-          style: TextStyle(color: Colors.blue),
+          style: const TextStyle(color: Colors.blue),
           recognizer: TapGestureRecognizer()
             ..onTap = () => model.uncensorMessage(message),
         ),
       );
     } else {
-      message.elements.forEach((element) {
+      for (var element in message.elements) {
         if (element is UrlElement) {
           textSpans.add(
             TextSpan(
@@ -123,7 +123,7 @@ class ItemUserMessage extends StatelessWidget {
           textSpans.add(
             TextSpan(
               text: element.text,
-              style: TextStyle(color: Colors.blue),
+              style: const TextStyle(color: Colors.blue),
               recognizer: TapGestureRecognizer()
                 ..onTap =
                     () => model.setEmbed(element.embedId, element.embedType),
@@ -134,12 +134,12 @@ class ItemUserMessage extends StatelessWidget {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: message.isGreenText ? Color(0xFF6CA528) : null,
+                color: message.isGreenText ? const Color(0xFF6CA528) : null,
               ),
             ),
           );
         }
-      });
+      }
     }
     return textSpans;
   }

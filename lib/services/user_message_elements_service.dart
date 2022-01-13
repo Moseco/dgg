@@ -17,7 +17,7 @@ class UserMessageElementsService {
     }
 
     List<UserMessageElement> elements = parseUrls([TextElement(text)]);
-    if (emotes.emoteMap.length > 0) {
+    if (emotes.emoteMap.isNotEmpty) {
       elements = parseEmotes(elements, emotes);
     }
     elements = parseEmbedUrls(elements);

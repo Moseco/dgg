@@ -15,7 +15,7 @@ class SettingsView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
-          title: Text("Settings"),
+          title: const Text("Settings"),
           backgroundColor: model.appBarTheme == 1 ? Colors.transparent : null,
           elevation: model.appBarTheme == 1 ? 0 : null,
         ),
@@ -31,20 +31,20 @@ class SettingsView extends StatelessWidget {
                       SettingsTile(
                         title: 'Account info',
                         subtitle: model.username,
-                        leading: Icon(Icons.account_circle),
+                        leading: const Icon(Icons.account_circle),
                         onPressed: (BuildContext context) =>
                             model.openProfile(),
                       ),
                       SettingsTile(
                         title: 'Sign out',
-                        leading: Icon(Icons.logout),
+                        leading: const Icon(Icons.logout),
                         onPressed: (BuildContext context) => model.signOut(),
                       ),
                     ]
                   : [
                       SettingsTile(
                         title: 'Sign in',
-                        leading: Icon(Icons.account_circle),
+                        leading: const Icon(Icons.account_circle),
                         onPressed: (BuildContext context) =>
                             model.navigateToAuth(),
                       ),
@@ -55,13 +55,13 @@ class SettingsView extends StatelessWidget {
               tiles: [
                 SettingsTile(
                   title: 'Select app theme',
-                  leading: Icon(Icons.color_lens),
+                  leading: const Icon(Icons.color_lens),
                   onPressed: (BuildContext context) =>
                       _showThemeDialog(context, model),
                 ),
                 SettingsTile(
                   title: 'Select app bar theme',
-                  leading: Icon(Icons.line_style),
+                  leading: const Icon(Icons.line_style),
                   onPressed: (BuildContext context) =>
                       _showAppBarThemeDialog(context, model),
                 ),
@@ -74,20 +74,20 @@ class SettingsView extends StatelessWidget {
                   title: 'Wakelock',
                   subtitle: 'Prevent screen from turning off while in chat',
                   subtitleMaxLines: 2,
-                  leading: Icon(Icons.lightbulb),
+                  leading: const Icon(Icons.lightbulb),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isWakelockEnabled,
                   onToggle: model.toggleWakelockEnabled,
                 ),
                 SettingsTile(
                   title: 'Set default stream platform',
-                  leading: Icon(Icons.desktop_windows),
+                  leading: const Icon(Icons.desktop_windows),
                   onPressed: (BuildContext context) =>
                       _showDefaultStreamDialog(context, model),
                 ),
                 SettingsTile(
                   title: 'Customize chat style',
-                  leading: Icon(Icons.format_size),
+                  leading: const Icon(Icons.format_size),
                   onPressed: (BuildContext context) =>
                       model.navigateToChatSize(),
                 ),
@@ -98,14 +98,14 @@ class SettingsView extends StatelessWidget {
               tiles: [
                 SettingsTile.switchTile(
                   title: 'Send crash reports',
-                  leading: Icon(Icons.bug_report),
+                  leading: const Icon(Icons.bug_report),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isCrashlyticsCollectionEnabled,
                   onToggle: model.toggleCrashlyticsCollection,
                 ),
                 SettingsTile.switchTile(
                   title: 'Analytics collection',
-                  leading: Icon(Icons.analytics),
+                  leading: const Icon(Icons.analytics),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
                   switchValue: model.isAnalyticsEnabled,
                   onToggle: model.toggleAnalyticsCollection,
@@ -118,13 +118,13 @@ class SettingsView extends StatelessWidget {
                 SettingsTile(
                   title: 'Submit feedback',
                   subtitle: 'Opens Google Form',
-                  leading: Icon(Icons.feedback),
+                  leading: const Icon(Icons.feedback),
                   onPressed: (BuildContext context) => model.openFeedback(),
                 ),
                 SettingsTile(
                   title: 'About',
                   subtitle: 'App version: 0.9.2',
-                  leading: Icon(Icons.info),
+                  leading: const Icon(Icons.info),
                 ),
               ],
             ),
@@ -138,12 +138,12 @@ class SettingsView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext c) => AlertDialog(
-        title: Text("Select app theme"),
+        title: const Text("Select app theme"),
         content: SingleChildScrollView(
           child: Column(
             children: [
               RadioListTile<int>(
-                title: Text("Default"),
+                title: const Text("Default"),
                 value: 0,
                 groupValue: model.themeIndex,
                 activeColor: Theme.of(context).primaryColor,
@@ -153,7 +153,7 @@ class SettingsView extends StatelessWidget {
                 },
               ),
               RadioListTile<int>(
-                title: Text("True black"),
+                title: const Text("True black"),
                 value: 1,
                 groupValue: model.themeIndex,
                 activeColor: Theme.of(context).primaryColor,
@@ -167,7 +167,7 @@ class SettingsView extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
           ),
         ],
@@ -179,12 +179,12 @@ class SettingsView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext c) => AlertDialog(
-        title: Text("Select app bar theme"),
+        title: const Text("Select app bar theme"),
         content: SingleChildScrollView(
           child: Column(
             children: [
               RadioListTile<int>(
-                title: Text("Default"),
+                title: const Text("Default"),
                 value: 0,
                 groupValue: model.appBarTheme,
                 activeColor: Theme.of(context).primaryColor,
@@ -194,7 +194,7 @@ class SettingsView extends StatelessWidget {
                 },
               ),
               RadioListTile<int>(
-                title: Text("Match background"),
+                title: const Text("Match background"),
                 value: 1,
                 groupValue: model.appBarTheme,
                 activeColor: Theme.of(context).primaryColor,
@@ -208,7 +208,7 @@ class SettingsView extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
           ),
         ],
@@ -220,12 +220,12 @@ class SettingsView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext c) => AlertDialog(
-        title: Text("Set default stream platform"),
+        title: const Text("Set default stream platform"),
         content: SingleChildScrollView(
           child: Column(
             children: [
               RadioListTile<int>(
-                title: Text("Twitch"),
+                title: const Text("Twitch"),
                 value: 0,
                 groupValue: model.defaultStream,
                 activeColor: Theme.of(context).primaryColor,
@@ -235,7 +235,7 @@ class SettingsView extends StatelessWidget {
                 },
               ),
               RadioListTile<int>(
-                title: Text("YouTube"),
+                title: const Text("YouTube"),
                 value: 1,
                 groupValue: model.defaultStream,
                 activeColor: Theme.of(context).primaryColor,
@@ -249,7 +249,7 @@ class SettingsView extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            child: Text("Cancel", style: TextStyle(color: Colors.white)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.of(c).pop(),
           ),
         ],

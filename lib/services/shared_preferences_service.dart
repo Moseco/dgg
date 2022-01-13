@@ -20,9 +20,7 @@ class SharedPreferencesService {
   SharedPreferences? _sharedPreferences;
 
   Future<void> initialize() async {
-    if (_sharedPreferences == null) {
-      _sharedPreferences = await SharedPreferences.getInstance();
-    }
+    _sharedPreferences ??= await SharedPreferences.getInstance();
   }
 
   AuthInfo? getAuthInfo() {

@@ -8,29 +8,31 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../chat_viewmodel.dart';
 
 class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
+  const ChatStreamEmbed({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context, ChatViewModel model) {
-    if (model.showStreamPrompt) {
+  Widget build(BuildContext context, ChatViewModel viewModel) {
+    if (viewModel.showStreamPrompt) {
       return Container(
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
-            Text("Destiny is live. Show the stream?"),
+            const Text("Destiny is live. Show the stream?"),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 4),
                   child: ElevatedButton(
-                    child: Text("Yes"),
-                    onPressed: () => model.setShowEmbed(true),
+                    child: const Text("Yes"),
+                    onPressed: () => viewModel.setShowEmbed(true),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: ElevatedButton(
-                    child: Text("No"),
-                    onPressed: () => model.setShowEmbed(false),
+                    child: const Text("No"),
+                    onPressed: () => viewModel.setShowEmbed(false),
                   ),
                 ),
               ],
@@ -39,23 +41,23 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
         ),
       );
     } else {
-      if (model.showEmbed) {
-        if (model.embedType == EmbedType.YOUTUBE) {
+      if (viewModel.showEmbed) {
+        if (viewModel.embedType == EmbedType.YOUTUBE) {
           // Show youtube
           return YoutubePlayerIFrame(
-            controller: model.youtubePlayerController,
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+            controller: viewModel.youtubePlayerController,
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
           );
         } else {
           // Show webview and display correct twitch page
-          return Container(
+          return SizedBox(
             height: 9 / 16 * MediaQuery.of(context).size.width,
             child: WebView(
-              initialUrl: model.getTwitchEmbedUrl(),
+              initialUrl: viewModel.getTwitchEmbedUrl(),
               javascriptMode: JavascriptMode.unrestricted,
               initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
               onWebViewCreated: (WebViewController webViewController) {
-                model.webViewController = webViewController;
+                viewModel.webViewController = webViewController;
               },
             ),
           );

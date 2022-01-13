@@ -24,10 +24,12 @@ Future<void> main() async {
   await locator<SharedPreferencesService>().initialize();
   await locator<RemoteConfigService>().initialize();
   setupBottomSheetUi();
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
@@ -35,9 +37,9 @@ class App extends StatelessWidget {
         ThemeData(
           colorScheme: ColorScheme.fromSwatch().copyWith(
             brightness: Brightness.dark,
-            primary: Color(0xFF538CC6),
-            secondary: Color(0xFF538CC6),
-            surface: Color(0xFF538CC6),
+            primary: const Color(0xFF538CC6),
+            secondary: const Color(0xFF538CC6),
+            surface: const Color(0xFF538CC6),
             onSurface: Colors.white,
           ),
         ),
@@ -45,8 +47,8 @@ class App extends StatelessWidget {
           scaffoldBackgroundColor: Colors.black,
           colorScheme: ColorScheme.fromSwatch().copyWith(
             brightness: Brightness.dark,
-            primary: Color(0xFF538CC6),
-            secondary: Color(0xFF538CC6),
+            primary: const Color(0xFF538CC6),
+            secondary: const Color(0xFF538CC6),
             surface: Colors.black,
             onSurface: Colors.white,
           ),

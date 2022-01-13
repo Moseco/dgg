@@ -13,7 +13,7 @@ class ChatVote extends StatelessWidget {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
               color: Colors.black,
@@ -26,14 +26,14 @@ class ChatVote extends StatelessWidget {
           children: [
             Text(
               model.currentVote!.question,
-              style: TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 24),
             ),
             Text(
               "Winning option: ${model.currentVote!.getWinningOption()}",
               maxLines: 1,
             ),
             IconButton(
-              icon: Icon(Icons.keyboard_arrow_down),
+              icon: const Icon(Icons.keyboard_arrow_down),
               onPressed: model.toggleVoteCollapse,
             ),
           ],
@@ -45,7 +45,7 @@ class ChatVote extends StatelessWidget {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
               color: Colors.black,
@@ -58,7 +58,7 @@ class ChatVote extends StatelessWidget {
           children: [
             Text(
               model.currentVote!.question,
-              style: TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 24),
             ),
             Text(
               model.currentVote!.time - model.voteTimePassed > 0
@@ -67,7 +67,7 @@ class ChatVote extends StatelessWidget {
             ),
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: model.currentVote!.options.length,
               itemBuilder: (context, index) {
                 double percent =
@@ -86,7 +86,7 @@ class ChatVote extends StatelessWidget {
                         percent: percent,
                         center: Text(
                           "${(percent * 100).round()}%",
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                         ),
                         linearStrokeCap: LinearStrokeCap.roundAll,
                         progressColor: Theme.of(context).primaryColor,
@@ -97,7 +97,7 @@ class ChatVote extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: Icon(Icons.keyboard_arrow_up),
+              icon: const Icon(Icons.keyboard_arrow_up),
               onPressed: model.toggleVoteCollapse,
             ),
           ],

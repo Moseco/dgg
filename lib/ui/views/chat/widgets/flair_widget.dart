@@ -5,7 +5,7 @@ class FlairWidget extends StatelessWidget {
   final Flair flair;
   final double flairHeight;
 
-  FlairWidget({
+  const FlairWidget({
     Key? key,
     required this.flair,
     required this.flairHeight,

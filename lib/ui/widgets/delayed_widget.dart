@@ -25,7 +25,7 @@ class _DelayedWidgetState extends State<DelayedWidget>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(
+      duration: const Duration(
         milliseconds: 1000,
       ),
     );

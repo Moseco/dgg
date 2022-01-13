@@ -41,7 +41,7 @@ class ImageService {
       emoteBytes = await fileInfo.file.readAsBytes();
     } else {
       // Emote is not in the cache, download it
-      http.Client client = new http.Client();
+      http.Client client = http.Client();
       http.Response response = await client.get(Uri.parse(emote.url));
 
       if (response.statusCode == 200) {
@@ -102,7 +102,7 @@ class ImageService {
       flairBytes = await fileInfo.file.readAsBytes();
     } else {
       // Flair is not in the cache, download it
-      http.Client client = new http.Client();
+      http.Client client = http.Client();
       http.Response response = await client.get(Uri.parse(flair.url!));
 
       if (response.statusCode == 200) {

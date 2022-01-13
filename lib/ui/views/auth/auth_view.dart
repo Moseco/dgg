@@ -16,7 +16,7 @@ class AuthView extends StatelessWidget {
         onWillPop: model.handleOnWillPop,
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Sign in"),
+            title: const Text("Sign in"),
           ),
           body: SafeArea(
             child: model.isAuthMethodSelected
@@ -34,16 +34,16 @@ class AuthView extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
               child: Text(
                 "Sign in with destiny.gg",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 32),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
               child: Text(
                 "How would you like to sign in with your destiny.gg account?",
                 textAlign: TextAlign.center,
@@ -60,7 +60,7 @@ class AuthView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   "Use in-app webview",
                   style: TextStyle(fontSize: 16),
                 ),
@@ -69,7 +69,7 @@ class AuthView extends StatelessWidget {
               ),
             ),
             TextButton(
-              child: Text(
+              child: const Text(
                 "Use login key",
                 style: TextStyle(
                   decoration: TextDecoration.underline,
@@ -92,8 +92,8 @@ class AuthView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
+              const Padding(
+                padding: EdgeInsets.all(8),
                 child: Text("Failed to verify login information with dgg."),
               ),
               ElevatedButton(
@@ -103,7 +103,7 @@ class AuthView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text("Try again"),
+                child: const Text("Try again"),
                 onPressed: () => model.restartAuth(),
               ),
             ],
@@ -113,9 +113,9 @@ class AuthView extends StatelessWidget {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: const [
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8),
                 child: CircularProgressIndicator(),
               ),
               Text("Verifying information with dgg."),
@@ -151,23 +151,23 @@ class AuthView extends StatelessWidget {
                 ),
               ),
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
                     "Sign in with webview",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 32),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "This page will let you sign into your destiny.gg account and use it in this app. On the sign in page, make sure to select the \'remember me\' option to stay signed in, then sign in normally.\nTo get started press the button below.",
+                    "This page will let you sign into your destiny.gg account and use it in this app. On the sign in page, make sure to select the 'remember me' option to stay signed in, then sign in normally.\nTo get started press the button below.",
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
                     "Warning: Signing in with Google might not work because Google has disabled WebView login. Use a different login option or go back and use the login key method",
                     textAlign: TextAlign.center,
@@ -181,7 +181,7 @@ class AuthView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text("Start"),
+                  child: const Text("Start"),
                   onPressed: () => model.startAuthentication(),
                 ),
               ],
@@ -207,25 +207,25 @@ class AuthView extends StatelessWidget {
                 ),
               ),
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
                     "Use login key",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 32),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
                     "This page will explain how to create a login key on destiny.gg and let you use it in this app. The screenshot below shows the correct page.",
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "•Step 1: Press the start button below to go to the correct destiny.gg page. If you are not signed in already, then sign in.\n\n•Step 2: Expand the \'Connections\' drop down. If you do not have an item called \'DGG Login Key\' then press the button \'Add login key\'.\n\n•Step 3: Press the \'show\' button next to \'DGG Login Key\', copy the text that appears and return to this app.\n\n•Step 4: With the login key in your clipboard, press the button below to automatically grab the login key from your clipboard.",
+                    "•Step 1: Press the start button below to go to the correct destiny.gg page. If you are not signed in already, then sign in.\n\n•Step 2: Expand the 'Connections' drop down. If you do not have an item called 'DGG Login Key' then press the button 'Add login key'.\n\n•Step 3: Press the 'show' button next to 'DGG Login Key', copy the text that appears and return to this app.\n\n•Step 4: With the login key in your clipboard, press the button below to automatically grab the login key from your clipboard.",
                   ),
                 ),
                 !model.isAuthStarted
@@ -236,7 +236,7 @@ class AuthView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text("Go to destiny.gg"),
+                        child: const Text("Go to destiny.gg"),
                         onPressed: () => model.startAuthentication(),
                       )
                     : ElevatedButton(
@@ -246,11 +246,11 @@ class AuthView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text("Get key from clipboard and submit"),
+                        child: const Text("Get key from clipboard and submit"),
                         onPressed: () => model.getKeyFromClipboard(),
                       ),
                 model.isClipboardError
-                    ? Text(
+                    ? const Text(
                         "Failed to get login key from clipboard",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.red),

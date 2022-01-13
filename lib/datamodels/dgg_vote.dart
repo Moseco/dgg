@@ -57,7 +57,7 @@ class DggVote {
     temp = temp.substring(questionMarkIndex + 1).trim();
     List<String> options;
     List<int> voteCount;
-    if (temp.length == 0) {
+    if (temp.isEmpty) {
       //No options given, use 'yes' and 'no'
       options = ['Yes', 'No'];
       voteCount = [0, 0];
@@ -66,7 +66,7 @@ class DggVote {
       for (int i = 0; i < options.length; i++) {
         options[i] = options[i].trim();
       }
-      if (options.length < 2 || options.last.length == 0) {
+      if (options.length < 2 || options.last.isEmpty) {
         //Invalid vote, no 'or' to split options or last option is empty, return null
         return null;
       }
@@ -123,9 +123,9 @@ class DggVote {
 
   int getTotalVotes() {
     int total = 0;
-    voteCount.forEach((element) {
+    for (var element in voteCount) {
       total += element;
-    });
+    }
     return total;
   }
 

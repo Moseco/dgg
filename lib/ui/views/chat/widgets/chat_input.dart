@@ -18,12 +18,12 @@ class ChatInput extends StatelessWidget {
   Widget _buildNoInput() {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(),
         ),
       ),
-      child: Center(
+      child: const Center(
         child: Text(
           "Must be signed in to chat",
           textAlign: TextAlign.center,
@@ -52,7 +52,7 @@ class ChatInput extends StatelessWidget {
         height: 40,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(),
           ),
@@ -87,10 +87,10 @@ class ChatInput extends StatelessWidget {
       onSubmitted: (_) => model.sendChatMessage(),
       onEditingComplete: () {},
       decoration: InputDecoration(
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         hintText: 'Type a message...',
         suffixIcon: IconButton(
-          icon: Icon(Icons.send),
+          icon: const Icon(Icons.send),
           onPressed: model.isChatConnected && model.draft.isNotEmpty
               ? () => model.sendChatMessage()
               : null,

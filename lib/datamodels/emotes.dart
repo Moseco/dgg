@@ -14,17 +14,17 @@ class Emotes {
   static Emotes fromJson(String jsonString) {
     List<dynamic> emoteList = jsonDecode(jsonString);
 
-    Map<String, Emote> emoteMap = Map();
+    Map<String, Emote> emoteMap = {};
     StringBuffer stringBuffer = StringBuffer();
 
-    emoteList.forEach((map) {
+    for (var map in emoteList) {
       Emote? emote = Emote.fromMap(map);
       if (emote != null) {
         emoteMap[emote.name] = emote;
       }
-    });
+    }
 
-    if (emoteMap.length > 0) {
+    if (emoteMap.isNotEmpty) {
       List<String> keyList = emoteMap.keys.toList();
 
       for (int i = 0; i < keyList.length - 1; i++) {

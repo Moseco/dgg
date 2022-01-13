@@ -1,9 +1,8 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
-    as extendedNestedScrollView;
+    as extended_nested_scroll_view;
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
@@ -31,15 +30,15 @@ class _ChatViewState extends State<ChatView> {
       onModelReady: (model) => model.initialize(),
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
-          title: Text("Chat"),
+          title: const Text("Chat"),
           backgroundColor: model.appBarTheme == 1 ? Colors.transparent : null,
           elevation: model.appBarTheme == 1 ? 0 : null,
           actions: model.isAssetsLoaded
               ? <Widget>[
                   IconButton(
                     icon: model.showEmbed
-                        ? Icon(Icons.desktop_access_disabled)
-                        : Icon(Icons.desktop_windows),
+                        ? const Icon(Icons.desktop_access_disabled)
+                        : const Icon(Icons.desktop_windows),
                     onPressed: () => model.setShowEmbed(!model.showEmbed),
                   ),
                   PopupMenuButton<int>(
@@ -48,22 +47,22 @@ class _ChatViewState extends State<ChatView> {
                         : model.menuItemClick(selected),
                     itemBuilder: (BuildContext context) {
                       return [
-                        PopupMenuItem<int>(value: 0, child: Text('Settings')),
+                        const PopupMenuItem<int>(value: 0, child: Text('Settings')),
                         PopupMenuItem<int>(
                           value: 1,
                           child: Text(
                             model.isChatConnected ? 'Disconnect' : 'Reconnect',
                           ),
                         ),
-                        PopupMenuItem<int>(
+                        const PopupMenuItem<int>(
                           value: 2,
                           child: Text('Refresh emotes'),
                         ),
-                        PopupMenuItem<int>(
+                        const PopupMenuItem<int>(
                           value: 3,
                           child: Text('Open Destiny\'s steam'),
                         ),
-                        PopupMenuItem<int>(
+                        const PopupMenuItem<int>(
                           value: 4,
                           child: Text('Set Twitch stream'),
                         ),
@@ -79,8 +78,8 @@ class _ChatViewState extends State<ChatView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8),
+                      const Padding(
+                        padding: EdgeInsets.all(8),
                         child: CircularProgressIndicator(),
                       ),
                       Text(model.isAuthenticating
@@ -92,7 +91,7 @@ class _ChatViewState extends State<ChatView> {
               : Column(
                   children: [
                     Expanded(
-                      child: extendedNestedScrollView.NestedScrollView(
+                      child: extended_nested_scroll_view.NestedScrollView(
                         headerSliverBuilder:
                             (BuildContext context, bool? innerBoxIsScrolled) {
                           return <Widget>[
@@ -100,7 +99,7 @@ class _ChatViewState extends State<ChatView> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  ChatStreamEmbed(),
+                                  const ChatStreamEmbed(),
                                   model.currentVote == null
                                       ? Container()
                                       : ChatVote(model: model),
@@ -124,7 +123,7 @@ class _ChatViewState extends State<ChatView> {
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               color: Colors.red,
-                              child: Center(
+                              child: const Center(
                                 child: Text(
                                   "Chat paused, tap here to resume",
                                   textAlign: TextAlign.center,
@@ -140,7 +139,7 @@ class _ChatViewState extends State<ChatView> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Text("Reconnect"),
+                            child: const Text("Reconnect"),
                             onPressed: () => model.onReconnectButtonPressed(),
                           )
                         : Container(),

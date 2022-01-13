@@ -5,7 +5,7 @@ class EmoteWidget extends StatelessWidget {
   final Emote emote;
   final double emoteHeight;
 
-  EmoteWidget({
+  const EmoteWidget({
     Key? key,
     required this.emote,
     required this.emoteHeight,
@@ -17,7 +17,7 @@ class EmoteWidget extends StatelessWidget {
       return SizedBox(
         height: emoteHeight,
         width: emoteHeight,
-        child: CircularProgressIndicator(),
+        child: const CircularProgressIndicator(),
       );
     } else {
       if (emote.animated) {
@@ -26,7 +26,7 @@ class EmoteWidget extends StatelessWidget {
           emoteHeight: emoteHeight,
         );
       } else {
-        return Container(
+        return SizedBox(
           height: emoteHeight,
           child: emote.image,
         );
@@ -76,7 +76,7 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
     return AnimatedBuilder(
       animation: _animation,
       builder: (_, __) {
-        return Container(
+        return SizedBox(
           height: widget.emoteHeight,
           child: widget
               .emote.frames![_animation.value % widget.emote.frames!.length],
