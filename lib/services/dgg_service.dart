@@ -8,6 +8,7 @@ import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
+import 'package:dgg/datamodels/stream_status.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -28,6 +29,7 @@ class DggService {
   static const String emotesPath = r"/emotes/emotes.json";
   static const String emotesCssPath = r"/emotes/emotes.css";
   static const String historyPath = r"/api/chat/history";
+  static const String streamStatusPath = r"/api/info/stream";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
@@ -468,6 +470,22 @@ class DggService {
       return jsonDecode(response.body);
     } else {
       return [];
+    }
+  }
+
+  Future<StreamStatus> getStreamStatus() async {
+    final response = await http.get(Uri.https(dggBase, streamStatusPath));
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> json = jsonDecode(response.body);
+
+      return StreamStatus(
+        twitchLive: json["data"]["streams"]["twitch"]["live"],
+        youtubeLive: json["data"]["streams"]["youtube"]["live"],
+        youtubeId: json["data"]["streams"]["youtube"]["videoId"],
+      );
+    } else {
+      return const StreamStatus(twitchLive: false, youtubeLive: false);
     }
   }
 }

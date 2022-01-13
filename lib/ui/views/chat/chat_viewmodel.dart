@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
@@ -7,9 +6,9 @@ import 'package:dgg/datamodels/dgg_vote.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
+import 'package:dgg/datamodels/stream_status.dart';
 import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
-import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
 import 'package:flutter/scheduler.dart';
@@ -20,14 +19,12 @@ import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:http/http.dart' as http;
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
-  final _remoteConfigService = locator<RemoteConfigService>();
   final _navigationService = locator<NavigationService>();
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
@@ -513,91 +510,32 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<void> _getStreamStatus() async {
+    StreamStatus streamStatus = await _dggService.getStreamStatus();
+
     if (_sharedPreferencesService.getDefaultStream() == 0) {
       // Twitch is default
-      _getTwitchStreamStatus();
+      if (streamStatus.twitchLive) {
+        _showStreamPrompt = true;
+        _embedType = EmbedType.TWITCH_STREAM;
+        notifyListeners();
+      }
     } else {
       // YouTube is default
-      _getYouTubeStreamStatus();
-    }
-  }
-
-  Future<void> _getTwitchStreamStatus() async {
-    String twitchClientId = _remoteConfigService.getTwitchClientId();
-
-    if (twitchClientId.isNotEmpty) {
-      // Twitch api to check status of a channel
-      //    Hardcoded to Destiny's stream
-      final response = await http.get(
-        Uri.https("api.twitch.tv", "/kraken/streams/18074328"),
-        headers: {
-          'Accept': 'application/vnd.twitchtv.v5+json',
-          'Client-ID': twitchClientId,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> json = jsonDecode(response.body);
-
-        if (json['stream'] != null && !_showEmbed) {
-          // Stream is online
-          _showStreamPrompt = true;
-          _embedType = EmbedType.TWITCH_STREAM;
-          notifyListeners();
-        }
+      if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+        _currentEmbedId = streamStatus.youtubeId!;
+        _showStreamPrompt = true;
+        _embedType = EmbedType.YOUTUBE;
+        youtubePlayerController?.close();
+        youtubePlayerController = YoutubePlayerController(
+          initialVideoId: _currentEmbedId,
+          params: const YoutubePlayerParams(
+            autoPlay: true,
+            showControls: false,
+          ),
+        );
+        notifyListeners();
       }
     }
-  }
-
-  Future<void> _getYouTubeStreamStatus() async {
-    String? videoId = await _getYouTubeStreamId();
-
-    if (videoId != null && !_showEmbed) {
-      // Stream is online
-      _currentEmbedId = videoId;
-      _showStreamPrompt = true;
-      _embedType = EmbedType.YOUTUBE;
-      youtubePlayerController?.close();
-      youtubePlayerController = YoutubePlayerController(
-        initialVideoId: _currentEmbedId,
-        params: const YoutubePlayerParams(autoPlay: true, showControls: false),
-      );
-      notifyListeners();
-    }
-  }
-
-  Future<String?> _getYouTubeStreamId() async {
-    String youTubeApiKey = _remoteConfigService.getYouTubeApiKey();
-
-    if (youTubeApiKey.isNotEmpty) {
-      // YouTube api to get channel's live streams
-      //    Hardcoded to Destiny's channel
-      final response = await http.get(
-        Uri.https(
-          "youtube.googleapis.com",
-          "/youtube/v3/search",
-          {
-            "part": "snippet",
-            "channelId": "UC554eY5jNUfDq3yDOJYirOQ",
-            "eventType": "live",
-            "maxResults": "25",
-            "type": "video",
-            "key": youTubeApiKey,
-          },
-        ),
-        headers: {'Accept': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> json = jsonDecode(response.body);
-
-        if (json['items'] != null && json['items'].length > 0) {
-          return json['items'][0]['id']?['videoId'];
-        }
-      }
-    }
-
-    return null;
   }
 
   void setShowEmbed(bool value) {
@@ -742,12 +680,12 @@ class ChatViewModel extends BaseViewModel {
       setStreamChannelManual(["destiny"]);
     } else {
       // Open Destiny's stream on YouTube
-      String? streamId = await _getYouTubeStreamId();
-      if (streamId == null) {
+      StreamStatus streamStatus = await _dggService.getStreamStatus();
+      if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+        setEmbed(streamStatus.youtubeId!, "youtube");
+      } else {
         _snackbarService.showSnackbar(
             message: "Destiny's YouTube stream is offline");
-      } else {
-        setEmbed(streamId, "youtube");
       }
     }
   }

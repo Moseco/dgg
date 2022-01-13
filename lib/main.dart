@@ -1,4 +1,3 @@
-import 'package:dgg/services/remote_config_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,7 +21,6 @@ Future<void> main() async {
   setupLocator();
   await ThemeManager.initialise();
   await locator<SharedPreferencesService>().initialize();
-  await locator<RemoteConfigService>().initialize();
   setupBottomSheetUi();
   runApp(const App());
 }
