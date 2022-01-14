@@ -13,6 +13,8 @@ class ChatSizeViewModel extends BaseViewModel {
   bool get flairEnabled => _flairEnabled;
   double _flairSize = 1;
   double get flairSize => _flairSize;
+  bool _timestampEnabled = false;
+  bool get timestampEnabled => _timestampEnabled;
 
   double _textFontSize = 16;
   double get textFontSize => _textFontSize;
@@ -33,6 +35,7 @@ class ChatSizeViewModel extends BaseViewModel {
     _emoteSize = _sharedPreferencesService.getChatEmoteSize().toDouble();
     _flairEnabled = _sharedPreferencesService.getFlairEnabled();
     _flairSize = _sharedPreferencesService.getChatFlairSize().toDouble();
+    _timestampEnabled = _sharedPreferencesService.getTimestampEnabled();
     // Translate values
     _updateTextFontSize();
     _updateEmoteHeight();
@@ -110,12 +113,18 @@ class ChatSizeViewModel extends BaseViewModel {
     }
   }
 
+  void updateTimestampEnabled(bool value) {
+    _timestampEnabled = value;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _sharedPreferencesService.setChatTextSize(_textSize.toInt());
     _sharedPreferencesService.setChatEmoteSize(_emoteSize.toInt());
     _sharedPreferencesService.setFlairEnabled(_flairEnabled);
     _sharedPreferencesService.setChatFlairSize(_flairSize.toInt());
+    _sharedPreferencesService.setTimestampEnabled(_timestampEnabled);
     super.dispose();
   }
 }

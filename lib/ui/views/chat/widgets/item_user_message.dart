@@ -7,6 +7,7 @@ import 'package:dgg/ui/views/chat/widgets/emote_widget.dart';
 import 'package:dgg/ui/views/chat/widgets/flair_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ItemUserMessage extends StatelessWidget {
   final ChatViewModel model;
@@ -56,6 +57,19 @@ class ItemUserMessage extends StatelessWidget {
 
   List<InlineSpan> getMessageTextSpans(BuildContext context) {
     List<InlineSpan> textSpans = [];
+
+    // Add timestamp if enabled
+    if (model.timestampEnabled) {
+      textSpans.add(
+        TextSpan(
+          text: "${DateFormat.jm().format(message.timestamp)} ",
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
 
     // Add flairs if enabled
     if (flairEnabled) {

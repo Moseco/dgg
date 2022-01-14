@@ -93,6 +93,8 @@ class ChatViewModel extends BaseViewModel {
   bool get flairEnabled => _flairEnabled;
   double _flairHeight = 20;
   double get flairHeight => _flairHeight;
+  bool _timestampEnabled = false;
+  bool get timestampEnabled => _timestampEnabled;
 
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
@@ -713,6 +715,7 @@ class ChatViewModel extends BaseViewModel {
     int emoteSize = _sharedPreferencesService.getChatEmoteSize();
     _flairEnabled = _sharedPreferencesService.getFlairEnabled();
     int flairSize = _sharedPreferencesService.getChatFlairSize();
+    _timestampEnabled = _sharedPreferencesService.getTimestampEnabled();
     // Set text and icon size
     if (textSize == 0) {
       _textFontSize = 12;

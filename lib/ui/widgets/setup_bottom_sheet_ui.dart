@@ -1,4 +1,5 @@
 import 'package:dgg/app/app.locator.dart';
+import 'package:intl/intl.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
 
@@ -52,6 +53,26 @@ class _MessageActionBottomSheet extends StatelessWidget {
             Icons.reply,
             "Reply to ${request.customData.user.nick}",
             MessageActionSheetResponse.reply,
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(right: 24, top: 16, bottom: 16),
+                child: Icon(Icons.access_time, size: 24),
+              ),
+              Expanded(
+                child: Text(
+                  DateFormat.jm()
+                      .add_yMMMMd()
+                      .format(request.customData.timestamp),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

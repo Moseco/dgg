@@ -20,6 +20,7 @@ class UserMessage extends Message {
   final bool isGreenText;
   final bool isNsfw;
   final bool isNsfl;
+  final DateTime timestamp;
   bool isCensored;
 
   UserMessage({
@@ -33,6 +34,7 @@ class UserMessage extends Message {
     this.isGreenText = false,
     this.isNsfw = false,
     this.isNsfl = false,
+    required this.timestamp,
     this.isCensored = false,
   });
 
@@ -66,6 +68,7 @@ class UserMessage extends Message {
       isGreenText: isGreenText,
       isNsfw: isNsfw,
       isNsfl: isNsfl,
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
     );
   }
 

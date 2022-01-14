@@ -17,6 +17,7 @@ class SharedPreferencesService {
   static const String KEY_CHAT_FLAIR_ENABLED = "KEY_CHAT_FLAIR_ENABLED";
   static const String KEY_CHAT_FLAIR_SIZE = "KEY_CHAT_FLAIR_SIZE";
   static const String KEY_IN_APP_BROWSER_ENABLED = "KEY_IN_APP_BROWSER_ENABLED";
+  static const String KEY_CHAT_TIMESTAMP_ENABLED = "KEY_CHAT_TIMESTAMP_ENABLED";
 
   SharedPreferences? _sharedPreferences;
 
@@ -161,6 +162,14 @@ class SharedPreferencesService {
 
   Future<void> setInAppBrowserEnabled(bool value) async {
     await _sharedPreferences!.setBool(KEY_IN_APP_BROWSER_ENABLED, value);
+  }
+
+  bool getTimestampEnabled() {
+    return _sharedPreferences!.getBool(KEY_CHAT_TIMESTAMP_ENABLED) ?? false;
+  }
+
+  Future<void> setTimestampEnabled(bool value) async {
+    await _sharedPreferences!.setBool(KEY_CHAT_TIMESTAMP_ENABLED, value);
   }
 
   int getThemeIndex() {
