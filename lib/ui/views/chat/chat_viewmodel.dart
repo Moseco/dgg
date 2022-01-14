@@ -17,10 +17,12 @@ import 'package:flutter/widgets.dart';
 import 'package:stacked/stacked.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart' as url_launcher;
 import 'package:wakelock/wakelock.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart'
+    as flutter_custom_tabs;
 
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
@@ -631,8 +633,13 @@ class ChatViewModel extends BaseViewModel {
       urlToOpen = "https://" + url;
     }
 
-    if (await canLaunch(urlToOpen)) {
-      launch(urlToOpen);
+    if (await url_launcher.canLaunch(urlToOpen)) {
+      // Check if in-app browser option enabled
+      if (_sharedPreferencesService.getInAppBrowserEnabled()) {
+        flutter_custom_tabs.launch(urlToOpen);
+      } else {
+        url_launcher.launch(urlToOpen);
+      }
     } else {
       _snackbarService.showSnackbar(
         message: "Could not open url. Copied to clipboard",

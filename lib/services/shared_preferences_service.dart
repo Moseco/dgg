@@ -16,6 +16,7 @@ class SharedPreferencesService {
   static const String KEY_CACHE_VERSION = "KEY_CACHE_VERSION";
   static const String KEY_CHAT_FLAIR_ENABLED = "KEY_CHAT_FLAIR_ENABLED";
   static const String KEY_CHAT_FLAIR_SIZE = "KEY_CHAT_FLAIR_SIZE";
+  static const String KEY_IN_APP_BROWSER_ENABLED = "KEY_IN_APP_BROWSER_ENABLED";
 
   SharedPreferences? _sharedPreferences;
 
@@ -152,6 +153,14 @@ class SharedPreferencesService {
 
   Future<void> setChatFlairSize(int value) async {
     await _sharedPreferences!.setInt(KEY_CHAT_FLAIR_SIZE, value);
+  }
+
+  bool getInAppBrowserEnabled() {
+    return _sharedPreferences!.getBool(KEY_IN_APP_BROWSER_ENABLED) ?? true;
+  }
+
+  Future<void> setInAppBrowserEnabled(bool value) async {
+    await _sharedPreferences!.setBool(KEY_IN_APP_BROWSER_ENABLED, value);
   }
 
   int getThemeIndex() {

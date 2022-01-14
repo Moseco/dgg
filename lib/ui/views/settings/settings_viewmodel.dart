@@ -30,6 +30,8 @@ class SettingsViewModel extends BaseViewModel {
   int get appBarTheme => _appBarTheme;
   int _defaultStream = 0;
   int get defaultStream => _defaultStream;
+  bool _isInAppBrowserEnabled = true;
+  bool get isInAppBrowserEnabled => _isInAppBrowserEnabled;
 
   void initialize() {
     _isAnalyticsEnabled = _sharedPreferencesService.getAnalyticsEnabled();
@@ -37,6 +39,7 @@ class SettingsViewModel extends BaseViewModel {
     _themeIndex = _sharedPreferencesService.getThemeIndex();
     _appBarTheme = _sharedPreferencesService.getAppBarTheme();
     _defaultStream = _sharedPreferencesService.getDefaultStream();
+    _isInAppBrowserEnabled = _sharedPreferencesService.getInAppBrowserEnabled();
     notifyListeners();
   }
 
@@ -67,14 +70,14 @@ class SettingsViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> toggleAnalyticsCollection(bool value) async {
+  void toggleAnalyticsCollection(bool value) {
     FirebaseAnalytics().setAnalyticsCollectionEnabled(value);
     _sharedPreferencesService.setAnalyticsEnabled(value);
     _isAnalyticsEnabled = value;
     notifyListeners();
   }
 
-  Future<void> toggleWakelockEnabled(bool value) async {
+  void toggleWakelockEnabled(bool value) {
     _sharedPreferencesService.setWakelockEnabled(value);
     _isWakelockEnabled = value;
     notifyListeners();
@@ -100,5 +103,15 @@ class SettingsViewModel extends BaseViewModel {
 
   void navigateToChatSize() {
     _navigationService.navigateTo(Routes.chatSizeView);
+  }
+
+  void toggleInAppBrowserEnabled(bool value) {
+    _sharedPreferencesService.setInAppBrowserEnabled(value);
+    _isInAppBrowserEnabled = value;
+    notifyListeners();
+  }
+
+  void openGitHub() {
+    launch(r"https://github.com/Moseco/dgg");
   }
 }

@@ -13,11 +13,12 @@ class SettingsView extends StatelessWidget {
       viewModelBuilder: () => SettingsViewModel(),
       onModelReady: (model) => model.initialize(),
       fireOnModelReadyOnce: true,
-      builder: (context, model, child) => Scaffold(
+      builder: (context, viewModel, child) => Scaffold(
         appBar: AppBar(
           title: const Text("Settings"),
-          backgroundColor: model.appBarTheme == 1 ? Colors.transparent : null,
-          elevation: model.appBarTheme == 1 ? 0 : null,
+          backgroundColor:
+              viewModel.appBarTheme == 1 ? Colors.transparent : null,
+          elevation: viewModel.appBarTheme == 1 ? 0 : null,
         ),
         body: SettingsList(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -26,19 +27,20 @@ class SettingsView extends StatelessWidget {
               title: 'Account',
               titlePadding: const EdgeInsets.only(
                   left: 15, right: 15, top: 15, bottom: 6),
-              tiles: model.isSignedIn
+              tiles: viewModel.isSignedIn
                   ? [
                       SettingsTile(
                         title: 'Account info',
-                        subtitle: model.username,
+                        subtitle: viewModel.username,
                         leading: const Icon(Icons.account_circle),
                         onPressed: (BuildContext context) =>
-                            model.openProfile(),
+                            viewModel.openProfile(),
                       ),
                       SettingsTile(
                         title: 'Sign out',
                         leading: const Icon(Icons.logout),
-                        onPressed: (BuildContext context) => model.signOut(),
+                        onPressed: (BuildContext context) =>
+                            viewModel.signOut(),
                       ),
                     ]
                   : [
@@ -46,7 +48,7 @@ class SettingsView extends StatelessWidget {
                         title: 'Sign in',
                         leading: const Icon(Icons.account_circle),
                         onPressed: (BuildContext context) =>
-                            model.navigateToAuth(),
+                            viewModel.navigateToAuth(),
                       ),
                     ],
             ),
@@ -57,13 +59,13 @@ class SettingsView extends StatelessWidget {
                   title: 'Select app theme',
                   leading: const Icon(Icons.color_lens),
                   onPressed: (BuildContext context) =>
-                      _showThemeDialog(context, model),
+                      _showThemeDialog(context, viewModel),
                 ),
                 SettingsTile(
                   title: 'Select app bar theme',
                   leading: const Icon(Icons.line_style),
                   onPressed: (BuildContext context) =>
-                      _showAppBarThemeDialog(context, model),
+                      _showAppBarThemeDialog(context, viewModel),
                 ),
               ],
             ),
@@ -76,20 +78,27 @@ class SettingsView extends StatelessWidget {
                   subtitleMaxLines: 2,
                   leading: const Icon(Icons.lightbulb),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
-                  switchValue: model.isWakelockEnabled,
-                  onToggle: model.toggleWakelockEnabled,
+                  switchValue: viewModel.isWakelockEnabled,
+                  onToggle: viewModel.toggleWakelockEnabled,
                 ),
                 SettingsTile(
                   title: 'Set default stream platform',
                   leading: const Icon(Icons.desktop_windows),
                   onPressed: (BuildContext context) =>
-                      _showDefaultStreamDialog(context, model),
+                      _showDefaultStreamDialog(context, viewModel),
                 ),
                 SettingsTile(
                   title: 'Customize chat style',
                   leading: const Icon(Icons.format_size),
                   onPressed: (BuildContext context) =>
-                      model.navigateToChatSize(),
+                      viewModel.navigateToChatSize(),
+                ),
+                SettingsTile.switchTile(
+                  title: 'Use in-app browser',
+                  leading: const Icon(Icons.open_in_browser),
+                  switchActiveColor: Theme.of(context).colorScheme.primary,
+                  switchValue: viewModel.isInAppBrowserEnabled,
+                  onToggle: viewModel.toggleInAppBrowserEnabled,
                 ),
               ],
             ),
@@ -100,15 +109,15 @@ class SettingsView extends StatelessWidget {
                   title: 'Send crash reports',
                   leading: const Icon(Icons.bug_report),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
-                  switchValue: model.isCrashlyticsCollectionEnabled,
-                  onToggle: model.toggleCrashlyticsCollection,
+                  switchValue: viewModel.isCrashlyticsCollectionEnabled,
+                  onToggle: viewModel.toggleCrashlyticsCollection,
                 ),
                 SettingsTile.switchTile(
                   title: 'Analytics collection',
                   leading: const Icon(Icons.analytics),
                   switchActiveColor: Theme.of(context).colorScheme.primary,
-                  switchValue: model.isAnalyticsEnabled,
-                  onToggle: model.toggleAnalyticsCollection,
+                  switchValue: viewModel.isAnalyticsEnabled,
+                  onToggle: viewModel.toggleAnalyticsCollection,
                 ),
               ],
             ),
@@ -119,7 +128,13 @@ class SettingsView extends StatelessWidget {
                   title: 'Submit feedback',
                   subtitle: 'Opens Google Form',
                   leading: const Icon(Icons.feedback),
-                  onPressed: (BuildContext context) => model.openFeedback(),
+                  onPressed: (BuildContext context) => viewModel.openFeedback(),
+                ),
+                SettingsTile(
+                  title: 'Source code',
+                  subtitle: 'See the code on GitHub',
+                  leading: const Icon(Icons.code),
+                  onPressed: (BuildContext context) => viewModel.openGitHub(),
                 ),
                 SettingsTile(
                   title: 'About',
