@@ -17,6 +17,7 @@ dependencies:
   stacked: ^2.2.7+1
   stacked_services: ^0.8.16
   stacked_themes: ^0.3.8+1
+  stacked_hooks: ^0.2.1+1
 
   # Firebase
   firebase_core: ^1.0.3
@@ -44,6 +45,7 @@ dependencies:
   youtube_player_iframe: ^2.0.0
   flutter_cache_manager: ^3.1.1
   intl: ^0.17.0
+  flutter_hooks: ^0.17.0
 
 dev_dependencies:
   flutter_test:

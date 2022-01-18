@@ -357,11 +357,11 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> menuItemClick(int selected) async {
+  Future<void> menuItemClick(AppBarActions selected) async {
     switch (selected) {
-      case 0:
+      case AppBarActions.SETTINGS:
         // Navigate to settings
-        //    Disconnect chat/turn off wakelock while in settings
+        // Disconnect chat/turn off wakelock while in settings
         if (_sharedPreferencesService.getWakelockEnabled()) {
           Wakelock.disable();
         }
@@ -374,7 +374,7 @@ class ChatViewModel extends BaseViewModel {
         }
         _connectChat();
         break;
-      case 1:
+      case AppBarActions.CONNECTION:
         // Disconnect or reconnect
         if (_isChatConnected) {
           _disconnectChat();
@@ -382,7 +382,7 @@ class ChatViewModel extends BaseViewModel {
           _connectChat();
         }
         break;
-      case 2:
+      case AppBarActions.REFRESH:
         // Refresh assets
         // First disconnect from chat
         await _disconnectChat();
@@ -394,7 +394,7 @@ class ChatViewModel extends BaseViewModel {
         // Re-open chat
         _connectChat();
         break;
-      case 3:
+      case AppBarActions.OPEN_DESTINY_STREAM:
         _openDestinyStream();
         break;
       default:
@@ -778,4 +778,12 @@ enum EmbedType {
   TWITCH_VOD,
   TWITCH_CLIP,
   YOUTUBE,
+}
+
+enum AppBarActions {
+  SETTINGS,
+  CONNECTION,
+  REFRESH,
+  OPEN_DESTINY_STREAM,
+  OPEN_TWITCH_STREAM,
 }

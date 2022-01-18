@@ -41,8 +41,11 @@ class StackedRouter extends RouterBase {
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
   final _pagesMap = <Type, StackedRouteFactory>{
     ChatView: (data) {
+      var args = data.getArgs<ChatViewArguments>(
+        orElse: () => ChatViewArguments(),
+      );
       return MaterialPageRoute<dynamic>(
-        builder: (context) => const ChatView(),
+        builder: (context) => ChatView(key: args.key),
         settings: data,
       );
     },
@@ -71,4 +74,14 @@ class StackedRouter extends RouterBase {
       );
     },
   };
+}
+
+/// ************************************************************************
+/// Arguments holder classes
+/// *************************************************************************
+
+/// ChatView arguments holder class
+class ChatViewArguments {
+  final Key? key;
+  ChatViewArguments({this.key});
 }
