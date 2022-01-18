@@ -89,7 +89,7 @@ class ChatVote extends StatelessWidget {
                           style: const TextStyle(color: Colors.black),
                         ),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        progressColor: Theme.of(context).primaryColor,
+                        progressColor: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],

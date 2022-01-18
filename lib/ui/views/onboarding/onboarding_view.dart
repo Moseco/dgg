@@ -52,7 +52,7 @@ class OnboardingView extends StatelessWidget {
             ),
           ],
           dotsDecorator: DotsDecorator(
-            activeColor: Theme.of(context).primaryColor,
+            activeColor: Theme.of(context).colorScheme.primary,
           ),
           done: const Text(
             "Done",
@@ -84,7 +84,7 @@ class OnboardingView extends StatelessWidget {
             ),
             Switch(
               value: model.isAnalyticsEnabled,
-              activeColor: Theme.of(context).primaryColor,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: model.toggleAnalyticsCollection,
             ),
           ],
@@ -100,7 +100,7 @@ class OnboardingView extends StatelessWidget {
             ),
             Switch(
               value: model.isCrashlyticsCollectionEnabled,
-              activeColor: Theme.of(context).primaryColor,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: model.toggleCrashlyticsCollection,
             ),
           ],
@@ -118,7 +118,7 @@ class OnboardingView extends StatelessWidget {
     } else {
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
-          primary: Theme.of(context).primaryColor,
+          primary: Theme.of(context).colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

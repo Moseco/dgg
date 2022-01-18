@@ -161,7 +161,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("Default"),
                 value: 0,
                 groupValue: model.themeIndex,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setTheme(value!);
                   Navigator.of(c).pop();
@@ -171,7 +171,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("True black"),
                 value: 1,
                 groupValue: model.themeIndex,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setTheme(value!);
                   Navigator.of(c).pop();
@@ -202,7 +202,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("Default"),
                 value: 0,
                 groupValue: model.appBarTheme,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setAppBarTheme(value!);
                   Navigator.of(c).pop();
@@ -212,7 +212,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("Match background"),
                 value: 1,
                 groupValue: model.appBarTheme,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setAppBarTheme(value!);
                   Navigator.of(c).pop();
@@ -243,7 +243,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("Twitch"),
                 value: 0,
                 groupValue: model.defaultStream,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setDefaultStream(value!);
                   Navigator.of(c).pop();
@@ -253,7 +253,7 @@ class SettingsView extends StatelessWidget {
                 title: const Text("YouTube"),
                 value: 1,
                 groupValue: model.defaultStream,
-                activeColor: Theme.of(context).primaryColor,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setDefaultStream(value!);
                   Navigator.of(c).pop();
