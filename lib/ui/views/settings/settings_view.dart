@@ -138,7 +138,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   title: 'About',
-                  subtitle: 'App version: 0.9.2',
+                  subtitle: 'App version: 0.10.0',
                   leading: const Icon(Icons.info),
                 ),
               ],

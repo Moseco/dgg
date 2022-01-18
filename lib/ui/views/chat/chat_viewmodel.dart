@@ -704,8 +704,7 @@ class ChatViewModel extends BaseViewModel {
     if (showChangelog) {
       _dialogService.showDialog(
         title: "What's new",
-        description:
-            "•Fixed a bug that caused the app to get stuck when initially loading assets.\n•Fixed a bug that caused messages with certain characters to not be sent.\n•Messages with commands are now verified before sending. This was added to prevent users from accidentally leaking private information using unimplemented commands.",
+        description: "• Added the option to use an in-app browser for links opened in chat.\n• Added an option to show message timestamps. You can turn it on in the chat style settings.\n• Landscape mode is now officially supported. Better support for large devices like tablets coming soon.",
       );
     }
   }
