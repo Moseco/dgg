@@ -63,7 +63,7 @@ class AuthViewModel extends BaseViewModel {
     _isSavingAuth = true;
     notifyListeners();
     ClipboardData? data = await Clipboard.getData('text/plain');
-    String? loginKey = data?.text;
+    String? loginKey = data?.text?.trim();
 
     if (loginKey != null && loginKey.isNotEmpty) {
       _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));
@@ -72,6 +72,17 @@ class AuthViewModel extends BaseViewModel {
       _isSavingAuth = false;
       _isClipboardError = true;
       notifyListeners();
+    }
+  }
+
+  Future<void> loginKeySubmitted(String value) async {
+    String loginKey = value.trim();
+
+    if (loginKey.isNotEmpty) {
+      _isSavingAuth = true;
+      notifyListeners();
+      _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));
+      _getSessionInfo();
     }
   }
 

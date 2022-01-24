@@ -11,7 +11,7 @@ class OnboardingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<OnboardingViewModel>.reactive(
       viewModelBuilder: () => OnboardingViewModel(),
-      builder: (context, model, child) => Scaffold(
+      builder: (context, viewModel, child) => Scaffold(
         body: IntroductionScreen(
           pages: <PageViewModel>[
             PageViewModel(
@@ -35,11 +35,47 @@ class OnboardingView extends StatelessWidget {
                   size: 200,
                 ),
               ),
-              footer: _buildAnalyticsSwitches(context, model),
+              footer: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "Analytics collection",
+                          maxLines: 1,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      Switch(
+                        value: viewModel.isAnalyticsEnabled,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        onChanged: viewModel.toggleAnalyticsCollection,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "Send crash reports",
+                          maxLines: 1,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                      Switch(
+                        value: viewModel.isCrashlyticsCollectionEnabled,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        onChanged: viewModel.toggleCrashlyticsCollection,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             PageViewModel(
-              title: model.isSignedIn ? "You are ready to go!" : "Final Thing",
-              body: model.isSignedIn
+              title:
+                  viewModel.isSignedIn ? "You are ready to go!" : "Final Thing",
+              body: viewModel.isSignedIn
                   ? ""
                   : "To send messages in chat you must sign in, if you want to you can do that now. If not, you can always do it later in the settings.",
               image: const Center(
@@ -48,7 +84,21 @@ class OnboardingView extends StatelessWidget {
                   size: 200,
                 ),
               ),
-              footer: _buildSigninButton(context, model),
+              footer: viewModel.isSignedIn
+                  ? Text(
+                      "Signed in as: ${viewModel.nickname}",
+                      textAlign: TextAlign.center,
+                    )
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text("Sign in"),
+                      onPressed: () => viewModel.navigateToAuth(),
+                    ),
             ),
           ],
           dotsDecorator: DotsDecorator(
@@ -60,72 +110,12 @@ class OnboardingView extends StatelessWidget {
           ),
           skip: const Text("Skip", style: TextStyle(color: Colors.white)),
           next: const Text("Next"),
-          onDone: model.finishOnboarding,
-          onSkip: model.finishOnboarding,
+          onDone: viewModel.finishOnboarding,
+          onSkip: viewModel.finishOnboarding,
           showNextButton: true,
           showSkipButton: true,
         ),
       ),
     );
-  }
-
-  Widget _buildAnalyticsSwitches(
-      BuildContext context, OnboardingViewModel model) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                "Analytics collection",
-                maxLines: 1,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Switch(
-              value: model.isAnalyticsEnabled,
-              activeColor: Theme.of(context).colorScheme.primary,
-              onChanged: model.toggleAnalyticsCollection,
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                "Send crash reports",
-                maxLines: 1,
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-            Switch(
-              value: model.isCrashlyticsCollectionEnabled,
-              activeColor: Theme.of(context).colorScheme.primary,
-              onChanged: model.toggleCrashlyticsCollection,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSigninButton(BuildContext context, OnboardingViewModel model) {
-    if (model.isSignedIn) {
-      return Text(
-        "Signed in as: ${model.nickname}",
-        textAlign: TextAlign.center,
-      );
-    } else {
-      return ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          primary: Theme.of(context).colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: const Text("Sign in"),
-        onPressed: () => model.navigateToAuth(),
-      );
-    }
   }
 }
