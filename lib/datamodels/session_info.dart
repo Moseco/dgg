@@ -49,8 +49,9 @@ class Available extends SessionInfo {
 
 class Unavailable extends SessionInfo {
   final int? httpStatusCode;
+  final bool usedToken;
 
-  const Unavailable({this.httpStatusCode});
+  const Unavailable({this.httpStatusCode, this.usedToken = false});
 }
 
 class Unauthenticated extends SessionInfo {}

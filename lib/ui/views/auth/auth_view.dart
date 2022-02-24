@@ -1,3 +1,4 @@
+import 'package:dgg/datamodels/session_info.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -102,19 +103,20 @@ class _AuthMethod extends ViewModelWidget<AuthViewModel> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(8),
-                child: Text("Failed to verify login information with dgg."),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+              const Text("Failed to verify login information with dgg."),
+              _AuthErrorText(viewModel.sessionInfo as Unavailable),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
+                  child: const Text("Try again"),
+                  onPressed: () => viewModel.restartAuth(),
                 ),
-                child: const Text("Try again"),
-                onPressed: () => viewModel.restartAuth(),
               ),
             ],
           ),
@@ -139,6 +141,36 @@ class _AuthMethod extends ViewModelWidget<AuthViewModel> {
       } else {
         return const AuthLoginKey();
       }
+    }
+  }
+}
+
+class _AuthErrorText extends StatelessWidget {
+  final Unavailable unavailable;
+
+  const _AuthErrorText(this.unavailable, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (unavailable.usedToken) {
+      late String text;
+      switch (unavailable.httpStatusCode) {
+        case 500:
+          text = "Login key is missing. Make sure you entered it correctly.";
+          break;
+        case 400:
+          text = "Invalid login key. Make sure you entered it correctly.";
+          break;
+        case 403:
+          text = "Login key has expired. Make a new one and try again.";
+          break;
+        default:
+          text = "Something unexpected went wrong.";
+          break;
+      }
+      return Text(text, style: const TextStyle(color: Colors.red));
+    } else {
+      return Container();
     }
   }
 }

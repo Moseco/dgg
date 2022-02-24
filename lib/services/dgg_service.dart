@@ -86,17 +86,26 @@ class DggService {
           : null,
     );
 
+    Map<String, dynamic> json = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      if (response.body.startsWith('{"error"')) {
-        //Token is not valid, or some other error
-        _sessionInfo = const Unavailable();
+      // We can get status code 200 but still have an error, confirm first
+      if (json.containsKey("code") && json["code"] != 200) {
+        _sessionInfo = Unavailable(
+          httpStatusCode: json["code"],
+          usedToken: _authInfo!.loginKey != null,
+        );
+      } else if (json.containsKey("error")) {
+        _sessionInfo = Unavailable(usedToken: _authInfo!.loginKey != null);
       } else {
-        //token or sid is valid
+        // Token or sid is valid
         _sessionInfo = Available.fromJson(response.body);
         _currentNick = (_sessionInfo as Available).nick;
       }
     } else {
-      _sessionInfo = Unavailable(httpStatusCode: response.statusCode);
+      _sessionInfo = Unavailable(
+        httpStatusCode: json["code"],
+        usedToken: _authInfo!.loginKey != null,
+      );
     }
   }
 

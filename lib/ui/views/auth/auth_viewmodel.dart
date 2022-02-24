@@ -1,4 +1,5 @@
 import 'package:dgg/app/app.locator.dart';
+import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:flutter/services.dart';
@@ -33,6 +34,8 @@ class AuthViewModel extends BaseViewModel {
   bool _isClipboardError = false;
   bool get isClipboardError => _isClipboardError;
 
+  SessionInfo? get sessionInfo => _dggService.sessionInfo;
+
   void setAuthMethod(int? method) {
     _authMethod = method;
     notifyListeners();
@@ -54,7 +57,7 @@ class AuthViewModel extends BaseViewModel {
     if (authInfo != null) {
       _isSavingAuth = true;
       notifyListeners();
-      _sharedPreferencesService.storeAuthInfo(authInfo);
+      await _sharedPreferencesService.storeAuthInfo(authInfo);
       _getSessionInfo();
     }
   }
@@ -66,7 +69,8 @@ class AuthViewModel extends BaseViewModel {
     String? loginKey = data?.text?.trim();
 
     if (loginKey != null && loginKey.isNotEmpty) {
-      _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));
+      await _sharedPreferencesService
+          .storeAuthInfo(AuthInfo(loginKey: loginKey));
       _getSessionInfo();
     } else {
       _isSavingAuth = false;
@@ -81,7 +85,8 @@ class AuthViewModel extends BaseViewModel {
     if (loginKey.isNotEmpty) {
       _isSavingAuth = true;
       notifyListeners();
-      _sharedPreferencesService.storeAuthInfo(AuthInfo(loginKey: loginKey));
+      await _sharedPreferencesService
+          .storeAuthInfo(AuthInfo(loginKey: loginKey));
       _getSessionInfo();
     }
   }
@@ -93,7 +98,7 @@ class AuthViewModel extends BaseViewModel {
       _navigationService.back();
     } else {
       //Verification failed
-      _dggService.signOut();
+      _sharedPreferencesService.clearAuthInfo();
       _isVerifyFailed = true;
       notifyListeners();
     }
