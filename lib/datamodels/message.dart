@@ -51,7 +51,9 @@ class UserMessage extends Message {
     User user = User.fromJson(map);
 
     // Check message contents for how message is displayed
-    bool isMentioned = data.contains(RegExp("(\\@?)\\b$currentNick\\b"));
+    bool isMentioned = currentNick != null
+        ? data.contains(RegExp("(\\@?)\\b$currentNick\\b"))
+        : false;
     bool isOwn = user.nick == currentNick;
     bool isGreenText = data.startsWith('>');
     bool isNsfw = data.contains(RegExp("\\bnsfw\\b", caseSensitive: false));
