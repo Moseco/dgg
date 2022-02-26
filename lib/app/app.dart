@@ -17,6 +17,7 @@ import 'package:stacked_themes/stacked_themes.dart';
     MaterialRoute(page: SettingsView),
     MaterialRoute(page: OnboardingView),
     MaterialRoute(page: ChatSizeView),
+    MaterialRoute(page: IgnoreListView),
   ],
   dependencies: [
     LazySingleton(classType: CookieManagerService),

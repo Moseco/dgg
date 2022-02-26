@@ -96,6 +96,8 @@ class ChatViewModel extends BaseViewModel {
   bool _timestampEnabled = false;
   bool get timestampEnabled => _timestampEnabled;
 
+  late List<String> _ignoreList;
+
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
       SchedulerBinding.instance?.addPostFrameCallback(
@@ -107,6 +109,7 @@ class ChatViewModel extends BaseViewModel {
     }
     _appBarTheme = _sharedPreferencesService.getAppBarTheme();
     _setChatSize();
+    _ignoreList = _sharedPreferencesService.getIgnoreList();
     notifyListeners();
     await _getSessionInfo();
     _getStreamStatus();
@@ -231,8 +234,10 @@ class ChatViewModel extends BaseViewModel {
           }
         }
 
-        //Add message normally
-        _messages.add(userMessage);
+        // Check if user is in ignore list before adding
+        if (!_ignoreList.contains(userMessage.user.nick)) {
+          _messages.add(userMessage);
+        }
         break;
       case JoinMessage:
         _users.add((currentMessage as JoinMessage).user);
@@ -372,6 +377,7 @@ class ChatViewModel extends BaseViewModel {
         if (_sharedPreferencesService.getWakelockEnabled()) {
           Wakelock.enable();
         }
+        _ignoreList = _sharedPreferencesService.getIgnoreList();
         _connectChat();
         break;
       case AppBarActions.CONNECTION:
@@ -670,6 +676,25 @@ class ChatViewModel extends BaseViewModel {
           chatInputController.selection =
               TextSelection.fromPosition(TextPosition(offset: newDraft.length));
           break;
+        case MessageActionSheetResponse.ignore:
+          // Make sure user is not already in the list
+          if (!_ignoreList.contains(message!.user.nick)) {
+            // Add to ignore list
+            _ignoreList.add(message.user.nick);
+            _sharedPreferencesService.setIgnoreList(_ignoreList);
+            // Remove newly ignored user's messages from the chat
+            for (int i = 0; i < _messages.length; i++) {
+              if (_messages[i] is UserMessage &&
+                  (_messages[i] as UserMessage).user.nick ==
+                      message.user.nick) {
+                _messages.removeAt(i);
+                i--;
+              }
+            }
+            notifyListeners();
+          }
+
+          break;
         default:
           break;
       }
@@ -704,7 +729,8 @@ class ChatViewModel extends BaseViewModel {
     if (showChangelog) {
       _dialogService.showDialog(
         title: "What's new",
-        description: "• Added the option to use an in-app browser for links opened in chat.\n• Added an option to show message timestamps. You can turn it on in the chat style settings.\n• Landscape mode is now officially supported. Better support for large devices like tablets coming soon.",
+        description:
+            "• Added the option to use an in-app browser for links opened in chat.\n• Added an option to show message timestamps. You can turn it on in the chat style settings.\n• Landscape mode is now officially supported. Better support for large devices like tablets coming soon.",
       );
     }
   }

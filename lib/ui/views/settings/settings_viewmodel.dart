@@ -105,6 +105,10 @@ class SettingsViewModel extends BaseViewModel {
     _navigationService.navigateTo(Routes.chatSizeView);
   }
 
+  void navigateToIgnoreList() {
+    _navigationService.navigateTo(Routes.ignoreListView);
+  }
+
   void toggleInAppBrowserEnabled(bool value) {
     _sharedPreferencesService.setInAppBrowserEnabled(value);
     _isInAppBrowserEnabled = value;

@@ -18,6 +18,7 @@ class SharedPreferencesService {
   static const String KEY_CHAT_FLAIR_SIZE = "KEY_CHAT_FLAIR_SIZE";
   static const String KEY_IN_APP_BROWSER_ENABLED = "KEY_IN_APP_BROWSER_ENABLED";
   static const String KEY_CHAT_TIMESTAMP_ENABLED = "KEY_CHAT_TIMESTAMP_ENABLED";
+  static const String KEY_IGNORE_LIST = "KEY_IGNORE_LIST";
 
   SharedPreferences? _sharedPreferences;
 
@@ -170,6 +171,14 @@ class SharedPreferencesService {
 
   Future<void> setTimestampEnabled(bool value) async {
     await _sharedPreferences!.setBool(KEY_CHAT_TIMESTAMP_ENABLED, value);
+  }
+
+  List<String> getIgnoreList() {
+    return _sharedPreferences!.getStringList(KEY_IGNORE_LIST) ?? [];
+  }
+
+  Future<void> setIgnoreList(List<String> ignoreList) async {
+    await _sharedPreferences!.setStringList(KEY_IGNORE_LIST, ignoreList);
   }
 
   int getThemeIndex() {

@@ -18,12 +18,14 @@ class Routes {
   static const String settingsView = '/settings-view';
   static const String onboardingView = '/onboarding-view';
   static const String chatSizeView = '/chat-size-view';
+  static const String ignoreListView = '/ignore-list-view';
   static const all = <String>{
     chatView,
     authView,
     settingsView,
     onboardingView,
     chatSizeView,
+    ignoreListView,
   };
 }
 
@@ -36,6 +38,7 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.settingsView, page: SettingsView),
     RouteDef(Routes.onboardingView, page: OnboardingView),
     RouteDef(Routes.chatSizeView, page: ChatSizeView),
+    RouteDef(Routes.ignoreListView, page: IgnoreListView),
   ];
   @override
   Map<Type, StackedRouteFactory> get pagesMap => _pagesMap;
@@ -70,6 +73,12 @@ class StackedRouter extends RouterBase {
     ChatSizeView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => const ChatSizeView(),
+        settings: data,
+      );
+    },
+    IgnoreListView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => const IgnoreListView(),
         settings: data,
       );
     },

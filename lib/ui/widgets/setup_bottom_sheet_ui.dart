@@ -10,6 +10,7 @@ enum BottomSheetType {
 enum MessageActionSheetResponse {
   copy,
   reply,
+  ignore,
 }
 
 void setupBottomSheetUi() {
@@ -53,6 +54,11 @@ class _MessageActionBottomSheet extends StatelessWidget {
             Icons.reply,
             "Reply to ${request.customData.user.nick}",
             MessageActionSheetResponse.reply,
+          ),
+          _buildItem(
+            Icons.person_off,
+            "Ignore ${request.customData.user.nick}",
+            MessageActionSheetResponse.ignore,
           ),
           Row(
             mainAxisSize: MainAxisSize.max,

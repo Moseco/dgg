@@ -100,6 +100,12 @@ class SettingsView extends StatelessWidget {
                   switchValue: viewModel.isInAppBrowserEnabled,
                   onToggle: viewModel.toggleInAppBrowserEnabled,
                 ),
+                SettingsTile(
+                  title: 'Open ignore list',
+                  leading: const Icon(Icons.person_off),
+                  onPressed: (BuildContext context) =>
+                      viewModel.navigateToIgnoreList(),
+                ),
               ],
             ),
             SettingsSection(
