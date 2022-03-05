@@ -98,6 +98,10 @@ class ChatViewModel extends BaseViewModel {
 
   late List<String> _ignoreList;
 
+  bool _showEmoteSelector = false;
+  bool get showEmoteSelector => _showEmoteSelector;
+  List<Emote>? emoteSelectorList;
+
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
       SchedulerBinding.instance?.addPostFrameCallback(
@@ -783,6 +787,36 @@ class ChatViewModel extends BaseViewModel {
       // User wants to send the message anyway
       sendChatMessage(commandCheck: false);
     }
+  }
+
+  void toggleEmoteSelector() {
+    _showEmoteSelector = !_showEmoteSelector;
+    notifyListeners();
+    // Load all emotes if not all already loaded
+    if (emoteSelectorList == null) {
+      emoteSelectorList = _dggService.emotes.emoteMap.values.toList();
+      for (var emote in emoteSelectorList!) {
+        if (!emote.loading && emote.image == null) {
+          _loadEmote(emote);
+        }
+      }
+    }
+  }
+
+  void emoteSelected(int index) {
+    late String newDraft;
+    if (_draft.endsWith(" ") || _draft.isEmpty) {
+      // Draft ends with space or is empty, just append emote name
+      newDraft = _draft + emoteSelectorList![index].name + " ";
+    } else {
+      // Draft does not end with a space and is not empty, add emote name with spaces
+      newDraft = _draft + " " + emoteSelectorList![index].name + " ";
+    }
+
+    updateChatDraft(newDraft);
+    chatInputController.text = newDraft;
+    chatInputController.selection =
+        TextSelection.fromPosition(TextPosition(offset: newDraft.length));
   }
 
   @override

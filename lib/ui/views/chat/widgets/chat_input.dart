@@ -89,6 +89,13 @@ class ChatInput extends StatelessWidget {
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         hintText: 'Type a message...',
+        prefixIcon: IconButton(
+          icon: const Icon(
+            Icons.emoji_emotions,
+            color: Colors.grey,
+          ),
+          onPressed: model.toggleEmoteSelector,
+        ),
         suffixIcon: IconButton(
           icon: const Icon(Icons.send),
           onPressed: model.isChatConnected && model.draft.isNotEmpty

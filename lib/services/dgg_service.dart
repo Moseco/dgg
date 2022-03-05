@@ -363,44 +363,34 @@ class DggService {
     _assetsLoaded = false;
   }
 
-  Future<void> loadEmote(Emote emote) async {
+  Future<void> loadEmote(Emote emote, {bool fromQueue = false}) async {
+    bool loaded = false;
     // Check if emote has already been loaded before trying to load it
     if (emote.image == null) {
+      // Set loading to true for current emote so additional copies are not put in the queue
+      emote.loading = true;
       if (_loadingEmote) {
         // Another emote is already being loaded, add current to the queue
         _emoteLoadQueue.add(emote);
       } else {
         // Load emote
         _loadingEmote = true;
-
-        emote.loading = true;
         emote.image = await _imageService.loadAndProcessEmote(emote);
-        // Only set loading to false if emote load worked
-        //    Allows it to try again next time emote is seen
-        if (emote.image != null) {
-          emote.loading = false;
-        }
 
+        emote.loading = false;
         _loadingEmote = false;
-        if (_emoteLoadQueue.isNotEmpty) {
-          // Remove the next emote from the queue and start loading it
-          Emote nextToLoad = _emoteLoadQueue[0];
-          _emoteLoadQueue.removeAt(0);
-          loadEmote(nextToLoad);
-        }
+        loaded = true;
       }
-    } else if (_emoteLoadQueue.isNotEmpty) {
-      if (emote.name == _emoteLoadQueue[0].name) {
-        // Current emote is already loaded and is next in the queue, remove it
-        _emoteLoadQueue.removeAt(0);
-      }
+    }
 
-      if (_emoteLoadQueue.isNotEmpty) {
-        // Remove the next emote from the queue and start loading it
-        Emote nextToLoad = _emoteLoadQueue[0];
-        _emoteLoadQueue.removeAt(0);
-        loadEmote(nextToLoad);
-      }
+    // If load request came from queue and emote is loaded, remove it
+    if (fromQueue && emote.image != null) {
+      _emoteLoadQueue.removeAt(0);
+    }
+
+    // If loaded emote and still have emotes in the queue, start loading the next one
+    if (loaded && _emoteLoadQueue.isNotEmpty) {
+      loadEmote(_emoteLoadQueue.first, fromQueue: true);
     }
   }
 
