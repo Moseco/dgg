@@ -20,87 +20,83 @@ class ChatView extends StatelessWidget {
       viewModelBuilder: () => ChatViewModel(),
       fireOnModelReadyOnce: true,
       onModelReady: (viewModel) => viewModel.initialize(),
-      builder: (context, viewModel, child) => Scaffold(
-        appBar: AppBar(
-          title: const Text("Chat"),
-          backgroundColor:
-              viewModel.appBarTheme == 1 ? Colors.transparent : null,
-          elevation: viewModel.appBarTheme == 1 ? 0 : null,
-          actions: viewModel.isAssetsLoaded
-              ? <Widget>[
-                  IconButton(
-                    icon: viewModel.showEmbed
-                        ? const Icon(Icons.desktop_access_disabled)
-                        : const Icon(Icons.desktop_windows),
-                    onPressed: () =>
-                        viewModel.setShowEmbed(!viewModel.showEmbed),
-                  ),
-                  PopupMenuButton<AppBarActions>(
-                    onSelected: (AppBarActions selected) =>
-                        selected == AppBarActions.OPEN_TWITCH_STREAM
-                            ? showStreamSelectDialog(context, viewModel)
-                            : viewModel.menuItemClick(selected),
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        const PopupMenuItem<AppBarActions>(
-                          value: AppBarActions.SETTINGS,
-                          child: Text('Settings'),
-                        ),
-                        PopupMenuItem<AppBarActions>(
-                          value: AppBarActions.CONNECTION,
-                          child: Text(
-                            viewModel.isChatConnected
-                                ? 'Disconnect'
-                                : 'Reconnect',
-                          ),
-                        ),
-                        const PopupMenuItem<AppBarActions>(
-                          value: AppBarActions.REFRESH,
-                          child: Text('Refresh emotes'),
-                        ),
-                        const PopupMenuItem<AppBarActions>(
-                          value: AppBarActions.OPEN_DESTINY_STREAM,
-                          child: Text('Open Destiny\'s steam'),
-                        ),
-                        const PopupMenuItem<AppBarActions>(
-                          value: AppBarActions.OPEN_TWITCH_STREAM,
-                          child: Text('Set Twitch stream'),
-                        ),
-                      ];
-                    },
-                  ),
-                ]
-              : null,
-        ),
-        body: PageStorage(
-          bucket: _pageStorageBucket,
-          child: SafeArea(
-            child: viewModel.isLoading
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: CircularProgressIndicator(),
-                        ),
-                        Text(
-                          viewModel.isAuthenticating
-                              ? "Authenticating with dgg"
-                              : "Loading assets",
-                        ),
-                      ],
+      builder: (context, viewModel, child) => OrientationBuilder(
+        builder: (_, orientation) => Scaffold(
+          appBar: AppBar(
+            title: const Text("Chat"),
+            backgroundColor:
+                viewModel.appBarTheme == 1 ? Colors.transparent : null,
+            elevation: viewModel.appBarTheme == 1 ? 0 : null,
+            actions: viewModel.isAssetsLoaded
+                ? <Widget>[
+                    IconButton(
+                      icon: viewModel.showEmbed
+                          ? const Icon(Icons.desktop_access_disabled)
+                          : const Icon(Icons.desktop_windows),
+                      onPressed: () =>
+                          viewModel.setShowEmbed(!viewModel.showEmbed),
                     ),
-                  )
-                : OrientationBuilder(
-                    builder: (context, orientation) {
-                      if (orientation == Orientation.portrait) {
-                        return const _ChatPortrait();
-                      } else {
-                        return const _ChatLandscape();
-                      }
-                    },
-                  ),
+                    PopupMenuButton<AppBarActions>(
+                      onSelected: (AppBarActions selected) =>
+                          selected == AppBarActions.OPEN_TWITCH_STREAM
+                              ? showStreamSelectDialog(context, viewModel)
+                              : viewModel.menuItemClick(selected),
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          const PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.SETTINGS,
+                            child: Text('Settings'),
+                          ),
+                          PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.CONNECTION,
+                            child: Text(
+                              viewModel.isChatConnected
+                                  ? 'Disconnect'
+                                  : 'Reconnect',
+                            ),
+                          ),
+                          const PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.REFRESH,
+                            child: Text('Refresh emotes'),
+                          ),
+                          const PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.OPEN_DESTINY_STREAM,
+                            child: Text('Open Destiny\'s steam'),
+                          ),
+                          const PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.OPEN_TWITCH_STREAM,
+                            child: Text('Set Twitch stream'),
+                          ),
+                        ];
+                      },
+                    ),
+                  ]
+                : null,
+          ),
+          body: PageStorage(
+            bucket: _pageStorageBucket,
+            child: SafeArea(
+              child: viewModel.isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: CircularProgressIndicator(),
+                          ),
+                          Text(
+                            viewModel.isAuthenticating
+                                ? "Authenticating with dgg"
+                                : "Loading assets",
+                          ),
+                        ],
+                      ),
+                    )
+                  : orientation == Orientation.portrait
+                      ? const _ChatPortrait()
+                      : const _ChatLandscape(),
+            ),
           ),
         ),
       ),
