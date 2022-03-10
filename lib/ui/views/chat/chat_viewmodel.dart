@@ -734,7 +734,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "• Added the option to use an in-app browser for links opened in chat.\n• Added an option to show message timestamps. You can turn it on in the chat style settings.\n• Landscape mode is now officially supported. Better support for large devices like tablets coming soon.",
+            "• Fixed a bug that caused the keyboard to be dismissed immediately.\n• Added an emote selector to make it easier to add emotes to chat messages.\n• Added ignore list support so you can hide other users.",
       );
     }
   }
