@@ -479,9 +479,9 @@ class DggService {
       Map<String, dynamic> json = jsonDecode(response.body);
 
       return StreamStatus(
-        twitchLive: json["data"]["streams"]["twitch"]["live"],
-        youtubeLive: json["data"]["streams"]["youtube"]["live"],
-        youtubeId: json["data"]["streams"]["youtube"]["videoId"],
+        twitchLive: json["data"]?["streams"]?["twitch"]?["live"] ?? false,
+        youtubeLive: json["data"]?["streams"]?["youtube"]?["live"] ?? false,
+        youtubeId: json["data"]?["streams"]?["youtube"]?["videoId"],
       );
     } else {
       return const StreamStatus(twitchLive: false, youtubeLive: false);
