@@ -100,7 +100,7 @@ class SharedPreferencesService {
   }
 
   int getDefaultStream() {
-    return _sharedPreferences!.getInt(KEY_DEFAULT_STREAM) ?? 0;
+    return _sharedPreferences!.getInt(KEY_DEFAULT_STREAM) ?? 1;
   }
 
   Future<void> setDefaultStream(int value) async {
