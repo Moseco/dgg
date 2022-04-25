@@ -1,4 +1,5 @@
 import 'package:dgg/datamodels/emotes.dart';
+import 'package:dgg/datamodels/user.dart';
 
 abstract class UserMessageElement {
   final String text;
@@ -35,5 +36,14 @@ class EmbedUrlElement extends UserMessageElement {
     String text,
     this.embedId,
     this.embedType,
+  ) : super(text);
+}
+
+class MentionElement extends UserMessageElement {
+  final User user;
+
+  const MentionElement(
+      String text,
+      this.user,
   ) : super(text);
 }

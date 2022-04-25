@@ -17,6 +17,8 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
+import '../datamodels/user.dart';
+
 class DggService {
   // Base urls
   static const String dggBase = r"destiny.gg";
@@ -125,7 +127,7 @@ class DggService {
     _webSocketChannel = null;
   }
 
-  Message? parseWebSocketData(String? data) {
+  Message? parseWebSocketData(String? data, List<User> users) {
     String dataString = data.toString();
     int spaceIndex = dataString.indexOf(' ');
     String key = dataString.substring(0, spaceIndex);
@@ -139,6 +141,7 @@ class DggService {
           jsonString,
           flairs,
           emotes,
+          users,
           _userMessageElementsService.createMessageElements,
           currentNick: _currentNick,
         );

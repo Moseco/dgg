@@ -102,6 +102,9 @@ class ChatViewModel extends BaseViewModel {
   bool get showEmoteSelector => _showEmoteSelector;
   List<Emote>? emoteSelectorList;
 
+  bool isHighlightOn = false;
+  User? userHighlighted;
+
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
       SchedulerBinding.instance?.addPostFrameCallback(
@@ -149,7 +152,7 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void _processMessage(String? data) {
-    Message? currentMessage = _dggService.parseWebSocketData(data);
+    Message? currentMessage = _dggService.parseWebSocketData(data, _users);
 
     switch (currentMessage.runtimeType) {
       case NamesMessage:
@@ -217,7 +220,7 @@ class ChatViewModel extends BaseViewModel {
             }
           }
         }
-        //Check if message is stoping a vote
+        //Check if message is stopping a vote
         if (userMessage.data.startsWith(DggVote.voteStopRegex)) {
           if (_dggService.hasVotePermission(userMessage.user.features)) {
             _currentVote = null;
@@ -550,6 +553,22 @@ class ChatViewModel extends BaseViewModel {
         notifyListeners();
       }
     }
+  }
+
+  void toggleHighlightUser(User user){ //NON FUNZIONAAAAAAAAA
+    if (isHighlightOn) {
+      userHighlighted = null;
+    } else {
+      userHighlighted = user;
+    }
+    isHighlightOn = !isHighlightOn;
+
+    notifyListeners();
+  }
+
+  void disableHighlightUser(){
+    userHighlighted = null;
+    isHighlightOn = false;
   }
 
   void setShowEmbed(bool value) {
