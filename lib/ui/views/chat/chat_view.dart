@@ -23,7 +23,9 @@ class ChatView extends StatelessWidget {
       onModelReady: (viewModel) => viewModel.initialize(),
       builder: (context, viewModel, child) => OrientationBuilder(
         builder: (_, orientation) => Scaffold(
-          appBar: AppBar(
+          appBar: orientation == Orientation.landscape
+              ? null
+              : AppBar(
             title: const Text("Chat"),
             backgroundColor:
                 viewModel.appBarTheme == 1 ? Colors.transparent : null,
@@ -266,8 +268,9 @@ class _ChatLandscape extends HookViewModelWidget<ChatViewModel> {
     return Row(
       children: [
         if (viewModel.showStreamPrompt || viewModel.showEmbed)
-          const Expanded(child: ChatStreamEmbed()),
+          const Expanded(child: ChatStreamEmbed(), flex: 4),
         Expanded(
+          flex: 2,
           child: Column(
             children: [
               if (viewModel.currentVote != null)
