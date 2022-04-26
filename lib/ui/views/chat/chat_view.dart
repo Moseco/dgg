@@ -26,62 +26,62 @@ class ChatView extends StatelessWidget {
           appBar: orientation == Orientation.landscape
               ? null
               : AppBar(
-            title: const Text("Chat"),
-            backgroundColor:
-                viewModel.appBarTheme == 1 ? Colors.transparent : null,
-            elevation: viewModel.appBarTheme == 1 ? 0 : null,
-            actions: viewModel.isAssetsLoaded
-                ? <Widget>[
-                    IconButton(
-                      icon: viewModel.showEmbed
-                          ? const Icon(Icons.desktop_access_disabled)
-                          : const Icon(Icons.desktop_windows),
-                      onPressed: () =>
-                          viewModel.setShowEmbed(!viewModel.showEmbed),
-                    ),
-                    PopupMenuButton<AppBarActions>(
-                      onSelected: (AppBarActions selected) =>
-                          selected == AppBarActions.OPEN_TWITCH_STREAM
-                              ? showStreamSelectDialog(context, viewModel)
-                              : (selected == AppBarActions.SHOW_EMBEDS
-                              ? showEmbedsDialog(context, viewModel)
-                              : viewModel.menuItemClick(selected)),
-                      itemBuilder: (BuildContext context) {
-                        return [
-                          const PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.SETTINGS,
-                            child: Text('Settings'),
+                  title: const Text("Chat"),
+                  backgroundColor:
+                      viewModel.appBarTheme == 1 ? Colors.transparent : null,
+                  elevation: viewModel.appBarTheme == 1 ? 0 : null,
+                  actions: viewModel.isAssetsLoaded
+                      ? <Widget>[
+                          IconButton(
+                            icon: viewModel.showEmbed
+                                ? const Icon(Icons.desktop_access_disabled)
+                                : const Icon(Icons.desktop_windows),
+                            onPressed: () =>
+                                viewModel.setShowEmbed(!viewModel.showEmbed),
                           ),
-                          PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.CONNECTION,
-                            child: Text(
-                              viewModel.isChatConnected
-                                  ? 'Disconnect'
-                                  : 'Reconnect',
-                            ),
+                          PopupMenuButton<AppBarActions>(
+                            onSelected: (AppBarActions selected) =>
+                                selected == AppBarActions.OPEN_TWITCH_STREAM
+                                    ? showStreamSelectDialog(context, viewModel)
+                                    : (selected == AppBarActions.SHOW_EMBEDS
+                                        ? showEmbedsDialog(context, viewModel)
+                                        : viewModel.menuItemClick(selected)),
+                            itemBuilder: (BuildContext context) {
+                              return [
+                                const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.SETTINGS,
+                                  child: Text('Settings'),
+                                ),
+                                PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.CONNECTION,
+                                  child: Text(
+                                    viewModel.isChatConnected
+                                        ? 'Disconnect'
+                                        : 'Reconnect',
+                                  ),
+                                ),
+                                const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.REFRESH,
+                                  child: Text('Refresh emotes'),
+                                ),
+                                const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.OPEN_DESTINY_STREAM,
+                                  child: Text('Open Destiny\'s steam'),
+                                ),
+                                const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.OPEN_TWITCH_STREAM,
+                                  child: Text('Set Twitch stream'),
+                                ),
+                                const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.SHOW_EMBEDS,
+                                  child: Text('Show embeds'),
+                                ),
+                              ];
+                            },
                           ),
-                          const PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.REFRESH,
-                            child: Text('Refresh emotes'),
-                          ),
-                          const PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.OPEN_DESTINY_STREAM,
-                            child: Text('Open Destiny\'s steam'),
-                          ),
-                          const PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.OPEN_TWITCH_STREAM,
-                            child: Text('Set Twitch stream'),
-                          ),
-                          const PopupMenuItem<AppBarActions>(
-                            value: AppBarActions.SHOW_EMBEDS,
-                            child: Text('Show embeds'),
-                          ),
-                        ];
-                      },
-                    ),
-                  ]
-                : null,
-          ),
+                        ]
+                      : null,
+                ),
           body: PageStorage(
             bucket: _pageStorageBucket,
             child: SafeArea(
@@ -130,20 +130,22 @@ class ChatView extends StatelessWidget {
   }
 
   Future<void> showEmbedsDialog(
-      BuildContext context,
-      ChatViewModel viewModel,
-      ) async {
+    BuildContext context,
+    ChatViewModel viewModel,
+  ) async {
     // Show dialog and get result
     final result = await showDialog(
       context: context,
-      builder: (BuildContext context) { return TopEmbeds(model: viewModel); },
+      builder: (BuildContext context) {
+        return TopEmbeds(model: viewModel);
+      },
     );
 
     viewModel.setStreamChannelManual(result);
   }
 }
 
-class TopEmbeds extends StatelessWidget{
+class TopEmbeds extends StatelessWidget {
   final ChatViewModel model;
 
   const TopEmbeds({
@@ -159,7 +161,9 @@ class TopEmbeds extends StatelessWidget{
           if (snapshot.hasData) {
             return getDialog(snapshot.requireData, context);
           } else {
-            return const SimpleDialog(title: Text('Top 5 embeds in the last 30 minutes'),);
+            return const SimpleDialog(
+              title: Text('Top 5 embeds in the last 30 minutes'),
+            );
           }
         });
   }
@@ -167,15 +171,15 @@ class TopEmbeds extends StatelessWidget{
   Widget getDialog(List<Embed> embedsList, BuildContext context) {
     List<SimpleDialogOption> embedsDialogs = [];
 
-    for (var i = 0; i < embedsList.length; i++){
-      embedsDialogs.add(
-          SimpleDialogOption(
-            onPressed: () {
-              model.setEmbed(embedsList[i].channel, embedsList[i].platform);
-              Navigator.pop(context);
-              },
-            child: Text(embedsList[i].link + " (" + embedsList[i].count.toString() + ")"),
-          ));
+    for (var i = 0; i < embedsList.length; i++) {
+      embedsDialogs.add(SimpleDialogOption(
+        onPressed: () {
+          model.setEmbed(embedsList[i].channel, embedsList[i].platform);
+          Navigator.pop(context);
+        },
+        child: Text(
+            embedsList[i].link + " (" + embedsList[i].count.toString() + ")"),
+      ));
     }
 
     return SimpleDialog(
@@ -268,69 +272,91 @@ class _ChatLandscape extends HookViewModelWidget<ChatViewModel> {
     return Row(
       children: [
         if (viewModel.showStreamPrompt || viewModel.showEmbed)
-          const Expanded(child: ChatStreamEmbed(), flex: 4),
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              if (viewModel.currentVote != null)
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: ChatVote(model: viewModel),
-                  ),
-                ),
-              Expanded(
-                child: ChatList(
-                  key: const PageStorageKey("chatlist"),
-                  scrollController: scrollController,
-                ),
+          Expanded(
+              flex: 4,
+              child: GestureDetector(
+                onHorizontalDragUpdate: (details){
+                  if (details.primaryDelta != null && details.primaryDelta! < 0){
+                    viewModel.showChat = true;
+                  } else if (details.primaryDelta != null) {
+                    viewModel.showChat = false;
+                  }
+                },
+                  child: const ChatStreamEmbed(),
               ),
-              if (!viewModel.isListAtBottom)
-                InkWell(
-                  onTap: () => scrollController.animateTo(
-                    0.0,
-                    curve: Curves.easeOut,
-                    duration: const Duration(milliseconds: 200),
+          ),
+        if (viewModel.showChat || !(viewModel.showStreamPrompt || viewModel.showEmbed))
+          Expanded(
+            flex: 2,
+            child: GestureDetector(
+              onHorizontalDragUpdate: (details){
+                if (details.primaryDelta != null && details.primaryDelta! > 0){
+                  viewModel.showChat = false;
+                } else if (details.primaryDelta != null) {
+                  viewModel.showChat = true;
+                }
+              },
+              child: Column(
+              children: [
+                if (viewModel.currentVote != null)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: ChatVote(model: viewModel),
+                    ),
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.red,
-                    child: const Center(
-                      child: Text(
-                        "Chat paused, tap here to resume",
-                        textAlign: TextAlign.center,
+                Expanded(
+                  child: ChatList(
+                    key: const PageStorageKey("chatlist"),
+                    scrollController: scrollController,
+                  ),
+                ),
+                if (!viewModel.isListAtBottom)
+                  InkWell(
+                    onTap: () => scrollController.animateTo(
+                      0.0,
+                      curve: Curves.easeOut,
+                      duration: const Duration(milliseconds: 200),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      color: Colors.red,
+                      child: const Center(
+                        child: Text(
+                          "Chat paused, tap here to resume",
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              if (viewModel.showReconnectButton)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                if (viewModel.showReconnectButton)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text("Reconnect"),
+                    onPressed: () => viewModel.onReconnectButtonPressed(),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      top: BorderSide(),
                     ),
                   ),
-                  child: const Text("Reconnect"),
-                  onPressed: () => viewModel.onReconnectButtonPressed(),
-                ),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    top: BorderSide(),
+                  child: const Center(
+                    child: Text(
+                      "Input unavailable in landscape",
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-                child: const Center(
-                  child: Text(
-                    "Input unavailable in landscape",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
+    ),
           ),
-        ),
       ],
     );
   }

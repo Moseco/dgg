@@ -75,6 +75,8 @@ class ChatViewModel extends BaseViewModel {
   EmbedType _embedType = EmbedType.TWITCH_STREAM;
   EmbedType get embedType => _embedType;
 
+  bool showChat = true;
+
   DggVote? _currentVote;
   DggVote? get currentVote => _currentVote;
   Timer? _voteTimer;
