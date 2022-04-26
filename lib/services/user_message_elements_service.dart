@@ -14,7 +14,7 @@ class UserMessageElementsService {
   );
 
   final RegExp _mentionRegex = RegExp(
-    r"(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])", //////// CONTROLLARE SE GIUSTA
+    r"(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])",
     caseSensitive: false,
   );
 
