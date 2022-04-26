@@ -23,6 +23,7 @@ class DggService {
   // Base urls
   static const String dggBase = r"destiny.gg";
   static const String dggCdnBase = r"cdn.destiny.gg";
+  static const String vyneerBase = r"vyneer.me";
   // Url endpoints
   static const String sessionInfoPath = r"/api/chat/me";
   static const String userInfoPath = r"/api/userinfo";
@@ -32,6 +33,7 @@ class DggService {
   static const String emotesCssPath = r"/emotes/emotes.css";
   static const String historyPath = r"/api/chat/history";
   static const String streamStatusPath = r"/api/info/stream";
+  static const String embedsPath = r"/tools/embeds?t=30";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
@@ -467,6 +469,16 @@ class DggService {
 
   Future<List<dynamic>> getChatHistory() async {
     final response = await http.get(Uri.https(dggBase, historyPath));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getEmbeds() async {
+    final response = await http.get(Uri.parse("https://vyneer.me/tools/embeds?t=30"));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);

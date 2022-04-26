@@ -6,6 +6,7 @@ import 'package:stacked/stacked.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     as extended_nested_scroll_view;
 import 'package:stacked_hooks/stacked_hooks.dart';
+import '../../../datamodels/embeds.dart';
 import 'chat_viewmodel.dart';
 import 'widgets/widgets.dart';
 
@@ -40,7 +41,9 @@ class ChatView extends StatelessWidget {
                       onSelected: (AppBarActions selected) =>
                           selected == AppBarActions.OPEN_TWITCH_STREAM
                               ? showStreamSelectDialog(context, viewModel)
-                              : viewModel.menuItemClick(selected),
+                              : (selected == AppBarActions.SHOW_EMBEDS
+                              ? showEmbedsDialog(context, viewModel)
+                              : viewModel.menuItemClick(selected)),
                       itemBuilder: (BuildContext context) {
                         return [
                           const PopupMenuItem<AppBarActions>(
@@ -66,6 +69,10 @@ class ChatView extends StatelessWidget {
                           const PopupMenuItem<AppBarActions>(
                             value: AppBarActions.OPEN_TWITCH_STREAM,
                             child: Text('Set Twitch stream'),
+                          ),
+                          const PopupMenuItem<AppBarActions>(
+                            value: AppBarActions.SHOW_EMBEDS,
+                            child: Text('Show embeds'),
                           ),
                         ];
                       },
@@ -118,6 +125,61 @@ class ChatView extends StatelessWidget {
     );
 
     viewModel.setStreamChannelManual(result);
+  }
+
+  Future<void> showEmbedsDialog(
+      BuildContext context,
+      ChatViewModel viewModel,
+      ) async {
+    // Show dialog and get result
+    final result = await showDialog(
+      context: context,
+      builder: (BuildContext context) { return TopEmbeds(model: viewModel); },
+    );
+
+    viewModel.setStreamChannelManual(result);
+  }
+}
+
+class TopEmbeds extends StatelessWidget{
+  final ChatViewModel model;
+
+  const TopEmbeds({
+    Key? key,
+    required this.model,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: model.getEmbeds(),
+        builder: (context, AsyncSnapshot<List<Embed>> snapshot) {
+          if (snapshot.hasData) {
+            return getDialog(snapshot.requireData, context);
+          } else {
+            return const SimpleDialog(title: Text('Top 5 embeds in the last 30 minutes'),);
+          }
+        });
+  }
+
+  Widget getDialog(List<Embed> embedsList, BuildContext context) {
+    List<SimpleDialogOption> embedsDialogs = [];
+
+    for (var i = 0; i < embedsList.length; i++){
+      embedsDialogs.add(
+          SimpleDialogOption(
+            onPressed: () {
+              model.setEmbed(embedsList[i].channel, embedsList[i].platform);
+              Navigator.pop(context);
+              },
+            child: Text(embedsList[i].link + " (" + embedsList[i].count.toString() + ")"),
+          ));
+    }
+
+    return SimpleDialog(
+      title: const Text('Top 5 embeds in the last 30 minutes'),
+      children: embedsDialogs,
+    );
   }
 }
 

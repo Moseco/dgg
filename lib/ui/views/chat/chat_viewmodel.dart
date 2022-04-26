@@ -24,6 +24,8 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart'
     as flutter_custom_tabs;
 
+import '../../../datamodels/embeds.dart';
+
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
@@ -137,6 +139,17 @@ class ChatViewModel extends BaseViewModel {
     for (int i = 100; i < rawHistoryMessages.length; i++) {
       _processMessage(rawHistoryMessages[i].toString());
     }
+  }
+
+  Future<List<Embed>> getEmbeds() async {
+    List<dynamic> embeds = await _dggService.getEmbeds();
+    List<Embed> embedsList = [];
+
+    for (int i = 0; i < embeds.length; i++){
+      embedsList.add(Embed.fromJson(embeds[i]));
+    }
+
+    return embedsList;
   }
 
   void _connectChat() {
@@ -864,4 +877,5 @@ enum AppBarActions {
   REFRESH,
   OPEN_DESTINY_STREAM,
   OPEN_TWITCH_STREAM,
+  SHOW_EMBEDS
 }
