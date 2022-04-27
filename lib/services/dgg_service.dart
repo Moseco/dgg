@@ -496,7 +496,7 @@ class DggService {
       return StreamStatus(
         twitchLive: json["data"]?["streams"]?["twitch"]?["live"] ?? false,
         youtubeLive: json["data"]?["streams"]?["youtube"]?["live"] ?? false,
-        youtubeId: json["data"]?["streams"]?["youtube"]?["videoId"],
+        youtubeId: json["data"]?["streams"]?["youtube"]?["id"],
       );
     } else {
       return const StreamStatus(twitchLive: false, youtubeLive: false);
