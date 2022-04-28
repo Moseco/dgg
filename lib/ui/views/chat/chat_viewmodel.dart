@@ -106,8 +106,10 @@ class ChatViewModel extends BaseViewModel {
   bool get showEmoteSelector => _showEmoteSelector;
   List<Emote>? emoteSelectorList;
 
-  bool isHighlightOn = false;
-  User? userHighlighted;
+  bool _isHighlightOn = false;
+  bool get isHighlightOn => _isHighlightOn;
+  User? _userHighlighted;
+  User? get userHighlighted => _userHighlighted;
 
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
@@ -570,20 +572,20 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  void toggleHighlightUser(User user){ //NON FUNZIONAAAAAAAAA
-    if (isHighlightOn) {
-      userHighlighted = null;
+  void toggleHighlightUser(User user){
+    if (_isHighlightOn) {
+      _userHighlighted = null;
     } else {
-      userHighlighted = user;
+      _userHighlighted = user;
     }
-    isHighlightOn = !isHighlightOn;
+    _isHighlightOn = !_isHighlightOn;
 
     notifyListeners();
   }
 
   void disableHighlightUser(){
-    userHighlighted = null;
-    isHighlightOn = false;
+    _userHighlighted = null;
+    _isHighlightOn = false;
   }
 
   void setShowEmbed(bool value) {

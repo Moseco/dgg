@@ -59,6 +59,7 @@ class ChatList extends ViewModelWidget<ChatViewModel> {
               );
             } else if (currentMessage is ComboMessage) {
               return ItemComboMessage(
+                isHighlightOn: viewModel.isHighlightOn,
                 message: currentMessage,
                 textFontSize: viewModel.textFontSize,
                 emoteHeight: viewModel.emoteHeight,

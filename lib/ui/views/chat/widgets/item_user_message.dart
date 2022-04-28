@@ -26,11 +26,11 @@ class ItemUserMessage extends StatefulWidget {
 }
 
 class ItemUserMessageState extends State<ItemUserMessage> {
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => widget.model.onUserMessageLongPress(widget.message),
+      // Highlights get turned off when the next message is received, not instantly
       onTap: () => widget.model.disableHighlightUser(),
       child: Container(
         width: double.infinity,
@@ -83,9 +83,12 @@ class ItemUserMessageState extends State<ItemUserMessage> {
       for (int i = 0; i < widget.message.visibleFlairs.length; i++) {
         textSpans.add(
           WidgetSpan(
-            child: FlairWidget(
-              flair: widget.message.visibleFlairs[i],
-              flairHeight: widget.model.flairHeight,
+            child: Opacity(
+              opacity: imageOpacity(),
+              child: FlairWidget(
+                flair: widget.message.visibleFlairs[i],
+                flairHeight: widget.model.flairHeight,
+              ),
             ),
           ),
         );
@@ -98,11 +101,12 @@ class ItemUserMessageState extends State<ItemUserMessage> {
         text: widget.message.user.nick,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: widget.message.color == null ? actualColor(Colors.white, textSpans) : actualColor(Color(widget.message.color!), textSpans),
+          color: widget.message.color == null
+              ? actualColor(Colors.white)
+              : actualColor(Color(widget.message.color!)),
         ),
         recognizer: TapGestureRecognizer()
-          ..onTap =
-              () => widget.model.toggleHighlightUser(widget.message.user),
+          ..onTap = () => widget.model.toggleHighlightUser(widget.message.user),
       ),
       const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
     ]);
@@ -111,7 +115,7 @@ class ItemUserMessageState extends State<ItemUserMessage> {
       textSpans.add(
         TextSpan(
           text: "<censored>",
-          style: TextStyle(color: actualColor(Colors.blue, textSpans)),
+          style: TextStyle(color: actualColor(Colors.blue)),
           recognizer: TapGestureRecognizer()
             ..onTap = () => widget.model.uncensorMessage(widget.message),
         ),
@@ -123,11 +127,12 @@ class ItemUserMessageState extends State<ItemUserMessage> {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: actualColor(Colors.blue, textSpans),
+                color: actualColor(Colors.blue),
                 decoration: widget.message.isNsfw || widget.message.isNsfl
                     ? TextDecoration.underline
                     : null,
-                decorationColor: widget.message.isNsfw ? Colors.red : Colors.yellow,
+                decorationColor:
+                    widget.message.isNsfw ? Colors.red : Colors.yellow,
                 decorationThickness: 2,
               ),
               recognizer: TapGestureRecognizer()
@@ -137,9 +142,12 @@ class ItemUserMessageState extends State<ItemUserMessage> {
         } else if (element is EmoteElement) {
           textSpans.add(
             WidgetSpan(
-              child: EmoteWidget(
-                emote: element.emote,
-                emoteHeight: widget.model.emoteHeight,
+              child: Opacity(
+                opacity: imageOpacity(),
+                child: EmoteWidget(
+                  emote: element.emote,
+                  emoteHeight: widget.model.emoteHeight,
+                ),
               ),
             ),
           );
@@ -147,10 +155,10 @@ class ItemUserMessageState extends State<ItemUserMessage> {
           textSpans.add(
             TextSpan(
               text: element.text,
-              style: TextStyle(color: actualColor(Colors.blue, textSpans)),
+              style: TextStyle(color: actualColor(Colors.blue)),
               recognizer: TapGestureRecognizer()
-                ..onTap =
-                    () => widget.model.setEmbed(element.embedId, element.embedType),
+                ..onTap = () =>
+                    widget.model.setEmbed(element.embedId, element.embedType),
             ),
           );
         } else if (element is MentionElement) {
@@ -158,12 +166,13 @@ class ItemUserMessageState extends State<ItemUserMessage> {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: widget.message.isGreenText ? actualColor(const Color(0xFF6CA528), textSpans) : actualColor(Colors.white, textSpans),
+                color: widget.message.isGreenText
+                    ? actualColor(const Color(0xFF6CA528))
+                    : actualColor(Colors.white),
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap =
-                    () => widget.model.toggleHighlightUser(element.user),
+                ..onTap = () => widget.model.toggleHighlightUser(element.user),
             ),
           );
         } else {
@@ -171,7 +180,9 @@ class ItemUserMessageState extends State<ItemUserMessage> {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: widget.message.isGreenText ? actualColor(const Color(0xFF6CA528), textSpans) : actualColor(Colors.white, textSpans),
+                color: widget.message.isGreenText
+                    ? actualColor(const Color(0xFF6CA528))
+                    : actualColor(Colors.white),
               ),
             ),
           );
@@ -181,25 +192,28 @@ class ItemUserMessageState extends State<ItemUserMessage> {
     return textSpans;
   }
 
-  bool nickIsContained(){
-    for (var i = 0; i < widget.message.elements.length; i++){
-      if (widget.message.elements[i] is MentionElement && (widget.message.elements[i] as MentionElement).user == widget.model.userHighlighted){
+  bool nickIsContained() {
+    for (var i = 0; i < widget.message.elements.length; i++) {
+      if (widget.message.elements[i] is MentionElement &&
+          (widget.message.elements[i] as MentionElement).user ==
+              widget.model.userHighlighted) {
         return true;
       }
     }
     return false;
   }
-  
-  Color actualColor(Color color, textSpans){
-    bool _isNotDark = true;
 
+  Color actualColor(Color color) {
     if (widget.model.isHighlightOn &&
         widget.message.user.nick != widget.model.userHighlighted!.nick &&
-            !nickIsContained()){
-      _isNotDark = false;
-    }
-
-    if (!_isNotDark) return color.withOpacity(0.4);
+        !nickIsContained()) return color.withOpacity(0.4);
     return color;
+  }
+
+  double imageOpacity() {
+    if (widget.model.isHighlightOn &&
+        widget.message.user.nick != widget.model.userHighlighted!.nick &&
+        !nickIsContained()) return 0.4;
+    return 1.0;
   }
 }
