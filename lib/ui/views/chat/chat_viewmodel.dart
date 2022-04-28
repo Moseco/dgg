@@ -149,7 +149,7 @@ class ChatViewModel extends BaseViewModel {
     List<dynamic> embeds = await _dggService.getEmbeds();
     List<Embed> embedsList = [];
 
-    for (int i = 0; i < embeds.length; i++){
+    for (int i = 0; i < embeds.length; i++) {
       embedsList.add(Embed.fromJson(embeds[i]));
     }
 
@@ -572,20 +572,20 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  void toggleHighlightUser(User user){
+  void toggleHighlightUser(User user) {
     if (_isHighlightOn) {
       _userHighlighted = null;
     } else {
       _userHighlighted = user;
     }
     _isHighlightOn = !_isHighlightOn;
-
     notifyListeners();
   }
 
-  void disableHighlightUser(){
+  void disableHighlightUser() {
     _userHighlighted = null;
     _isHighlightOn = false;
+    notifyListeners();
   }
 
   void setShowEmbed(bool value) {

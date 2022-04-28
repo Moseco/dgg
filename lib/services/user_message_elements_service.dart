@@ -18,7 +18,8 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
 
-  List<UserMessageElement> createMessageElements(String text, Emotes emotes, List<User> users) {
+  List<UserMessageElement> createMessageElements(
+      String text, Emotes emotes, List<User> users) {
     if (text.isEmpty) {
       return [];
     }
@@ -128,8 +129,10 @@ class UserMessageElementsService {
         if (match != null) {
           String currentText = list[i].text;
           String mentionedNick = currentText.substring(match.start, match.end);
-          int userIndex = users.indexWhere((element) => element.nick == mentionedNick);
-          if (userIndex != -1){
+          int userIndex = users.indexWhere((element) => mentionedNick[0] == '@'
+              ? element.nick == mentionedNick.substring(1, mentionedNick.length)
+              : element.nick == mentionedNick);
+          if (userIndex != -1) {
             int insertIndex = i + 1;
             if (match.start > 0) {
               list[i] = TextElement(currentText.substring(0, match.start));

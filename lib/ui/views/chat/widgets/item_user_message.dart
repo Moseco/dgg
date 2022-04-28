@@ -30,7 +30,6 @@ class ItemUserMessageState extends State<ItemUserMessage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => widget.model.onUserMessageLongPress(widget.message),
-      // Highlights get turned off when the next message is received, not instantly
       onTap: () => widget.model.disableHighlightUser(),
       child: Container(
         width: double.infinity,
@@ -195,8 +194,8 @@ class ItemUserMessageState extends State<ItemUserMessage> {
   bool nickIsContained() {
     for (var i = 0; i < widget.message.elements.length; i++) {
       if (widget.message.elements[i] is MentionElement &&
-          (widget.message.elements[i] as MentionElement).user ==
-              widget.model.userHighlighted) {
+          (widget.message.elements[i] as MentionElement).user.nick ==
+              widget.model.userHighlighted!.nick) {
         return true;
       }
     }
