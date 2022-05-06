@@ -125,17 +125,25 @@ class UserMessageElementsService {
     List<UserMessageElement> list = List<UserMessageElement>.from(elements);
     for (var i = 0; i < list.length; i++) {
       if (list[i] is TextElement) {
-        RegExpMatch? match = _mentionRegex.firstMatch(list[i].text);
-        if (match != null) {
-          String currentText = list[i].text;
-          String mentionedNick = currentText.substring(match.start, match.end);
-          int userIndex = users.indexWhere((element) => mentionedNick[0] == '@'
-              ? element.nick == mentionedNick.substring(1, mentionedNick.length)
-              : element.nick == mentionedNick);
+        Iterator<RegExpMatch> matches = _mentionRegex.allMatches(list[i].text).iterator;
+        String currentText = list[i].text;
+        
+        while (matches.moveNext()) {
+          RegExpMatch match = matches.current;
+          // It can probably be done with another regexp
+          int nickStart =
+              currentText[match.start] == '@' || currentText[match.start] == ' '
+                  ? currentText[match.start + 1] == '@'
+                      ? match.start + 2
+                      : match.start + 1
+                  : match.start;
+          String mentionedNick = currentText.substring(nickStart, match.end);
+          int userIndex = users.indexWhere((element) =>
+              element.nick.toLowerCase() == mentionedNick.toLowerCase());
           if (userIndex != -1) {
             int insertIndex = i + 1;
-            if (match.start > 0) {
-              list[i] = TextElement(currentText.substring(0, match.start));
+            if (nickStart > 0) {
+              list[i] = TextElement(currentText.substring(0, nickStart));
               list.insert(insertIndex++,
                   MentionElement(mentionedNick, users[userIndex]));
             } else {
@@ -146,6 +154,7 @@ class UserMessageElementsService {
               list.insert(
                   insertIndex, TextElement(currentText.substring(match.end)));
             }
+            break;
           }
         }
       }

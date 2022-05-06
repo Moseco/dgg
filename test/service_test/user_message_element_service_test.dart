@@ -8,7 +8,12 @@ import '../setup/test_data.dart';
 
 void main() {
   Emotes exampleEmotes = Emotes.fromJson(TestData.EMOTE_STRING);
-  List<User> users = [User(features: [], nick: 'pippo', )]; //it will probably break all tests, don't want to waste time with this
+  List<User> users = [
+    User(features: [], nick: 'potatO123', ),
+    User(features: [], nick: '_asdlol', ),
+    User(features: [], nick: 'a_aEE', ),
+    User(features: [], nick: 'BoB', )
+  ]; //it will probably break all tests, don't want to waste time with this
 
   group('UserMessageElementsServiceTest', () {
     final _userMessageElementsService = UserMessageElementsService();
@@ -380,6 +385,74 @@ void main() {
       expect(elements[0].text, "#youtube/name");
       expect((elements[0] as EmbedUrlElement).embedId, "name");
       expect((elements[0] as EmbedUrlElement).embedType, "youtube");
+    });
+
+    test('Only nick', () {
+      List<UserMessageElement> elements =
+      _userMessageElementsService.createMessageElements(
+        "_asdlol",
+        exampleEmotes,
+        users,
+      );
+
+      expect(elements.length, 1);
+      expect(elements[0].runtimeType, MentionElement);
+      expect(elements[0].text, "_asdlol");
+    });
+
+    test('Only nick with @', () {
+      List<UserMessageElement> elements =
+      _userMessageElementsService.createMessageElements(
+        "@_asdlol",
+        exampleEmotes,
+        users,
+      );
+
+      expect(elements.length, 2);
+      expect(elements[0].runtimeType, TextElement);
+      expect(elements[0].text, "@");
+      expect(elements[1].runtimeType, MentionElement);
+      expect(elements[1].text, "_asdlol");
+    });
+
+    test('Only nick multiple', () {
+      List<UserMessageElement> elements =
+      _userMessageElementsService.createMessageElements(
+        "potatO123 _asdlol @a_aEE",
+        exampleEmotes,
+        users,
+      );
+
+      expect(elements.length, 5);
+      expect(elements[0].runtimeType, MentionElement);
+      expect(elements[0].text, "potatO123");
+      expect(elements[1].runtimeType, TextElement);
+      expect(elements[1].text, " ");
+      expect(elements[2].runtimeType, MentionElement);
+      expect(elements[2].text, "_asdlol");
+      expect(elements[3].runtimeType, TextElement);
+      expect(elements[3].text, " @");
+      expect(elements[4].runtimeType, MentionElement);
+      expect(elements[4].text, "a_aEE");
+    });
+
+    test('Text with nick', () {
+      List<UserMessageElement> elements =
+      _userMessageElementsService.createMessageElements(
+        "This is a test with the nicks BoB and potatO123",
+        exampleEmotes,
+        users,
+      );
+
+      expect(elements.length, 4);
+      expect(elements[0].runtimeType, TextElement);
+      expect(elements[0].text, "This is a test with the nicks ");
+      expect(elements[1].runtimeType, MentionElement);
+      expect(elements[1].text, "BoB");
+      expect(elements[2].runtimeType, TextElement);
+      expect(elements[2].text, " and ");
+      expect(elements[3].runtimeType, MentionElement);
+      expect(elements[3].text, "potatO123");
     });
   });
 }
