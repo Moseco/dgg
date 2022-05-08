@@ -38,8 +38,8 @@ dependencies:
   webview_flutter: ^3.0.0
   webview_cookie_manager: ^2.0.0
   web_socket_channel: ^2.0.0
-  url_launcher: ^6.0.3
-  flutter_custom_tabs: ^1.0.3
+  url_launcher: ^6.0.20
+  flutter_custom_tabs: ^1.0.4
   image: ^3.0.2
   wakelock: ^0.5.6
   youtube_player_iframe: ^2.0.0
