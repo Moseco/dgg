@@ -17,10 +17,13 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
+import '../datamodels/user.dart';
+
 class DggService {
   // Base urls
   static const String dggBase = r"destiny.gg";
   static const String dggCdnBase = r"cdn.destiny.gg";
+  static const String vyneerBase = r"vyneer.me";
   // Url endpoints
   static const String sessionInfoPath = r"/api/chat/me";
   static const String userInfoPath = r"/api/userinfo";
@@ -30,6 +33,7 @@ class DggService {
   static const String emotesCssPath = r"/emotes/emotes.css";
   static const String historyPath = r"/api/chat/history";
   static const String streamStatusPath = r"/api/info/stream";
+  static const String embedsPath = r"/tools/embeds?t=30";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
@@ -125,7 +129,7 @@ class DggService {
     _webSocketChannel = null;
   }
 
-  Message? parseWebSocketData(String? data) {
+  Message? parseWebSocketData(String? data, List<User> users) {
     String dataString = data.toString();
     int spaceIndex = dataString.indexOf(' ');
     String key = dataString.substring(0, spaceIndex);
@@ -139,6 +143,7 @@ class DggService {
           jsonString,
           flairs,
           emotes,
+          users,
           _userMessageElementsService.createMessageElements,
           currentNick: _currentNick,
         );
@@ -472,6 +477,16 @@ class DggService {
     }
   }
 
+  Future<List<dynamic>> getEmbeds() async {
+    final response = await http.get(Uri.parse("https://vyneer.me/tools/embeds?t=30"));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return [];
+    }
+  }
+
   Future<StreamStatus> getStreamStatus() async {
     final response = await http.get(Uri.https(dggBase, streamStatusPath));
 
@@ -481,7 +496,7 @@ class DggService {
       return StreamStatus(
         twitchLive: json["data"]?["streams"]?["twitch"]?["live"] ?? false,
         youtubeLive: json["data"]?["streams"]?["youtube"]?["live"] ?? false,
-        youtubeId: json["data"]?["streams"]?["youtube"]?["videoId"],
+        youtubeId: json["data"]?["streams"]?["youtube"]?["id"],
       );
     } else {
       return const StreamStatus(twitchLive: false, youtubeLive: false);

@@ -41,6 +41,7 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
         ),
       );
     } else {
+      // PROBLEM: Every time screen is rotated video is reloaded
       if (viewModel.showEmbed) {
         if (viewModel.embedType == EmbedType.YOUTUBE) {
           // Show youtube

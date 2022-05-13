@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:dgg/datamodels/message.dart';
 
 class ItemComboMessage extends StatelessWidget {
+  final bool isHighlightOn;
   final ComboMessage message;
   final double textFontSize;
   final double emoteHeight;
 
   const ItemComboMessage({
     Key? key,
+    required this.isHighlightOn,
     required this.message,
     required this.textFontSize,
     required this.emoteHeight,
@@ -22,9 +24,12 @@ class ItemComboMessage extends StatelessWidget {
         text: TextSpan(
           children: <InlineSpan>[
             WidgetSpan(
-              child: EmoteWidget(
-                emote: message.emote,
-                emoteHeight: emoteHeight,
+              child: Opacity(
+                opacity: isHighlightOn ? 0.4 : 1.0,
+                child: EmoteWidget(
+                  emote: message.emote,
+                  emoteHeight: emoteHeight,
+                ),
               ),
             ),
             TextSpan(
@@ -32,6 +37,7 @@ class ItemComboMessage extends StatelessWidget {
               style: TextStyle(
                 fontSize: textFontSize,
                 fontWeight: FontWeight.bold,
+                color: isHighlightOn ? Colors.white.withOpacity(0.4) : null,
               ),
             ),
           ],

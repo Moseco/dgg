@@ -1,6 +1,8 @@
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 
+import '../datamodels/user.dart';
+
 class UserMessageElementsService {
   final RegExp _urlRegex = RegExp(
     r"(http://|ftp://|https://)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?",
@@ -11,7 +13,13 @@ class UserMessageElementsService {
     caseSensitive: false,
   );
 
-  List<UserMessageElement> createMessageElements(String text, Emotes emotes) {
+  final RegExp _mentionRegex = RegExp(
+    r"(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])",
+    caseSensitive: false,
+  );
+
+  List<UserMessageElement> createMessageElements(
+      String text, Emotes emotes, List<User> users) {
     if (text.isEmpty) {
       return [];
     }
@@ -21,6 +29,7 @@ class UserMessageElementsService {
       elements = parseEmotes(elements, emotes);
     }
     elements = parseEmbedUrls(elements);
+    elements = parseMentions(elements, users);
 
     return elements;
   }
@@ -103,6 +112,49 @@ class UserMessageElementsService {
           if (match.end < currentText.length) {
             list.insert(
                 insertIndex, TextElement(currentText.substring(match.end)));
+          }
+        }
+      }
+    }
+
+    return list;
+  }
+
+  List<UserMessageElement> parseMentions(
+      List<UserMessageElement> elements, List<User> users) {
+    List<UserMessageElement> list = List<UserMessageElement>.from(elements);
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] is TextElement) {
+        Iterator<RegExpMatch> matches = _mentionRegex.allMatches(list[i].text).iterator;
+        String currentText = list[i].text;
+        
+        while (matches.moveNext()) {
+          RegExpMatch match = matches.current;
+          // It can probably be done with another regexp
+          int nickStart =
+              currentText[match.start] == '@' || currentText[match.start] == ' '
+                  ? currentText[match.start + 1] == '@'
+                      ? match.start + 2
+                      : match.start + 1
+                  : match.start;
+          String mentionedNick = currentText.substring(nickStart, match.end);
+          int userIndex = users.indexWhere((element) =>
+              element.nick.toLowerCase() == mentionedNick.toLowerCase());
+          if (userIndex != -1) {
+            int insertIndex = i + 1;
+            if (nickStart > 0) {
+              list[i] = TextElement(currentText.substring(0, nickStart));
+              list.insert(insertIndex++,
+                  MentionElement(mentionedNick, users[userIndex]));
+            } else {
+              list[i] = MentionElement(mentionedNick, users[userIndex]);
+            }
+
+            if (match.end < currentText.length) {
+              list.insert(
+                  insertIndex, TextElement(currentText.substring(match.end)));
+            }
+            break;
           }
         }
       }

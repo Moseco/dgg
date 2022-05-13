@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ItemUserMessage extends StatelessWidget {
+class ItemUserMessage extends StatefulWidget {
   final ChatViewModel model;
   final UserMessage message;
   final bool flairEnabled;
@@ -22,9 +22,15 @@ class ItemUserMessage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  ItemUserMessageState createState() => ItemUserMessageState();
+}
+
+class ItemUserMessageState extends State<ItemUserMessage> {
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () => model.onUserMessageLongPress(message),
+      onLongPress: () => widget.model.onUserMessageLongPress(widget.message),
+      onTap: () => widget.model.disableHighlightUser(),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
@@ -36,7 +42,7 @@ class ItemUserMessage extends StatelessWidget {
           excluding: Platform.isIOS,
           child: RichText(
             text: TextSpan(
-              style: TextStyle(fontSize: model.textFontSize),
+              style: TextStyle(fontSize: widget.model.textFontSize),
               children: getMessageTextSpans(context),
             ),
           ),
@@ -46,9 +52,9 @@ class ItemUserMessage extends StatelessWidget {
   }
 
   Color? _getBackgroundColor() {
-    if (message.isMentioned) {
+    if (widget.message.isMentioned) {
       return const Color(0xBF06263E);
-    } else if (message.isOwn) {
+    } else if (widget.message.isOwn) {
       return const Color(0x409e9e9e);
     } else {
       return null;
@@ -59,10 +65,10 @@ class ItemUserMessage extends StatelessWidget {
     List<InlineSpan> textSpans = [];
 
     // Add timestamp if enabled
-    if (model.timestampEnabled) {
+    if (widget.model.timestampEnabled) {
       textSpans.add(
         TextSpan(
-          text: "${DateFormat.jm().format(message.timestamp)} ",
+          text: "${DateFormat.jm().format(widget.message.timestamp)} ",
           style: const TextStyle(
             fontSize: 10,
             color: Colors.grey,
@@ -72,13 +78,16 @@ class ItemUserMessage extends StatelessWidget {
     }
 
     // Add flairs if enabled
-    if (flairEnabled) {
-      for (int i = 0; i < message.visibleFlairs.length; i++) {
+    if (widget.flairEnabled) {
+      for (int i = 0; i < widget.message.visibleFlairs.length; i++) {
         textSpans.add(
           WidgetSpan(
-            child: FlairWidget(
-              flair: message.visibleFlairs[i],
-              flairHeight: model.flairHeight,
+            child: Opacity(
+              opacity: imageOpacity(),
+              child: FlairWidget(
+                flair: widget.message.visibleFlairs[i],
+                flairHeight: widget.model.flairHeight,
+              ),
             ),
           ),
         );
@@ -88,48 +97,56 @@ class ItemUserMessage extends StatelessWidget {
     // Add username and colon
     textSpans.addAll([
       TextSpan(
-        text: message.user.nick,
+        text: widget.message.user.nick,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: message.color == null ? null : Color(message.color!),
+          color: widget.message.color == null
+              ? actualColor(Colors.white)
+              : actualColor(Color(widget.message.color!)),
         ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () => widget.model.toggleHighlightUser(widget.message.user),
       ),
       const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
     ]);
 
-    if (message.isCensored) {
+    if (widget.message.isCensored) {
       textSpans.add(
         TextSpan(
           text: "<censored>",
-          style: const TextStyle(color: Colors.blue),
+          style: TextStyle(color: actualColor(Colors.blue)),
           recognizer: TapGestureRecognizer()
-            ..onTap = () => model.uncensorMessage(message),
+            ..onTap = () => widget.model.uncensorMessage(widget.message),
         ),
       );
     } else {
-      for (var element in message.elements) {
+      for (var element in widget.message.elements) {
         if (element is UrlElement) {
           textSpans.add(
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: Colors.blue,
-                decoration: message.isNsfw || message.isNsfl
+                color: actualColor(Colors.blue),
+                decoration: widget.message.isNsfw || widget.message.isNsfl
                     ? TextDecoration.underline
                     : null,
-                decorationColor: message.isNsfw ? Colors.red : Colors.yellow,
+                decorationColor:
+                    widget.message.isNsfw ? Colors.red : Colors.yellow,
                 decorationThickness: 2,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () => model.openUrl(element.text),
+                ..onTap = () => widget.model.openUrl(element.text),
             ),
           );
         } else if (element is EmoteElement) {
           textSpans.add(
             WidgetSpan(
-              child: EmoteWidget(
-                emote: element.emote,
-                emoteHeight: model.emoteHeight,
+              child: Opacity(
+                opacity: imageOpacity(),
+                child: EmoteWidget(
+                  emote: element.emote,
+                  emoteHeight: widget.model.emoteHeight,
+                ),
               ),
             ),
           );
@@ -137,10 +154,24 @@ class ItemUserMessage extends StatelessWidget {
           textSpans.add(
             TextSpan(
               text: element.text,
-              style: const TextStyle(color: Colors.blue),
+              style: TextStyle(color: actualColor(Colors.blue)),
               recognizer: TapGestureRecognizer()
-                ..onTap =
-                    () => model.setEmbed(element.embedId, element.embedType),
+                ..onTap = () =>
+                    widget.model.setEmbed(element.embedId, element.embedType),
+            ),
+          );
+        } else if (element is MentionElement) {
+          textSpans.add(
+            TextSpan(
+              text: element.text,
+              style: TextStyle(
+                color: widget.message.isGreenText
+                    ? actualColor(const Color(0xFF6CA528))
+                    : actualColor(Colors.white),
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => widget.model.toggleHighlightUser(element.user),
             ),
           );
         } else {
@@ -148,7 +179,9 @@ class ItemUserMessage extends StatelessWidget {
             TextSpan(
               text: element.text,
               style: TextStyle(
-                color: message.isGreenText ? const Color(0xFF6CA528) : null,
+                color: widget.message.isGreenText
+                    ? actualColor(const Color(0xFF6CA528))
+                    : actualColor(Colors.white),
               ),
             ),
           );
@@ -156,5 +189,30 @@ class ItemUserMessage extends StatelessWidget {
       }
     }
     return textSpans;
+  }
+
+  bool nickIsContained() {
+    for (var i = 0; i < widget.message.elements.length; i++) {
+      if (widget.message.elements[i] is MentionElement &&
+          (widget.message.elements[i] as MentionElement).user.nick ==
+              widget.model.userHighlighted!.nick) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Color actualColor(Color color) {
+    if (widget.model.isHighlightOn &&
+        widget.message.user.nick != widget.model.userHighlighted!.nick &&
+        !nickIsContained()) return color.withOpacity(0.4);
+    return color;
+  }
+
+  double imageOpacity() {
+    if (widget.model.isHighlightOn &&
+        widget.message.user.nick != widget.model.userHighlighted!.nick &&
+        !nickIsContained()) return 0.4;
+    return 1.0;
   }
 }

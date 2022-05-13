@@ -42,7 +42,8 @@ class UserMessage extends Message {
     String jsonString,
     Flairs flairs,
     Emotes emotes,
-    Function(String, Emotes) createElements, {
+    List<User> users,
+    Function(String, Emotes, List<User>) createElements, {
     String? currentNick,
   }) {
     Map<String, dynamic> map = jsonDecode(jsonString);
@@ -62,7 +63,7 @@ class UserMessage extends Message {
     return UserMessage(
       user: user,
       data: data,
-      elements: createElements(data, emotes),
+      elements: createElements(data, emotes, users),
       visibleFlairs: getVisibleFlairs(user.features, flairs),
       color: getColor(user.features, flairs),
       isMentioned: isMentioned,

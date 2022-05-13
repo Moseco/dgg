@@ -24,6 +24,8 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart'
     as flutter_custom_tabs;
 
+import '../../../datamodels/embeds.dart';
+
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
@@ -73,6 +75,8 @@ class ChatViewModel extends BaseViewModel {
   EmbedType _embedType = EmbedType.TWITCH_STREAM;
   EmbedType get embedType => _embedType;
 
+  bool showChat = true;
+
   DggVote? _currentVote;
   DggVote? get currentVote => _currentVote;
   Timer? _voteTimer;
@@ -101,6 +105,11 @@ class ChatViewModel extends BaseViewModel {
   bool _showEmoteSelector = false;
   bool get showEmoteSelector => _showEmoteSelector;
   List<Emote>? emoteSelectorList;
+
+  bool _isHighlightOn = false;
+  bool get isHighlightOn => _isHighlightOn;
+  User? _userHighlighted;
+  User? get userHighlighted => _userHighlighted;
 
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
@@ -136,6 +145,17 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
+  Future<List<Embed>> getEmbeds() async {
+    List<dynamic> embeds = await _dggService.getEmbeds();
+    List<Embed> embedsList = [];
+
+    for (int i = 0; i < embeds.length; i++) {
+      embedsList.add(Embed.fromJson(embeds[i]));
+    }
+
+    return embedsList;
+  }
+
   void _connectChat() {
     _showReconnectButton = false;
     _messages.add(const StatusMessage(data: "Connecting..."));
@@ -149,7 +169,7 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void _processMessage(String? data) {
-    Message? currentMessage = _dggService.parseWebSocketData(data);
+    Message? currentMessage = _dggService.parseWebSocketData(data, _users);
 
     switch (currentMessage.runtimeType) {
       case NamesMessage:
@@ -217,7 +237,7 @@ class ChatViewModel extends BaseViewModel {
             }
           }
         }
-        //Check if message is stoping a vote
+        //Check if message is stopping a vote
         if (userMessage.data.startsWith(DggVote.voteStopRegex)) {
           if (_dggService.hasVotePermission(userMessage.user.features)) {
             _currentVote = null;
@@ -552,6 +572,22 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
+  void toggleHighlightUser(User user) {
+    if (_isHighlightOn) {
+      _userHighlighted = null;
+    } else {
+      _userHighlighted = user;
+    }
+    _isHighlightOn = !_isHighlightOn;
+    notifyListeners();
+  }
+
+  void disableHighlightUser() {
+    _userHighlighted = null;
+    _isHighlightOn = false;
+    notifyListeners();
+  }
+
   void setShowEmbed(bool value) {
     _showStreamPrompt = false;
     _showEmbed = value;
@@ -845,4 +881,5 @@ enum AppBarActions {
   REFRESH,
   OPEN_DESTINY_STREAM,
   OPEN_TWITCH_STREAM,
+  SHOW_EMBEDS
 }
