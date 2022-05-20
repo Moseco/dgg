@@ -1,5 +1,3 @@
-Trying to add features without knowing Dart, or app development in general.
-
 # Unofficial Dgg chat app
 
 This is an unofficial Dgg chat app built with [Flutter](https://flutter.dev/docs).
