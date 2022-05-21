@@ -4,11 +4,13 @@ import 'dart:io';
 
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
+import 'package:dgg/datamodels/embeds.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/stream_status.dart';
+import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
@@ -16,8 +18,6 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
-
-import '../datamodels/user.dart';
 
 class DggService {
   // Base urls
@@ -33,7 +33,7 @@ class DggService {
   static const String emotesCssPath = r"/emotes/emotes.css";
   static const String historyPath = r"/api/chat/history";
   static const String streamStatusPath = r"/api/info/stream";
-  static const String embedsPath = r"/tools/embeds?t=30";
+  static const String embedsPath = r"/tools/embeds";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
@@ -477,13 +477,17 @@ class DggService {
     }
   }
 
-  Future<List<dynamic>> getEmbeds() async {
-    final response = await http.get(Uri.parse("https://vyneer.me/tools/embeds?t=30"));
+  Future<List<Embed>> getEmbeds() async {
+    final response = await http.get(Uri.https(
+      vyneerBase,
+      embedsPath,
+      {"t": "30"},
+    ));
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return Embeds.fromJson(response.body).embedList;
     } else {
-      return [];
+      return const [];
     }
   }
 

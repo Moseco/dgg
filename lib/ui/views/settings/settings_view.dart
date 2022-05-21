@@ -183,16 +183,6 @@ class SettingsView extends StatelessWidget {
                   Navigator.of(c).pop();
                 },
               ),
-              RadioListTile<int>(
-                title: const Text("Test"),
-                value: 2,
-                groupValue: model.themeIndex,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (int? value) {
-                  model.setTheme(value!);
-                  Navigator.of(c).pop();
-                },
-              ),
             ],
           ),
         ),

@@ -1,18 +1,19 @@
 import 'dart:convert';
 
 class Embeds {
-  final List<Embed> embedsList;
+  final List<Embed> embedList;
 
   const Embeds({
-    required this.embedsList,
+    required this.embedList,
   });
 
   static Embeds fromJson(String jsonString) {
-    var list = jsonDecode(jsonString) as List;
+    List<dynamic> rawEmbedList = jsonDecode(jsonString);
 
-    List<Embed> embeds =  list.map((embed) => Embed.fromJson(embed)).toList();
+    List<Embed> embedList =
+        rawEmbedList.map((embed) => Embed.fromJson(embed)).toList();
 
-    return Embeds(embedsList: embeds);
+    return Embeds(embedList: embedList);
   }
 }
 
@@ -31,13 +32,13 @@ class Embed {
     required this.count,
   });
 
-  static Embed fromJson(dynamic json){
+  static Embed fromJson(dynamic json) {
     return Embed(
-    link: json['link'] as String,
-    platform: json['platform'] as String,
-    channel: json['channel'] as String,
-    title: json['title'] as String,
-    count: json['count'] as int,
+      link: json['link'] as String,
+      platform: json['platform'] as String,
+      channel: json['channel'] as String,
+      title: json['title'] as String,
+      count: json['count'] as int,
     );
   }
 }

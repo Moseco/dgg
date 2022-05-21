@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
+import 'package:dgg/datamodels/embeds.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/message.dart';
@@ -11,6 +12,7 @@ import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
+import 'package:dgg/ui/widgets/setup_dialog_ui.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -23,8 +25,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart'
     as flutter_custom_tabs;
-
-import '../../../datamodels/embeds.dart';
 
 class ChatViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
@@ -74,8 +74,6 @@ class ChatViewModel extends BaseViewModel {
   bool get showEmbed => _showEmbed;
   EmbedType _embedType = EmbedType.TWITCH_STREAM;
   EmbedType get embedType => _embedType;
-
-  bool showChat = true;
 
   DggVote? _currentVote;
   DggVote? get currentVote => _currentVote;
@@ -145,15 +143,8 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  Future<List<Embed>> getEmbeds() async {
-    List<dynamic> embeds = await _dggService.getEmbeds();
-    List<Embed> embedsList = [];
-
-    for (int i = 0; i < embeds.length; i++) {
-      embedsList.add(Embed.fromJson(embeds[i]));
-    }
-
-    return embedsList;
+  Future<List<Embed>> _getEmbeds() async {
+    return _dggService.getEmbeds();
   }
 
   void _connectChat() {
@@ -427,6 +418,34 @@ class ChatViewModel extends BaseViewModel {
       case AppBarActions.OPEN_DESTINY_STREAM:
         _openDestinyStream();
         break;
+      case AppBarActions.OPEN_TWITCH_STREAM:
+        // Prompt user to enter a Twitch channel name and try to open it
+        final response = await _dialogService.showCustomDialog(
+          variant: DialogType.INPUT,
+          title: "Open Twitch stream",
+          description: "Enter the name of the Twitch channel you want to open",
+          barrierDismissible: true,
+        );
+        if (response != null && response.data != null) {
+          setStreamChannelManual(response.data);
+        }
+        break;
+      case AppBarActions.TOGGLE_EMBED:
+        setShowEmbed(!_showEmbed);
+        break;
+      case AppBarActions.GET_RECENT_EMBEDS:
+        // Get top embeds from past 30 minutes and allow user to select one
+        final response = await _dialogService.showCustomDialog(
+          variant: DialogType.SELECT_OPTION_FUTURE,
+          title: "Recent embeds",
+          description: "Select an embed to open it",
+          data: _getEmbeds(),
+          barrierDismissible: true,
+        );
+        if (response != null && response.data != null) {
+          setEmbed(response.data.channel, response.data.platform);
+        }
+        break;
       default:
         print("ERROR: Invalid chat menu item");
     }
@@ -594,8 +613,8 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setStreamChannelManual(List<String>? channel) {
-    if (channel != null && channel[0].trim().isNotEmpty) {
+  void setStreamChannelManual(String channel) {
+    if (channel.trim().isNotEmpty) {
       setEmbed(channel[0], "twitch");
     }
   }
@@ -643,7 +662,10 @@ class ChatViewModel extends BaseViewModel {
         _embedType = EmbedType.TWITCH_CLIP;
         break;
       default:
-        break;
+        _snackbarService.showSnackbar(
+          message: "$embedType is not currently supported",
+        );
+        return;
     }
     //Show the stream embed
     setShowEmbed(true);
@@ -751,7 +773,7 @@ class ChatViewModel extends BaseViewModel {
     // Open default stream platform
     if (_sharedPreferencesService.getDefaultStream() == 0) {
       // Open Destiny's stream on Twitch
-      setStreamChannelManual(["destiny"]);
+      setStreamChannelManual("destiny");
     } else {
       // Open Destiny's stream on YouTube
       StreamStatus streamStatus = await _dggService.getStreamStatus();
@@ -881,5 +903,6 @@ enum AppBarActions {
   REFRESH,
   OPEN_DESTINY_STREAM,
   OPEN_TWITCH_STREAM,
-  SHOW_EMBEDS
+  GET_RECENT_EMBEDS,
+  TOGGLE_EMBED,
 }
