@@ -46,7 +46,7 @@ class ChatViewModel extends BaseViewModel {
   StreamSubscription? _chatSubscription;
   final List<Message> _messages = [];
   List<Message> get messages => _isListAtBottom ? _messages : _pausedMessages;
-  List<User> _users = [];
+  final Map<String, User> _userMap = {};
   bool _isChatConnected = false;
   bool get isChatConnected => _isChatConnected;
   bool _isListAtBottom = true;
@@ -104,10 +104,9 @@ class ChatViewModel extends BaseViewModel {
   bool get showEmoteSelector => _showEmoteSelector;
   List<Emote>? emoteSelectorList;
 
-  bool _isHighlightOn = false;
-  bool get isHighlightOn => _isHighlightOn;
   User? _userHighlighted;
   User? get userHighlighted => _userHighlighted;
+  bool get isHighlightOn => _userHighlighted != null;
 
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
@@ -149,6 +148,7 @@ class ChatViewModel extends BaseViewModel {
 
   void _connectChat() {
     _showReconnectButton = false;
+    _userMap.clear();
     _messages.add(const StatusMessage(data: "Connecting..."));
     notifyListeners();
     _chatSubscription?.cancel();
@@ -160,17 +160,30 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void _processMessage(String? data) {
-    Message? currentMessage = _dggService.parseWebSocketData(data, _users);
+    String dataString = data.toString();
+    int spaceIndex = dataString.indexOf(' ');
+    String key = dataString.substring(0, spaceIndex);
+    String jsonString = dataString.substring(spaceIndex + 1);
 
-    switch (currentMessage.runtimeType) {
-      case NamesMessage:
+    switch (key) {
+      case "NAMES":
+        final namesMessage = NamesMessage.fromJson(jsonString);
         _isChatConnected = true;
-        _users = (currentMessage as NamesMessage).users;
-        _messages
-            .add(StatusMessage(data: "Connected with ${_users.length} users"));
+        for (var user in namesMessage.users) {
+          _userMap[user.nick] = user;
+        }
+        _messages.add(
+          StatusMessage(data: "Connected with ${_userMap.length} users"),
+        );
         break;
-      case UserMessage:
-        UserMessage userMessage = currentMessage as UserMessage;
+      case "MSG":
+        final userMessage = UserMessage.fromJson(
+          jsonString,
+          _dggService.flairs,
+          _dggService.emotes,
+          _userMap,
+          _dggService.currentNick,
+        );
         if (_flairEnabled) {
           //for each flair, check if it needs to be loaded
           for (var flair in userMessage.visibleFlairs) {
@@ -254,18 +267,21 @@ class ChatViewModel extends BaseViewModel {
           _messages.add(userMessage);
         }
         break;
-      case JoinMessage:
-        _users.add((currentMessage as JoinMessage).user);
+      case "JOIN":
+        final joinMessage = JoinMessage.fromJson(jsonString);
+        _userMap[joinMessage.user.nick] = joinMessage.user;
         break;
-      case QuitMessage:
-        _users.remove((currentMessage as QuitMessage).user);
+      case "QUIT":
+        final quitMessage = QuitMessage.fromJson(jsonString);
+        _userMap.remove(quitMessage.user.nick);
         break;
-      case BroadcastMessage:
-        _messages.add(currentMessage!);
+      case "BROADCAST":
+        final broadcastMessage = BroadcastMessage.fromJson(jsonString);
+        _messages.add(broadcastMessage);
         break;
-      case MuteMessage:
+      case "MUTE":
         //Go through up to previous 10 messages and censor messages from muted user
-        MuteMessage muteMessage = currentMessage as MuteMessage;
+        final muteMessage = MuteMessage.fromJson(jsonString);
         int lengthToCheck = _messages.length >= 11 ? 11 : _messages.length;
         for (int i = 1; i < lengthToCheck; i++) {
           Message msg = _messages[_messages.length - i];
@@ -278,32 +294,34 @@ class ChatViewModel extends BaseViewModel {
         _messages.add(StatusMessage(
             data: "${muteMessage.data} muted by ${muteMessage.nick}"));
         break;
-      case UnmuteMessage:
-        UnmuteMessage unmuteMessage = currentMessage as UnmuteMessage;
+      case "UNMUTE":
+        final unmuteMessage = UnmuteMessage.fromJson(jsonString);
         _messages.add(StatusMessage(
             data: "${unmuteMessage.data} unmuted by ${unmuteMessage.nick}"));
         break;
-      case BanMessage:
-        BanMessage banMessage = currentMessage as BanMessage;
+      case "BAN":
+        final banMessage = BanMessage.fromJson(jsonString);
         _messages.add(StatusMessage(
             data: "${banMessage.data} banned by ${banMessage.nick}"));
         break;
-      case UnbanMessage:
-        UnbanMessage unbanMessage = currentMessage as UnbanMessage;
+      case "UNBAN":
+        final unbanMessage = UnbanMessage.fromJson(jsonString);
         _messages.add(StatusMessage(
             data: "${unbanMessage.data} unbanned by ${unbanMessage.nick}"));
         break;
-      case StatusMessage:
-        _messages.add(currentMessage!);
+      case "REFRESH":
+        _messages.add(
+          const StatusMessage(data: "Being disconnected by server..."),
+        );
         break;
-      case SubOnlyMessage:
-        SubOnlyMessage subOnlyMessage = currentMessage as SubOnlyMessage;
+      case "SUBONLY":
+        final subOnlyMessage = SubOnlyMessage.fromJson(jsonString);
         String subMode = subOnlyMessage.data == 'on' ? 'enabled' : 'disabled';
         _messages.add(StatusMessage(
             data: "Subscriber only mode $subMode by ${subOnlyMessage.nick}"));
         break;
-      case ErrorMessage:
-        ErrorMessage errorMessage = currentMessage as ErrorMessage;
+      case "ERR":
+        final errorMessage = ErrorMessage.fromJson(jsonString);
         if (errorMessage.description == "banned") {
           _messages.add(const StatusMessage(
             data:
@@ -332,6 +350,7 @@ class ChatViewModel extends BaseViewModel {
         }
         break;
       default:
+        print(data);
         break;
     }
 
@@ -537,7 +556,7 @@ class ChatViewModel extends BaseViewModel {
         });
 
         //check user names
-        for (var user in _users) {
+        for (var user in _userMap.values) {
           if (user.nick.startsWith(lastWordRegex)) {
             newSuggestions.add(user.nick);
           }
@@ -591,19 +610,13 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  void toggleHighlightUser(User user) {
-    if (_isHighlightOn) {
-      _userHighlighted = null;
-    } else {
-      _userHighlighted = user;
-    }
-    _isHighlightOn = !_isHighlightOn;
+  void enableHighlightUser(User user) {
+    _userHighlighted = user;
     notifyListeners();
   }
 
   void disableHighlightUser() {
     _userHighlighted = null;
-    _isHighlightOn = false;
     notifyListeners();
   }
 

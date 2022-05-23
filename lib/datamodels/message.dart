@@ -4,6 +4,8 @@ import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
+import 'package:dgg/utils/constants.dart';
+import 'package:flutter/material.dart' show visibleForTesting;
 
 abstract class Message {
   const Message();
@@ -42,10 +44,9 @@ class UserMessage extends Message {
     String jsonString,
     Flairs flairs,
     Emotes emotes,
-    List<User> users,
-    Function(String, Emotes, List<User>) createElements, {
+    Map<String, User> userMap,
     String? currentNick,
-  }) {
+  ) {
     Map<String, dynamic> map = jsonDecode(jsonString);
 
     String data = map['data'] as String;
@@ -63,7 +64,7 @@ class UserMessage extends Message {
     return UserMessage(
       user: user,
       data: data,
-      elements: createElements(data, emotes, users),
+      elements: createElements(data, emotes, userMap),
       visibleFlairs: getVisibleFlairs(user.features, flairs),
       color: getColor(user.features, flairs),
       isMentioned: isMentioned,
@@ -96,6 +97,148 @@ class UserMessage extends Message {
     }
 
     return visibleFlairs;
+  }
+
+  @visibleForTesting
+  static List<UserMessageElement> createElements(
+    String text,
+    Emotes emotes,
+    Map<String, User> userMap,
+  ) {
+    if (text.isEmpty) {
+      return [];
+    }
+
+    List<UserMessageElement> elements = [TextElement(text)];
+
+    // Parse urls
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i] is TextElement) {
+        RegExpMatch? match = Constants.urlRegex.firstMatch(elements[i].text);
+        if (match != null) {
+          String currentText = elements[i].text;
+          String url = currentText.substring(match.start, match.end);
+          int insertIndex = i + 1;
+          if (match.start > 0) {
+            elements[i] = TextElement(currentText.substring(0, match.start));
+            elements.insert(insertIndex++, UrlElement(url));
+          } else {
+            elements[i] = UrlElement(url);
+          }
+
+          if (match.end < currentText.length) {
+            elements.insert(
+              insertIndex,
+              TextElement(currentText.substring(match.end)),
+            );
+          }
+        }
+      }
+    }
+
+    // Parse emotes if available
+    if (emotes.emoteMap.isNotEmpty) {
+      for (var i = 0; i < elements.length; i++) {
+        if (elements[i] is TextElement) {
+          RegExpMatch? match = emotes.emoteRegex.firstMatch(elements[i].text);
+          if (match != null) {
+            String currentText = elements[i].text;
+            String emoteName = currentText.substring(match.start, match.end);
+            int insertIndex = i + 1;
+            if (match.start > 0) {
+              elements[i] = TextElement(currentText.substring(0, match.start));
+              elements.insert(insertIndex++,
+                  EmoteElement(emoteName, emotes.emoteMap[emoteName]!));
+            } else {
+              elements[i] =
+                  EmoteElement(emoteName, emotes.emoteMap[emoteName]!);
+            }
+
+            if (match.end < currentText.length) {
+              elements.insert(
+                insertIndex,
+                TextElement(currentText.substring(match.end)),
+              );
+            }
+          }
+        }
+      }
+    }
+
+    // Parse embed urls
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i] is TextElement) {
+        RegExpMatch? match =
+            Constants.embedUrlRegex.firstMatch(elements[i].text);
+        if (match != null) {
+          String currentText = elements[i].text;
+          String embedUrl = currentText.substring(match.start, match.end);
+          int insertIndex = i + 1;
+          String channel = embedUrl.substring(embedUrl.indexOf('/') + 1);
+          String embedType = embedUrl.substring(1, embedUrl.indexOf('/'));
+          if (match.start > 0) {
+            elements[i] = TextElement(currentText.substring(0, match.start));
+            elements.insert(
+                insertIndex++, EmbedUrlElement(embedUrl, channel, embedType));
+          } else {
+            elements[i] = EmbedUrlElement(embedUrl, channel, embedType);
+          }
+
+          if (match.end < currentText.length) {
+            elements.insert(
+              insertIndex,
+              TextElement(currentText.substring(match.end)),
+            );
+          }
+        }
+      }
+    }
+
+    // Parse mentions
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i] is TextElement) {
+        Iterator<RegExpMatch> matches =
+            Constants.mentionRegex.allMatches(elements[i].text).iterator;
+        String currentText = elements[i].text;
+
+        while (matches.moveNext()) {
+          RegExpMatch match = matches.current;
+          RegExpMatch? nickMatch = Constants.nickRegex.firstMatch(
+            match.input.substring(match.start, match.end),
+          );
+          if (nickMatch == null) {
+            continue;
+          }
+          String mentionedNick = nickMatch.input.substring(
+            nickMatch.start,
+            nickMatch.end,
+          );
+          User? user = userMap[mentionedNick];
+          if (user != null) {
+            int insertIndex = i + 1;
+            if (nickMatch.start > 0) {
+              elements[i] = TextElement(
+                  currentText.substring(0, match.start + nickMatch.start));
+              elements.insert(insertIndex++,
+                  MentionElement(mentionedNick, userMap[mentionedNick]!));
+            } else {
+              elements[i] =
+                  MentionElement(mentionedNick, userMap[mentionedNick]!);
+            }
+
+            if (match.end < currentText.length) {
+              elements.insert(
+                insertIndex,
+                TextElement(currentText.substring(match.end)),
+              );
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    return elements;
   }
 }
 

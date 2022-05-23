@@ -49,20 +49,22 @@ class ChatList extends ViewModelWidget<ChatViewModel> {
                 message: currentMessage,
                 textFontSize: viewModel.textFontSize,
                 iconSize: viewModel.iconSize,
+                isHighlightOn: viewModel.isHighlightOn,
                 key: ValueKey<int>(messageIndex),
               );
             } else if (currentMessage is BroadcastMessage) {
               return ItemBroadcastMessage(
                 message: currentMessage,
                 textFontSize: viewModel.textFontSize,
+                isHighlightOn: viewModel.isHighlightOn,
                 key: ValueKey<int>(messageIndex),
               );
             } else if (currentMessage is ComboMessage) {
               return ItemComboMessage(
-                isHighlightOn: viewModel.isHighlightOn,
                 message: currentMessage,
                 textFontSize: viewModel.textFontSize,
                 emoteHeight: viewModel.emoteHeight,
+                isHighlightOn: viewModel.isHighlightOn,
                 key: ValueKey<int>(messageIndex),
               );
             } else {

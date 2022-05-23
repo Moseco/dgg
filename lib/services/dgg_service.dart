@@ -7,12 +7,9 @@ import 'package:dgg/datamodels/auth_info.dart';
 import 'package:dgg/datamodels/embeds.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
-import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/stream_status.dart';
-import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/services/image_service.dart';
-import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
@@ -39,7 +36,6 @@ class DggService {
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
-  final _userMessageElementsService = locator<UserMessageElementsService>();
   final _imageService = locator<ImageService>();
 
   //Authentication information
@@ -47,6 +43,7 @@ class DggService {
   SessionInfo? _sessionInfo;
   SessionInfo? get sessionInfo => _sessionInfo;
   String? _currentNick;
+  String? get currentNick => _currentNick;
   bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
@@ -127,57 +124,6 @@ class DggService {
   Future<void> closeWebSocketConnection() async {
     await _webSocketChannel?.sink.close(status.goingAway);
     _webSocketChannel = null;
-  }
-
-  Message? parseWebSocketData(String? data, List<User> users) {
-    String dataString = data.toString();
-    int spaceIndex = dataString.indexOf(' ');
-    String key = dataString.substring(0, spaceIndex);
-    String jsonString = dataString.substring(spaceIndex + 1);
-
-    switch (key) {
-      case "NAMES":
-        return NamesMessage.fromJson(jsonString);
-      case "MSG":
-        return UserMessage.fromJson(
-          jsonString,
-          flairs,
-          emotes,
-          users,
-          _userMessageElementsService.createMessageElements,
-          currentNick: _currentNick,
-        );
-      case "JOIN":
-        return JoinMessage.fromJson(jsonString);
-      case "QUIT":
-        return QuitMessage.fromJson(jsonString);
-      case "BROADCAST":
-        return BroadcastMessage.fromJson(jsonString);
-      case "MUTE":
-        return MuteMessage.fromJson(jsonString);
-      case "UNMUTE":
-        return UnmuteMessage.fromJson(jsonString);
-      case "BAN":
-        return BanMessage.fromJson(jsonString);
-      case "UNBAN":
-        return UnbanMessage.fromJson(jsonString);
-      case "REFRESH":
-        return const StatusMessage(data: "Being disconnected by server...");
-      case "SUBONLY":
-        return SubOnlyMessage.fromJson(jsonString);
-      case "ERR":
-        return ErrorMessage.fromJson(jsonString);
-      // // Other possible types
-      // case "PING":
-      //   break;
-      // case "PONG":
-      //   break;
-      // case "PRIVMSG":
-      //   break;
-      default:
-        print(data);
-        return null;
-    }
   }
 
   Future<void> getAssets() async {
