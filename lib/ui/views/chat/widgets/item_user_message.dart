@@ -24,6 +24,7 @@ class ItemUserMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onLongPress: () => model.onUserMessageLongPress(message),
       onTap: model.disableHighlightUser,
       child: Opacity(
