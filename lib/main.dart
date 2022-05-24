@@ -1,5 +1,6 @@
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
+import 'package:dgg/ui/widgets/setup_dialog_ui.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ Future<void> main() async {
   await ThemeManager.initialise();
   await locator<SharedPreferencesService>().initialize();
   setupBottomSheetUi();
+  setupDialogUi();
   runApp(const App());
 }
 

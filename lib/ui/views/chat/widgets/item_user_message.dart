@@ -25,19 +25,23 @@ class ItemUserMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => model.onUserMessageLongPress(message),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        color: _getBackgroundColor(),
-        child: ExcludeSemantics(
-          // There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
-          //    Problem only happens on iOS so need different approach on Android/iOS
-          //    https://github.com/flutter/flutter/issues/51936
-          excluding: Platform.isIOS,
-          child: RichText(
-            text: TextSpan(
-              style: TextStyle(fontSize: model.textFontSize),
-              children: getMessageTextSpans(context),
+      onTap: model.disableHighlightUser,
+      child: Opacity(
+        opacity: _getOpacity(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          color: _getBackgroundColor(),
+          child: ExcludeSemantics(
+            // There is a problem with using a GestureRecognizer on a TextSpan if there is a WidgetSpan with it
+            //    Problem only happens on iOS so need different approach on Android/iOS
+            //    https://github.com/flutter/flutter/issues/51936
+            excluding: Platform.isIOS,
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: model.textFontSize),
+                children: getMessageTextSpans(context),
+              ),
             ),
           ),
         ),
@@ -93,6 +97,8 @@ class ItemUserMessage extends StatelessWidget {
           fontWeight: FontWeight.bold,
           color: message.color == null ? null : Color(message.color!),
         ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () => model.enableHighlightUser(message.user),
       ),
       const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
     ]);
@@ -143,6 +149,15 @@ class ItemUserMessage extends StatelessWidget {
                     () => model.setEmbed(element.embedId, element.embedType),
             ),
           );
+        } else if (element is MentionElement) {
+          textSpans.add(
+            TextSpan(
+              text: element.text,
+              style: const TextStyle(decoration: TextDecoration.underline),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => model.enableHighlightUser(element.user),
+            ),
+          );
         } else {
           textSpans.add(
             TextSpan(
@@ -156,5 +171,25 @@ class ItemUserMessage extends StatelessWidget {
       }
     }
     return textSpans;
+  }
+
+  double _getOpacity() {
+    if (model.isHighlightOn &&
+        message.user.nick != model.userHighlighted!.nick &&
+        !_isUserMentioned()) {
+      return 0.4;
+    }
+    return 1.0;
+  }
+
+  bool _isUserMentioned() {
+    for (var i = 0; i < message.elements.length; i++) {
+      if (message.elements[i] is MentionElement &&
+          (message.elements[i] as MentionElement).user.nick ==
+              model.userHighlighted!.nick) {
+        return true;
+      }
+    }
+    return false;
   }
 }

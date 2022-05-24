@@ -4,13 +4,12 @@ import 'dart:io';
 
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/datamodels/auth_info.dart';
+import 'package:dgg/datamodels/embeds.dart';
 import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
-import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/stream_status.dart';
 import 'package:dgg/services/image_service.dart';
-import 'package:dgg/services/user_message_elements_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
@@ -21,6 +20,7 @@ class DggService {
   // Base urls
   static const String dggBase = r"destiny.gg";
   static const String dggCdnBase = r"cdn.destiny.gg";
+  static const String vyneerBase = r"vyneer.me";
   // Url endpoints
   static const String sessionInfoPath = r"/api/chat/me";
   static const String userInfoPath = r"/api/userinfo";
@@ -30,12 +30,12 @@ class DggService {
   static const String emotesCssPath = r"/emotes/emotes.css";
   static const String historyPath = r"/api/chat/history";
   static const String streamStatusPath = r"/api/info/stream";
+  static const String embedsPath = r"/tools/embeds";
 
   // Dgg websocket url
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
-  final _userMessageElementsService = locator<UserMessageElementsService>();
   final _imageService = locator<ImageService>();
 
   //Authentication information
@@ -43,6 +43,7 @@ class DggService {
   SessionInfo? _sessionInfo;
   SessionInfo? get sessionInfo => _sessionInfo;
   String? _currentNick;
+  String? get currentNick => _currentNick;
   bool get isSignedIn => _sessionInfo is Available;
 
   //Assets
@@ -123,56 +124,6 @@ class DggService {
   Future<void> closeWebSocketConnection() async {
     await _webSocketChannel?.sink.close(status.goingAway);
     _webSocketChannel = null;
-  }
-
-  Message? parseWebSocketData(String? data) {
-    String dataString = data.toString();
-    int spaceIndex = dataString.indexOf(' ');
-    String key = dataString.substring(0, spaceIndex);
-    String jsonString = dataString.substring(spaceIndex + 1);
-
-    switch (key) {
-      case "NAMES":
-        return NamesMessage.fromJson(jsonString);
-      case "MSG":
-        return UserMessage.fromJson(
-          jsonString,
-          flairs,
-          emotes,
-          _userMessageElementsService.createMessageElements,
-          currentNick: _currentNick,
-        );
-      case "JOIN":
-        return JoinMessage.fromJson(jsonString);
-      case "QUIT":
-        return QuitMessage.fromJson(jsonString);
-      case "BROADCAST":
-        return BroadcastMessage.fromJson(jsonString);
-      case "MUTE":
-        return MuteMessage.fromJson(jsonString);
-      case "UNMUTE":
-        return UnmuteMessage.fromJson(jsonString);
-      case "BAN":
-        return BanMessage.fromJson(jsonString);
-      case "UNBAN":
-        return UnbanMessage.fromJson(jsonString);
-      case "REFRESH":
-        return const StatusMessage(data: "Being disconnected by server...");
-      case "SUBONLY":
-        return SubOnlyMessage.fromJson(jsonString);
-      case "ERR":
-        return ErrorMessage.fromJson(jsonString);
-      // // Other possible types
-      // case "PING":
-      //   break;
-      // case "PONG":
-      //   break;
-      // case "PRIVMSG":
-      //   break;
-      default:
-        print(data);
-        return null;
-    }
   }
 
   Future<void> getAssets() async {
@@ -472,6 +423,20 @@ class DggService {
     }
   }
 
+  Future<List<Embed>> getEmbeds() async {
+    final response = await http.get(Uri.https(
+      vyneerBase,
+      embedsPath,
+      {"t": "30"},
+    ));
+
+    if (response.statusCode == 200) {
+      return Embeds.fromJson(response.body).embedList;
+    } else {
+      return const [];
+    }
+  }
+
   Future<StreamStatus> getStreamStatus() async {
     final response = await http.get(Uri.https(dggBase, streamStatusPath));
 
@@ -481,7 +446,7 @@ class DggService {
       return StreamStatus(
         twitchLive: json["data"]?["streams"]?["twitch"]?["live"] ?? false,
         youtubeLive: json["data"]?["streams"]?["youtube"]?["live"] ?? false,
-        youtubeId: json["data"]?["streams"]?["youtube"]?["videoId"],
+        youtubeId: json["data"]?["streams"]?["youtube"]?["id"],
       );
     } else {
       return const StreamStatus(twitchLive: false, youtubeLive: false);
