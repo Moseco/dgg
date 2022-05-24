@@ -83,17 +83,20 @@ class DggVote {
     );
   }
 
-  void castVote(String nick, int option, List<String> features) {
+  bool castVote(String nick, int option, List<String> features) {
+    // Check if user has already voted
     if (!voters.containsKey(nick)) {
-      //Voter has not voted, count it
       voters[nick] = true;
       if (!isSubVote) {
-        //Not sub vote, all votes count as 1
+        // Not sub vote, all votes count as 1
         voteCount[option - 1]++;
       } else {
-        //Is subvote, multiply accordinly
+        // Is subvote, multiply accordingly
         voteCount[option - 1] += calculateSubVote(features);
       }
+      return true;
+    } else {
+      return false;
     }
   }
 

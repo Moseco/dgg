@@ -275,8 +275,14 @@ class ChatViewModel extends BaseViewModel {
           if (temp.isEmpty && userMessage.data.length < 3) {
             int vote = int.parse(userMessage.data);
             if (vote > 0 && vote <= _currentVote!.options.length) {
-              _currentVote!.castVote(
-                  userMessage.user.nick, vote, userMessage.user.features);
+              // Cast vote and if it counted break so message is not shown
+              if (_currentVote!.castVote(
+                userMessage.user.nick,
+                vote,
+                userMessage.user.features,
+              )) {
+                break;
+              }
             }
           }
         }
