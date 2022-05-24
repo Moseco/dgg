@@ -9,7 +9,6 @@ import 'package:dgg/datamodels/emotes.dart';
 import 'package:dgg/datamodels/flairs.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/datamodels/stream_status.dart';
-import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
@@ -36,7 +35,6 @@ class DggService {
   static const String webSocketUrl = r"wss://chat.destiny.gg/ws";
 
   final _sharedPreferencesService = locator<SharedPreferencesService>();
-  final _imageService = locator<ImageService>();
 
   //Authentication information
   AuthInfo? _authInfo;
@@ -45,16 +43,6 @@ class DggService {
   String? _currentNick;
   String? get currentNick => _currentNick;
   bool get isSignedIn => _sessionInfo is Available;
-
-  //Assets
-  bool _assetsLoaded = false;
-  bool get assetsLoaded => _assetsLoaded;
-  late Flairs flairs;
-  late Emotes emotes;
-  bool _loadingEmote = false;
-  final List<Emote> _emoteLoadQueue = [];
-  bool _loadingFlair = false;
-  final List<Flair> _flairLoadQueue = [];
 
   //Dgg chat websocket
   WebSocketChannel? _webSocketChannel;
@@ -126,71 +114,80 @@ class DggService {
     _webSocketChannel = null;
   }
 
-  Future<void> getAssets() async {
-    //First get cache key
-    String? dggCacheKey;
+  Future<String?> fetchDggCacheKey() async {
     final response = await http.get(Uri.https(dggBase, chatPath));
 
     if (response.statusCode == 200) {
       int cacheIndexStart = response.body.indexOf("data-cache-key=\"") + 16;
+      if (cacheIndexStart == -1) {
+        return null;
+      }
+
       int cacheIndexEnd = response.body.indexOf('"', cacheIndexStart);
-      dggCacheKey = response.body.substring(cacheIndexStart, cacheIndexEnd);
+      if (cacheIndexEnd == -1) {
+        return null;
+      }
+
+      return response.body.substring(cacheIndexStart, cacheIndexEnd);
     }
 
+    return null;
+  }
+
+  Future<Flairs> fetchFlairs(String? cacheKey) async {
     late Uri flairsUri;
+
+    if (cacheKey != null) {
+      flairsUri = Uri.https(dggCdnBase, flairsPath, {"_": cacheKey});
+    } else {
+      flairsUri = Uri.https(dggCdnBase, flairsPath);
+    }
+
+    final response = await http.get(flairsUri);
+
+    if (response.statusCode == 200) {
+      return Flairs.fromJson(response.body);
+    } else {
+      return Flairs.empty();
+    }
+  }
+
+  Future<Emotes> fetchEmotes(String? cacheKey) async {
     late Uri emotesUri;
     late Uri emotesCssUri;
 
-    if (dggCacheKey != null) {
-      flairsUri = Uri.https(dggCdnBase, flairsPath, {"_": dggCacheKey});
-      emotesUri = Uri.https(dggCdnBase, emotesPath, {"_": dggCacheKey});
-      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath, {"_": dggCacheKey});
+    if (cacheKey != null) {
+      emotesUri = Uri.https(dggCdnBase, emotesPath, {"_": cacheKey});
+      emotesCssUri = Uri.https(dggCdnBase, emotesCssPath, {"_": cacheKey});
     } else {
-      flairsUri = Uri.https(dggCdnBase, flairsPath);
       emotesUri = Uri.https(dggCdnBase, emotesPath);
       emotesCssUri = Uri.https(dggCdnBase, emotesCssPath);
     }
 
-    //Get assets based on url
-    await getFlairs(flairsUri);
-    await getEmotes(emotesUri, emotesCssUri);
-    await _imageService.validateCache(dggCacheKey);
-    _assetsLoaded = true;
-  }
-
-  Future<void> getFlairs(Uri flairsUri) async {
-    final response = await http.get(flairsUri);
-
-    if (response.statusCode == 200) {
-      flairs = Flairs.fromJson(response.body);
-    } else {
-      flairs = Flairs.empty();
-    }
-  }
-
-  Future<void> getEmotes(Uri emotesUri, Uri emotesCssUri) async {
     final response = await http.get(emotesUri);
 
     if (response.statusCode == 200) {
-      emotes = Emotes.fromJson(response.body);
+      Emotes emotes = Emotes.fromJson(response.body);
 
-      await _getEmoteCss(emotesCssUri);
+      await _fetchEmoteCss(emotesCssUri, emotes);
+
+      return emotes;
     } else {
-      emotes = Emotes.empty();
+      return Emotes.empty();
     }
   }
 
-  Future<void> _getEmoteCss(Uri emotesCssUri) async {
+  Future<void> _fetchEmoteCss(Uri emotesCssUri, Emotes emotes) async {
     if (emotes.emoteMap.isNotEmpty) {
       final response = await http.get(emotesCssUri);
 
       if (response.statusCode == 200) {
-        _parseCss(response.body);
+        _parseCss(response.body, emotes);
       }
     }
   }
 
-  void _parseCss(String source) {
+  void _parseCss(String source, Emotes emotes) {
     //Split css file by lines
     List<String> lines = const LineSplitter().convert(source);
 
@@ -306,83 +303,6 @@ class DggService {
     } catch (_) {
       // Most likely encountered a double or int parse error
       return null;
-    }
-  }
-
-  Future<void> clearAssets() async {
-    await closeWebSocketConnection();
-    _assetsLoaded = false;
-  }
-
-  Future<void> loadEmote(Emote emote, {bool fromQueue = false}) async {
-    bool loaded = false;
-    // Check if emote has already been loaded before trying to load it
-    if (emote.image == null) {
-      // Set loading to true for current emote so additional copies are not put in the queue
-      emote.loading = true;
-      if (_loadingEmote) {
-        // Another emote is already being loaded, add current to the queue
-        _emoteLoadQueue.add(emote);
-      } else {
-        // Load emote
-        _loadingEmote = true;
-        emote.image = await _imageService.loadAndProcessEmote(emote);
-
-        emote.loading = false;
-        _loadingEmote = false;
-        loaded = true;
-      }
-    }
-
-    // If load request came from queue and emote is loaded, remove it
-    if (fromQueue && emote.image != null) {
-      _emoteLoadQueue.removeAt(0);
-    }
-
-    // If loaded emote and still have emotes in the queue, start loading the next one
-    if (loaded && _emoteLoadQueue.isNotEmpty) {
-      loadEmote(_emoteLoadQueue.first, fromQueue: true);
-    }
-  }
-
-  Future<void> loadFlair(Flair flair) async {
-    // Check if flair has already been loaded before trying to load it
-    if (flair.image == null) {
-      if (_loadingFlair) {
-        // Another flair is already being loaded, add current to the queue
-        _flairLoadQueue.add(flair);
-      } else {
-        // Load flair
-        _loadingFlair = true;
-
-        flair.loading = true;
-        flair.image = await _imageService.loadAndProcessFlair(flair);
-        // Only set loading to false if flair load worked
-        //    Allows it to try again next time flair is seen
-        if (flair.image != null) {
-          flair.loading = false;
-        }
-
-        _loadingFlair = false;
-        if (_flairLoadQueue.isNotEmpty) {
-          // Remove the next flair from the queue and start loading it
-          Flair nextToLoad = _flairLoadQueue[0];
-          _flairLoadQueue.removeAt(0);
-          loadFlair(nextToLoad);
-        }
-      }
-    } else if (_flairLoadQueue.isNotEmpty) {
-      if (flair.name == _flairLoadQueue[0].name) {
-        // Current flair is already loaded and is next in the queue, remove it
-        _flairLoadQueue.removeAt(0);
-      }
-
-      if (_flairLoadQueue.isNotEmpty) {
-        // Remove the next flair from the queue and start loading it
-        Flair nextToLoad = _flairLoadQueue[0];
-        _flairLoadQueue.removeAt(0);
-        loadFlair(nextToLoad);
-      }
     }
   }
 

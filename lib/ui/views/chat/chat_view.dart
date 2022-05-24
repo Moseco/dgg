@@ -28,7 +28,7 @@ class ChatView extends StatelessWidget {
                   backgroundColor:
                       viewModel.appBarTheme == 1 ? Colors.transparent : null,
                   elevation: viewModel.appBarTheme == 1 ? 0 : null,
-                  actions: viewModel.isAssetsLoaded
+                  actions: viewModel.assetsLoaded
                       ? <Widget>[
                           IconButton(
                             icon: viewModel.showEmbed

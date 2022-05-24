@@ -10,6 +10,7 @@ import 'package:dgg/datamodels/message.dart';
 import 'package:dgg/datamodels/stream_status.dart';
 import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
+import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
 import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
 import 'package:dgg/ui/widgets/setup_dialog_ui.dart';
@@ -33,15 +34,24 @@ class ChatViewModel extends BaseViewModel {
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
   final _dialogService = locator<DialogService>();
+  final _imageService = locator<ImageService>();
 
   late WebViewController webViewController;
   YoutubePlayerController? youtubePlayerController;
   final chatInputController = TextEditingController();
 
-  bool get isLoading => isAuthenticating || !isAssetsLoaded;
+  bool get isLoading => isAuthenticating || !_assetsLoaded;
   bool get isAuthenticating => _dggService.sessionInfo == null;
-  bool get isAssetsLoaded => _dggService.assetsLoaded;
   bool get isSignedIn => _dggService.isSignedIn;
+
+  bool _assetsLoaded = false;
+  bool get assetsLoaded => _assetsLoaded;
+  late Flairs _flairs;
+  late Emotes _emotes;
+  bool _loadingEmote = false;
+  final List<Emote> _emoteLoadQueue = [];
+  bool _loadingFlair = false;
+  final List<Flair> _flairLoadQueue = [];
 
   StreamSubscription? _chatSubscription;
   final List<Message> _messages = [];
@@ -123,7 +133,7 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
     await _getSessionInfo();
     _getStreamStatus();
-    await _dggService.getAssets();
+    await _loadAssets();
     await _getChatHistory();
     _connectChat();
     _showChangelog();
@@ -132,6 +142,15 @@ class ChatViewModel extends BaseViewModel {
   Future<void> _getSessionInfo() async {
     await _dggService.getSessionInfo();
     notifyListeners();
+  }
+
+  Future<void> _loadAssets() async {
+    String? cacheKey = await _dggService.fetchDggCacheKey();
+
+    _flairs = await _dggService.fetchFlairs(cacheKey);
+    _emotes = await _dggService.fetchEmotes(cacheKey);
+    await _imageService.validateCache(cacheKey);
+    _assetsLoaded = true;
   }
 
   Future<void> _getChatHistory() async {
@@ -179,8 +198,8 @@ class ChatViewModel extends BaseViewModel {
       case "MSG":
         final userMessage = UserMessage.fromJson(
           jsonString,
-          _dggService.flairs,
-          _dggService.emotes,
+          _flairs,
+          _emotes,
           _userMap,
           _dggService.currentNick,
         );
@@ -381,14 +400,68 @@ class ChatViewModel extends BaseViewModel {
     _connectChat();
   }
 
-  Future<void> _loadEmote(Emote emote) async {
-    await _dggService.loadEmote(emote);
-    notifyListeners();
+  Future<void> _loadEmote(Emote emote, {bool fromQueue = false}) async {
+    bool loaded = false;
+    // Check if emote has already been loaded before trying to load it
+    if (emote.image == null) {
+      // Set loading to true for current emote so additional copies are not put in the queue
+      emote.loading = true;
+      if (_loadingEmote) {
+        // Another emote is already being loaded, add current to the queue
+        _emoteLoadQueue.add(emote);
+      } else {
+        // Load emote
+        _loadingEmote = true;
+        emote.image = await _imageService.loadAndProcessEmote(emote);
+
+        emote.loading = false;
+        _loadingEmote = false;
+        loaded = true;
+        notifyListeners();
+      }
+    }
+
+    // If load request came from queue and emote is loaded, remove it
+    if (fromQueue && emote.image != null) {
+      _emoteLoadQueue.removeAt(0);
+    }
+
+    // If loaded emote and still have emotes in the queue, start loading the next one
+    if (loaded && _emoteLoadQueue.isNotEmpty) {
+      _loadEmote(_emoteLoadQueue.first, fromQueue: true);
+    }
   }
 
-  Future<void> _loadFlair(Flair flair) async {
-    await _dggService.loadFlair(flair);
-    notifyListeners();
+  Future<void> _loadFlair(Flair flair, {bool fromQueue = false}) async {
+    bool loaded = false;
+    // Check if flair has already been loaded before trying to load it
+    if (flair.image == null) {
+      // Set loading to true for current flair so additional copies are not put in the queue
+      flair.loading = true;
+      if (_loadingFlair) {
+        // Another flair is already being loaded, add current to the queue
+        _flairLoadQueue.add(flair);
+      } else {
+        // Load flair
+        _loadingFlair = true;
+        flair.image = await _imageService.loadAndProcessFlair(flair);
+
+        flair.loading = false;
+        _loadingFlair = false;
+        loaded = true;
+        notifyListeners();
+      }
+    }
+
+    // If load request came from queue and flair is loaded, remove it
+    if (fromQueue && flair.image != null) {
+      _flairLoadQueue.removeAt(0);
+    }
+
+    // If loaded flair and still have flairs in the queue, start loading the next one
+    if (loaded && _flairLoadQueue.isNotEmpty) {
+      _loadFlair(_flairLoadQueue.first, fromQueue: true);
+    }
   }
 
   void uncensorMessage(UserMessage message) {
@@ -427,9 +500,9 @@ class ChatViewModel extends BaseViewModel {
         // First disconnect from chat
         await _disconnectChat();
         // Then clear assets
-        await _dggService.clearAssets();
+        _assetsLoaded = false;
         // Finally fetch assets
-        await _dggService.getAssets();
+        await _loadAssets();
         notifyListeners();
         // Re-open chat
         _connectChat();
@@ -549,7 +622,7 @@ class ChatViewModel extends BaseViewModel {
         );
 
         //check emotes
-        _dggService.emotes.emoteMap.forEach((k, v) {
+        _emotes.emoteMap.forEach((k, v) {
           if (k.startsWith(lastWordRegex)) {
             newSuggestions.add(k);
           }
@@ -865,7 +938,7 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
     // Load all emotes if not all already loaded
     if (emoteSelectorList == null) {
-      emoteSelectorList = _dggService.emotes.emoteMap.values.toList();
+      emoteSelectorList = _emotes.emoteMap.values.toList();
       for (var emote in emoteSelectorList!) {
         if (!emote.loading && emote.image == null) {
           _loadEmote(emote);
