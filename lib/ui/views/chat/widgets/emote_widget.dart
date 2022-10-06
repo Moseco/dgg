@@ -66,7 +66,7 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
     );
     _animation = IntTween(
       begin: 0,
-      end: widget.emote.frames!.length * widget.emote.repeatCount!,
+      end: widget.emote.frames == null ? 0 : widget.emote.frames!.length * widget.emote.repeatCount!,
     ).animate(_controller);
     _controller.forward();
   }
@@ -78,8 +78,8 @@ class _AnimatedEmoteState extends State<_AnimatedEmote>
       builder: (_, __) {
         return SizedBox(
           height: widget.emoteHeight,
-          child: widget
-              .emote.frames![_animation.value % widget.emote.frames!.length],
+          child: widget.emote.frames != null ? widget
+              .emote.frames![_animation.value % widget.emote.frames!.length] : widget.emote.image,
         );
       },
     );
