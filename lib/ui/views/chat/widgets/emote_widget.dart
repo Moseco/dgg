@@ -20,7 +20,7 @@ class EmoteWidget extends StatelessWidget {
         child: const CircularProgressIndicator(),
       );
     } else {
-      if (emote.animated) {
+      if (emote.animated && emote.frames != null) {
         return _AnimatedEmote(
           emote: emote,
           emoteHeight: emoteHeight,

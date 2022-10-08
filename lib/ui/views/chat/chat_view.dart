@@ -51,7 +51,7 @@ class ChatView extends StatelessWidget {
                                 ),
                                 const PopupMenuItem<AppBarActions>(
                                   value: AppBarActions.OPEN_DESTINY_STREAM,
-                                  child: Text('Open Destiny\'s steam'),
+                                  child: Text('Open Destiny\'s stream'),
                                 ),
                                 const PopupMenuItem<AppBarActions>(
                                   value: AppBarActions.OPEN_TWITCH_STREAM,
