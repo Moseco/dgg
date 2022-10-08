@@ -884,7 +884,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "• User mentions and highlighting are now supported. Thanks to Ricky434 for the feature.\n• Recent popular embeds can now be fetched and opened. Thanks to Vyneer for the api and Ricky434 for the feature.\n• Emote loading should be more stable now.",
+            "• Fixed a bug with certain emotes that caused a giant gray box to appear. This is a quick fix. A larger update will be coming in the future.",
       );
     }
   }
