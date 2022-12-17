@@ -17,6 +17,7 @@ class UserMessage extends Message {
   final List<UserMessageElement> elements;
   final List<Flair> visibleFlairs;
   final int? color;
+  final bool rainbowColor;
   final bool isMentioned;
   final bool isOwn;
   final bool isGreenText;
@@ -31,6 +32,7 @@ class UserMessage extends Message {
     required this.elements,
     required this.visibleFlairs,
     this.color,
+    this.rainbowColor = false,
     this.isMentioned = false,
     this.isOwn = false,
     this.isGreenText = false,
@@ -67,6 +69,7 @@ class UserMessage extends Message {
       elements: createElements(data, emotes, userMap),
       visibleFlairs: getVisibleFlairs(user.features, flairs),
       color: getColor(user.features, flairs),
+      rainbowColor: user.features.contains('flair42'),
       isMentioned: isMentioned,
       isOwn: isOwn,
       isGreenText: isGreenText,

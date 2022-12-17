@@ -91,18 +91,54 @@ class ItemUserMessage extends StatelessWidget {
     }
 
     // Add username and colon
-    textSpans.addAll([
-      TextSpan(
-        text: message.user.nick,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: message.color == null ? null : Color(message.color!),
+    if (message.rainbowColor) {
+      // Rainbow name
+      textSpans.addAll([
+        WidgetSpan(
+          child: ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (bounds) => const LinearGradient(colors: [
+              Color.fromRGBO(255, 0, 0, 1),
+              Color.fromRGBO(255, 154, 0, 1),
+              Color.fromRGBO(208, 222, 33, 1),
+              Color.fromRGBO(79, 220, 74, 1),
+              Color.fromRGBO(63, 218, 216, 1),
+              Color.fromRGBO(47, 201, 226, 1),
+              Color.fromRGBO(28, 127, 238, 1),
+              Color.fromRGBO(95, 21, 242, 1),
+              Color.fromRGBO(186, 12, 248, 1),
+              Color.fromRGBO(251, 7, 217, 1),
+              Color.fromRGBO(255, 0, 0, 1),
+            ]).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+            child: GestureDetector(
+              child: Text(
+                message.user.nick,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: model.textFontSize,
+                ),
+              ),
+              onTap: () => model.enableHighlightUser(message.user),
+            ),
+          ),
         ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () => model.enableHighlightUser(message.user),
-      ),
-      const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
-    ]);
+        const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
+      ]);
+    } else {
+      // Regular name color
+      textSpans.addAll([
+        TextSpan(
+          text: message.user.nick,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: message.color == null ? null : Color(message.color!),
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => model.enableHighlightUser(message.user),
+        ),
+        const TextSpan(text: ": ", style: TextStyle(fontSize: 16)),
+      ]);
+    }
 
     if (message.isCensored) {
       textSpans.add(

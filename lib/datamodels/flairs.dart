@@ -34,6 +34,7 @@ class Flair {
   final int? color;
   final String? url;
   final bool hidden;
+  final bool rainbowColor;
   bool loading;
   Image? image;
 
@@ -43,6 +44,7 @@ class Flair {
     this.color,
     this.url,
     this.hidden = true,
+    this.rainbowColor = false,
     this.loading = false,
     this.image,
   });
@@ -57,6 +59,7 @@ class Flair {
             : int.parse('FF' + map['color']?.substring(1), radix: 16),
         url: map['image']?[0]['url'],
         hidden: map['hidden'],
+        rainbowColor: map['rainbowColor'] == 1,
       );
     } else {
       return null;

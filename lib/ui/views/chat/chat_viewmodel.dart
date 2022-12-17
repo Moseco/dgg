@@ -120,7 +120,7 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> initialize() async {
     if (!_sharedPreferencesService.getOnboarding()) {
-      SchedulerBinding.instance?.addPostFrameCallback(
+      SchedulerBinding.instance.addPostFrameCallback(
           (_) => _navigationService.clearStackAndShow(Routes.onboardingView));
       return;
     }

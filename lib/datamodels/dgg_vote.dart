@@ -101,26 +101,11 @@ class DggVote {
   }
 
   int calculateSubVote(List<String> features) {
-    for (int i = 0; i < features.length; i++) {
-      if (features[i] == 'flair8') {
-        return 16;
-      }
-    }
-    for (int i = 0; i < features.length; i++) {
-      if (features[i] == 'flair3') {
-        return 8;
-      }
-    }
-    for (int i = 0; i < features.length; i++) {
-      if (features[i] == 'flair1') {
-        return 4;
-      }
-    }
-    for (int i = 0; i < features.length; i++) {
-      if (features[i] == 'flair13') {
-        return 2;
-      }
-    }
+    if (features.contains('flair42')) return 32;
+    if (features.contains('flair8')) return 16;
+    if (features.contains('flair3')) return 8;
+    if (features.contains('flair1')) return 4;
+    if (features.contains('flair13')) return 2;
     return 1;
   }
 
