@@ -883,8 +883,7 @@ class ChatViewModel extends BaseViewModel {
     if (showChangelog) {
       _dialogService.showDialog(
         title: "What's new",
-        description:
-            "• Fixed a bug with certain emotes that caused a giant gray box to appear. This is a quick fix. A larger update will be coming in the future.",
+        description: "• Tier V is now supported.",
       );
     }
   }
