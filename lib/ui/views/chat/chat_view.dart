@@ -91,9 +91,7 @@ class ChatView extends StatelessWidget {
                         ],
                       ),
                     )
-                  : orientation == Orientation.portrait
-                      ? const _ChatPortrait()
-                      : const _ChatLandscape(),
+                  : const _Chat(),
             ),
           ),
         ),
@@ -102,109 +100,49 @@ class ChatView extends StatelessWidget {
   }
 }
 
-class _ChatPortrait extends StackedHookView<ChatViewModel> {
-  const _ChatPortrait();
+class _Chat extends StackedHookView<ChatViewModel> {
+  const _Chat();
 
   @override
   Widget builder(BuildContext context, ChatViewModel viewModel) {
     final scrollController = useScrollController();
     return Stack(
       children: [
-        Column(
-          children: [
-            Expanded(
-              child: extended_nested_scroll_view.ExtendedNestedScrollView(
-                headerSliverBuilder: (
-                  BuildContext context,
-                  bool? innerBoxIsScrolled,
-                ) {
-                  return <Widget>[
-                    SliverToBoxAdapter(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const ChatStreamEmbed(),
-                          if (viewModel.currentVote != null)
-                            ChatVote(model: viewModel),
-                        ],
-                      ),
-                    ),
-                  ];
-                },
-                pinnedHeaderSliverHeightBuilder: () => kToolbarHeight,
-                body: ChatList(
-                  key: const PageStorageKey("chatlist"),
-                  scrollController: scrollController,
-                ),
-              ),
-            ),
-            if (!viewModel.isListAtBottom)
-              InkWell(
-                onTap: () => scrollController.animateTo(
-                  0.0,
-                  curve: Curves.easeOut,
-                  duration: const Duration(milliseconds: 200),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.red,
-                  child: const Center(
-                    child: Text(
-                      "Chat paused, tap here to resume",
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
-            if (viewModel.showReconnectButton)
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text("Reconnect"),
-                onPressed: () => viewModel.onReconnectButtonPressed(),
-              ),
-            ChatInput(model: viewModel),
-          ],
-        ),
-        if (viewModel.showEmoteSelector) const EmoteSelector(),
-      ],
-    );
-  }
-}
-
-class _ChatLandscape extends StackedHookView<ChatViewModel> {
-  const _ChatLandscape();
-
-  @override
-  Widget builder(BuildContext context, ChatViewModel viewModel) {
-    final scrollController = useScrollController();
-    return Stack(
-      children: [
-        Row(
+        Flex(
+          direction: MediaQuery.of(context).orientation == Orientation.portrait
+              ? Axis.vertical
+              : Axis.horizontal,
           children: [
             if (viewModel.showStreamPrompt || viewModel.showEmbed)
-              const Expanded(
-                flex: 4,
-                child: ChatStreamEmbed(),
+              Expanded(
+                flex: MediaQuery.of(context).orientation == Orientation.portrait
+                    ? 1
+                    : 4,
+                child: const ChatStreamEmbed(),
               ),
             Expanded(
               flex: 2,
               child: Column(
                 children: [
-                  if (viewModel.currentVote != null)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: ChatVote(model: viewModel),
-                      ),
-                    ),
                   Expanded(
-                    child: ChatList(
-                      key: const PageStorageKey("chatlist"),
-                      scrollController: scrollController,
+                    child: extended_nested_scroll_view.ExtendedNestedScrollView(
+                      headerSliverBuilder: (
+                          BuildContext context,
+                          bool? innerBoxIsScrolled,
+                          ) {
+                        return <Widget>[
+                          SliverToBoxAdapter(
+                            child: (viewModel.currentVote != null)
+                              ? ChatVote(model: viewModel)
+                              : null,
+                          ),
+                        ];
+                      },
+                      pinnedHeaderSliverHeightBuilder: () => kToolbarHeight,
+                      body: ChatList(
+                        key: const PageStorageKey("chatlist"),
+                        scrollController: scrollController,
+                      ),
                     ),
                   ),
                   if (!viewModel.isListAtBottom)
@@ -236,7 +174,9 @@ class _ChatLandscape extends StackedHookView<ChatViewModel> {
                       child: const Text("Reconnect"),
                       onPressed: () => viewModel.onReconnectButtonPressed(),
                     ),
-                  Container(
+                  MediaQuery.of(context).orientation == Orientation.portrait
+                      ? ChatInput(model: viewModel)
+                      : Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(
                       border: Border(
@@ -255,7 +195,11 @@ class _ChatLandscape extends StackedHookView<ChatViewModel> {
             ),
           ],
         ),
-        Align(
+        if (viewModel.showEmoteSelector &&
+            MediaQuery.of(context).orientation == Orientation.portrait)
+          const EmoteSelector(),
+        if (MediaQuery.of(context).orientation == Orientation.landscape)
+          Align(
           alignment: Alignment.topRight,
           child: Container(
             decoration: BoxDecoration(
