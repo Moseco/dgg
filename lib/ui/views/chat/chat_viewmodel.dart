@@ -794,6 +794,8 @@ class ChatViewModel extends BaseViewModel {
         videoPlayerController?.dispose();
         videoPlayerController = VideoPlayerController.network(_currentEmbedId);
         chewieController = ChewieController(
+          allowedScreenSleep: false,
+          aspectRatio: 16/9,
           videoPlayerController: videoPlayerController!,
           autoPlay: true,
           isLive: true,
