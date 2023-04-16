@@ -546,7 +546,12 @@ class ChatViewModel extends BaseViewModel {
           barrierDismissible: true,
         );
         if (response != null && response.data != null) {
-          setEmbed(response.data.channel, response.data.platform);
+          if (response.data.platform == "youtube") {
+            var link = response.data.link as String;
+            setEmbed(link.split("/")[1], response.data.platform);
+          } else {
+            setEmbed(response.data.channel, response.data.platform);
+          }
         }
         break;
       default:
@@ -667,7 +672,6 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> _getStreamStatus() async {
     StreamStatus streamStatus = await _dggService.getStreamStatus();
-
     if (_sharedPreferencesService.getDefaultStream() == 0) {
       // Twitch is default
       if (streamStatus.twitchLive) {
@@ -690,22 +694,22 @@ class ChatViewModel extends BaseViewModel {
           ),
         );
         notifyListeners();
-      } else if (_sharedPreferencesService.getDefaultStream() == 2) {
-        // Rumble is default
-        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-          _showStreamPrompt = true;
-          _embedType = EmbedType.RUMBLE;
-          _currentEmbedId = streamStatus.rumbleId!;
-          notifyListeners();
-        }
-      } else if (_sharedPreferencesService.getDefaultStream() == 3) {
-        // Kick is default
-        if (streamStatus.kickLive && streamStatus.kickId != null) {
-          _showStreamPrompt = true;
-          _embedType = EmbedType.KICK;
-          _currentEmbedId = streamStatus.kickId!;
-          notifyListeners();
-        }
+      }
+    } else if (_sharedPreferencesService.getDefaultStream() == 2) {
+      // Rumble is default
+      if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+        _showStreamPrompt = true;
+        _embedType = EmbedType.RUMBLE;
+        _currentEmbedId = streamStatus.rumbleId!;
+        notifyListeners();
+      }
+    } else if (_sharedPreferencesService.getDefaultStream() == 3) {
+      // Kick is default
+      if (streamStatus.kickLive && streamStatus.kickId != null) {
+        _showStreamPrompt = true;
+        _embedType = EmbedType.KICK;
+        _currentEmbedId = streamStatus.kickId!;
+        notifyListeners();
       }
     }
   }
