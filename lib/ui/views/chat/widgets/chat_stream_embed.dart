@@ -51,7 +51,10 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
             gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
           );
         } else if (viewModel.embedType == EmbedType.KICK) {
-          return Chewie(controller: viewModel.chewieController!);
+          return SizedBox(
+            height: 9 / 16 * MediaQuery.of(context).size.width,
+            child: Chewie(controller: viewModel.chewieController!),
+          );
         } else {
           // Show webview and display correct twitch page
           return SizedBox(

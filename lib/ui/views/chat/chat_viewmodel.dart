@@ -709,6 +709,14 @@ class ChatViewModel extends BaseViewModel {
         _showStreamPrompt = true;
         _embedType = EmbedType.KICK;
         _currentEmbedId = streamStatus.kickId!;
+        chewieController?.dispose();
+        videoPlayerController?.dispose();
+        videoPlayerController = VideoPlayerController.network(_currentEmbedId);
+        chewieController = ChewieController(
+          videoPlayerController: videoPlayerController!,
+          autoPlay: true,
+          isLive: true,
+        );
         notifyListeners();
       }
     }
