@@ -367,9 +367,13 @@ class DggService {
         twitchLive: json["data"]?["streams"]?["twitch"]?["live"] ?? false,
         youtubeLive: json["data"]?["streams"]?["youtube"]?["live"] ?? false,
         youtubeId: json["data"]?["streams"]?["youtube"]?["id"],
+        rumbleLive: json["data"]?["streams"]?["rumble"]?["live"] ?? false,
+        rumbleId: json["data"]?["streams"]?["rumble"]?["id"],
+        kickLive: json["data"]?["streams"]?["kick"]?["live"] ?? false,
+        kickId: json["data"]?["streams"]?["kick"]?["id"],
       );
     } else {
-      return const StreamStatus(twitchLive: false, youtubeLive: false);
+      return const StreamStatus(twitchLive: false, youtubeLive: false, rumbleLive: false, kickLive: false);
     }
   }
 }

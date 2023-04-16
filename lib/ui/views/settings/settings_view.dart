@@ -265,6 +265,26 @@ class SettingsView extends StatelessWidget {
                   Navigator.of(c).pop();
                 },
               ),
+              RadioListTile<int>(
+                title: const Text("Rumble"),
+                value: 2,
+                groupValue: model.defaultStream,
+                activeColor: Theme.of(context).colorScheme.primary,
+                onChanged: (int? value) {
+                  model.setDefaultStream(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
+              RadioListTile<int>(
+                title: const Text("Kick"),
+                value: 3,
+                groupValue: model.defaultStream,
+                activeColor: Theme.of(context).colorScheme.primary,
+                onChanged: (int? value) {
+                  model.setDefaultStream(value!);
+                  Navigator.of(c).pop();
+                },
+              ),
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chewie/chewie.dart';
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
@@ -21,6 +22,7 @@ import 'package:stacked/stacked.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -38,6 +40,8 @@ class ChatViewModel extends BaseViewModel {
 
   late WebViewController webViewController;
   YoutubePlayerController? youtubePlayerController;
+  VideoPlayerController? videoPlayerController;
+  ChewieController? chewieController;
   final chatInputController = TextEditingController();
 
   bool get isLoading => isAuthenticating || !_assetsLoaded;
@@ -77,6 +81,7 @@ class ChatViewModel extends BaseViewModel {
       r'https://player.twitch.tv/?parent=dev.moseco.dgg&muted=false&video=';
   static const String twitchClipUrlBase =
       r'https://clips.twitch.tv/embed?parent=dev.moseco.dgg&autoplay=true&muted=false&clip=';
+  static const String rumbleUrlBase = r'https://rumble.com/embed/';
   String _currentEmbedId = 'destiny';
   bool _showStreamPrompt = false;
   bool get showStreamPrompt => _showStreamPrompt;
@@ -670,7 +675,7 @@ class ChatViewModel extends BaseViewModel {
         _embedType = EmbedType.TWITCH_STREAM;
         notifyListeners();
       }
-    } else {
+    } else if (_sharedPreferencesService.getDefaultStream() == 1) {
       // YouTube is default
       if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
         _currentEmbedId = streamStatus.youtubeId!;
@@ -681,10 +686,26 @@ class ChatViewModel extends BaseViewModel {
           initialVideoId: _currentEmbedId,
           params: const YoutubePlayerParams(
             autoPlay: true,
-            showControls: false,
+            showControls: true,
           ),
         );
         notifyListeners();
+      } else if (_sharedPreferencesService.getDefaultStream() == 2) {
+        // Rumble is default
+        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+          _showStreamPrompt = true;
+          _embedType = EmbedType.RUMBLE;
+          _currentEmbedId = streamStatus.rumbleId!;
+          notifyListeners();
+        }
+      } else if (_sharedPreferencesService.getDefaultStream() == 3) {
+        // Kick is default
+        if (streamStatus.kickLive && streamStatus.kickId != null) {
+          _showStreamPrompt = true;
+          _embedType = EmbedType.KICK;
+          _currentEmbedId = streamStatus.kickId!;
+          notifyListeners();
+        }
       }
     }
   }
@@ -707,7 +728,7 @@ class ChatViewModel extends BaseViewModel {
 
   void setStreamChannelManual(String channel) {
     if (channel.trim().isNotEmpty) {
-      setEmbed(channel[0], "twitch");
+      setEmbed(channel.trim(), "twitch");
     }
   }
 
@@ -734,7 +755,7 @@ class ChatViewModel extends BaseViewModel {
             initialVideoId: _currentEmbedId,
             params: const YoutubePlayerParams(
               autoPlay: true,
-              showControls: false,
+              showControls: true,
             ),
           );
         }
@@ -753,6 +774,24 @@ class ChatViewModel extends BaseViewModel {
         }
         _embedType = EmbedType.TWITCH_CLIP;
         break;
+      case "rumble":
+        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+          //Embed already shown, use controller to load new stream
+          webViewController.loadUrl(rumbleUrlBase + _currentEmbedId);
+        }
+        _embedType = EmbedType.RUMBLE;
+        break;
+      case "kick":
+        _embedType = EmbedType.KICK;
+        chewieController?.dispose();
+        videoPlayerController?.dispose();
+        videoPlayerController = VideoPlayerController.network(_currentEmbedId);
+        chewieController = ChewieController(
+          videoPlayerController: videoPlayerController!,
+          autoPlay: true,
+          isLive: true,
+        );
+        break;
       default:
         _snackbarService.showSnackbar(
           message: "$embedType is not currently supported",
@@ -763,7 +802,7 @@ class ChatViewModel extends BaseViewModel {
     setShowEmbed(true);
   }
 
-  String getTwitchEmbedUrl() {
+  String getEmbedUrl() {
     switch (_embedType) {
       case EmbedType.TWITCH_STREAM:
         return twitchStreamUrlBase + _currentEmbedId;
@@ -771,6 +810,8 @@ class ChatViewModel extends BaseViewModel {
         return twitchVodUrlBase + _currentEmbedId;
       case EmbedType.TWITCH_CLIP:
         return twitchClipUrlBase + _currentEmbedId;
+      case EmbedType.RUMBLE:
+        return rumbleUrlBase + _currentEmbedId;
       default:
         return 'https://destiny.gg';
     }
@@ -862,19 +903,54 @@ class ChatViewModel extends BaseViewModel {
   }
 
   Future<void> _openDestinyStream() async {
+    // Try opening default stream, otherwise try to see if one of the other streams is live and open it
+    StreamStatus streamStatus = await _dggService.getStreamStatus();
     // Open default stream platform
-    if (_sharedPreferencesService.getDefaultStream() == 0) {
-      // Open Destiny's stream on Twitch
-      setStreamChannelManual("destiny");
-    } else {
-      // Open Destiny's stream on YouTube
-      StreamStatus streamStatus = await _dggService.getStreamStatus();
-      if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-        setEmbed(streamStatus.youtubeId!, "youtube");
-      } else {
-        _snackbarService.showSnackbar(
-            message: "Destiny's YouTube stream is offline");
-      }
+    switch (_sharedPreferencesService.getDefaultStream()) {
+      case 0:
+        // Try opening stream on Twitch
+        if (streamStatus.twitchLive) {
+          setStreamChannelManual("destiny");
+          break;
+        } else {
+          continue not_default_stream;
+        }
+      case 1:
+        // Try opening stream on Youtube
+        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+          setEmbed(streamStatus.youtubeId!, "youtube");
+          break;
+        } else {
+          continue not_default_stream;
+        }
+      case 2:
+        // Try opening stream on Rumble
+        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+          setEmbed(streamStatus.rumbleId!, "rumble");
+          break;
+        } else {
+          continue not_default_stream;
+        }
+      case 3:
+        // Try opening stream on Kick
+        if (streamStatus.kickLive && streamStatus.kickId != null) {
+          setEmbed(streamStatus.kickId!, "kick");
+          break;
+        } else {
+          continue not_default_stream;
+        }
+      not_default_stream:
+      default:
+        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+          setEmbed(streamStatus.youtubeId!, "youtube");
+        } else if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+          setEmbed(streamStatus.rumbleId!, "rumble");
+        } else if (streamStatus.kickLive) {
+          setEmbed(streamStatus.kickId!, "kick");
+        } else {
+          _snackbarService.showSnackbar(
+              message: "Destiny's YouTube stream is offline");
+        }
     }
   }
 
@@ -976,6 +1052,8 @@ class ChatViewModel extends BaseViewModel {
     _disconnectChat();
     _voteTimer?.cancel();
     youtubePlayerController?.close();
+    chewieController?.dispose();
+    videoPlayerController?.dispose();
     chatInputController.dispose();
     super.dispose();
   }
@@ -986,6 +1064,8 @@ enum EmbedType {
   TWITCH_VOD,
   TWITCH_CLIP,
   YOUTUBE,
+  RUMBLE,
+  KICK,
 }
 
 enum AppBarActions {
