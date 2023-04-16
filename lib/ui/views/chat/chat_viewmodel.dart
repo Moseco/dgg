@@ -677,32 +677,32 @@ class ChatViewModel extends BaseViewModel {
       case 0:
         // Twitch is default
         if (streamStatus.twitchLive) {
-          _showStreamPrompt = true;
           setEmbed("destiny", "twitch", showEmbed: false);
+          _showStreamPrompt = true;
           notifyListeners();
         }
         break;
       case 1:
         // YouTube is default
         if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-          _showStreamPrompt = true;
           setEmbed(streamStatus.youtubeId!, "youtube", showEmbed: false);
+          _showStreamPrompt = true;
           notifyListeners();
         }
         break;
       case 2:
         // Rumble is default
         if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-          _showStreamPrompt = true;
           setEmbed(streamStatus.rumbleId!, "rumble", showEmbed: false);
+          _showStreamPrompt = true;
           notifyListeners();
         }
         break;
       case 3:
         // Kick is default
         if (streamStatus.kickLive && streamStatus.kickId != null) {
-          _showStreamPrompt = true;
           setEmbed(streamStatus.kickId!, "kick", showEmbed: false);
+          _showStreamPrompt = true;
           notifyListeners();
         }
         break;
@@ -956,7 +956,7 @@ class ChatViewModel extends BaseViewModel {
           setEmbed(streamStatus.kickId!, "kick");
         } else {
           _snackbarService.showSnackbar(
-              message: "Destiny's YouTube stream is offline");
+              message: "Destiny's stream is offline");
         }
     }
   }
