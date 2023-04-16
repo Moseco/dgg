@@ -672,53 +672,40 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> _getStreamStatus() async {
     StreamStatus streamStatus = await _dggService.getStreamStatus();
-    if (_sharedPreferencesService.getDefaultStream() == 0) {
-      // Twitch is default
-      if (streamStatus.twitchLive) {
-        _showStreamPrompt = true;
-        _embedType = EmbedType.TWITCH_STREAM;
-        notifyListeners();
-      }
-    } else if (_sharedPreferencesService.getDefaultStream() == 1) {
-      // YouTube is default
-      if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-        _currentEmbedId = streamStatus.youtubeId!;
-        _showStreamPrompt = true;
-        _embedType = EmbedType.YOUTUBE;
-        youtubePlayerController?.close();
-        youtubePlayerController = YoutubePlayerController(
-          initialVideoId: _currentEmbedId,
-          params: const YoutubePlayerParams(
-            autoPlay: true,
-            showControls: true,
-          ),
-        );
-        notifyListeners();
-      }
-    } else if (_sharedPreferencesService.getDefaultStream() == 2) {
-      // Rumble is default
-      if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-        _showStreamPrompt = true;
-        _embedType = EmbedType.RUMBLE;
-        _currentEmbedId = streamStatus.rumbleId!;
-        notifyListeners();
-      }
-    } else if (_sharedPreferencesService.getDefaultStream() == 3) {
-      // Kick is default
-      if (streamStatus.kickLive && streamStatus.kickId != null) {
-        _showStreamPrompt = true;
-        _embedType = EmbedType.KICK;
-        _currentEmbedId = streamStatus.kickId!;
-        chewieController?.dispose();
-        videoPlayerController?.dispose();
-        videoPlayerController = VideoPlayerController.network(_currentEmbedId);
-        chewieController = ChewieController(
-          videoPlayerController: videoPlayerController!,
-          autoPlay: true,
-          isLive: true,
-        );
-        notifyListeners();
-      }
+    // If Destiny is only live on a platform different from the default one, the prompt won't be displayed
+    switch (_sharedPreferencesService.getDefaultStream()) {
+      case 0:
+        // Twitch is default
+        if (streamStatus.twitchLive) {
+          _showStreamPrompt = true;
+          setEmbed("destiny", "twitch", showEmbed: false);
+          notifyListeners();
+        }
+        break;
+      case 1:
+        // YouTube is default
+        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+          _showStreamPrompt = true;
+          setEmbed(streamStatus.youtubeId!, "youtube", showEmbed: false);
+          notifyListeners();
+        }
+        break;
+      case 2:
+        // Rumble is default
+        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+          _showStreamPrompt = true;
+          setEmbed(streamStatus.rumbleId!, "rumble", showEmbed: false);
+          notifyListeners();
+        }
+        break;
+      case 3:
+        // Kick is default
+        if (streamStatus.kickLive && streamStatus.kickId != null) {
+          _showStreamPrompt = true;
+          setEmbed(streamStatus.kickId!, "kick", showEmbed: false);
+          notifyListeners();
+        }
+        break;
     }
   }
 
@@ -744,13 +731,15 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  void setEmbed(String embedId, String embedType) {
+  void setEmbed(String embedId, String embedType, {bool showEmbed = true}) {
     //Set new channel name
     _currentEmbedId = embedId.trim();
     //Set values based on embed type and current embed state
     switch (embedType) {
       case "twitch":
-        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+        if (_showEmbed &&
+            _embedType != EmbedType.YOUTUBE &&
+            _embedType != EmbedType.KICK) {
           //Embed already shown, use controller to load new stream
           webViewController.loadUrl(twitchStreamUrlBase + _currentEmbedId);
         }
@@ -773,21 +762,27 @@ class ChatViewModel extends BaseViewModel {
         }
         break;
       case "twitch-vod":
-        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+        if (_showEmbed &&
+            _embedType != EmbedType.YOUTUBE &&
+            _embedType != EmbedType.KICK) {
           //Embed already shown, use controller to load new stream
           webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
         }
         _embedType = EmbedType.TWITCH_VOD;
         break;
       case "twitch-clip":
-        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+        if (_showEmbed &&
+            _embedType != EmbedType.YOUTUBE &&
+            _embedType != EmbedType.KICK) {
           //Embed already shown, use controller to load new stream
           webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
         }
         _embedType = EmbedType.TWITCH_CLIP;
         break;
       case "rumble":
-        if (_showEmbed && _embedType != EmbedType.YOUTUBE) {
+        if (_showEmbed &&
+            _embedType != EmbedType.YOUTUBE &&
+            _embedType != EmbedType.KICK) {
           //Embed already shown, use controller to load new stream
           webViewController.loadUrl(rumbleUrlBase + _currentEmbedId);
         }
@@ -811,7 +806,7 @@ class ChatViewModel extends BaseViewModel {
         return;
     }
     //Show the stream embed
-    setShowEmbed(true);
+    setShowEmbed(showEmbed);
   }
 
   String getEmbedUrl() {
