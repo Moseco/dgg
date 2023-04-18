@@ -43,9 +43,15 @@ dependencies:
   image: ^3.0.2
   wakelock: ^0.5.6
   youtube_player_iframe: ^2.0.0
+  chewie: ^1.0.0
+  video_player: ^2.6.1
   flutter_cache_manager: ^3.1.1
   intl: ^0.17.0
   flutter_hooks: ^0.17.0
+
+dependency_overrides:
+  firebase_core_platform_interface: 4.5.1
+
 
 dev_dependencies:
   flutter_test:
