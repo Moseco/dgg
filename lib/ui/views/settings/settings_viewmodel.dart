@@ -71,7 +71,7 @@ class SettingsViewModel extends BaseViewModel {
   }
 
   void toggleAnalyticsCollection(bool value) {
-    FirebaseAnalytics().setAnalyticsCollectionEnabled(value);
+    FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(value);
     _sharedPreferencesService.setAnalyticsEnabled(value);
     _isAnalyticsEnabled = value;
     notifyListeners();

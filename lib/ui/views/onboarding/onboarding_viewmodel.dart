@@ -27,7 +27,7 @@ class OnboardingViewModel extends BaseViewModel {
   }
 
   Future<void> toggleAnalyticsCollection(bool value) async {
-    FirebaseAnalytics().setAnalyticsCollectionEnabled(value);
+    FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(value);
     _sharedPreferencesService.setAnalyticsEnabled(value);
     _isAnalyticsEnabled = value;
     notifyListeners();

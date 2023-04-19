@@ -20,16 +20,16 @@ dependencies:
   stacked_hooks: ^0.2.1+1
 
   # Firebase
-  firebase_core: ^1.0.3
-  firebase_crashlytics: ^2.0.0
-  firebase_analytics: ^8.0.0
+  firebase_core: ^2.10.0
+  firebase_crashlytics: ^3.1.1
+  firebase_analytics: ^10.2.1
 
   # UI
   flutter_staggered_animations: ^1.0.0
   flutter_settings_ui: ^2.0.1
   adaptive_dialog: ^0.10.0+5
   percent_indicator: ^3.0.1
-  extended_nested_scroll_view: ^3.0.0
+  extended_nested_scroll_view: ^6.0.0
   introduction_screen: ^2.1.0
 
   # Other
@@ -49,10 +49,6 @@ dependencies:
   intl: ^0.17.0
   flutter_hooks: ^0.17.0
 
-dependency_overrides:
-  firebase_core_platform_interface: 4.5.1
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -60,19 +56,7 @@ dev_dependencies:
   build_runner:
   stacked_generator: ^0.5.6
 
-  flutter_launcher_icons: ^0.9.0
-
   flutter_lints: ^1.0.4
-
-#TODO need to make iOS icons later
-#To run:
-#flutter pub run flutter_launcher_icons:main
-flutter_icons:
-  android: false
-  ios: false
-  image_path_android: "assets/images/dgg_icon.png"
-  adaptive_icon_background: "#1A1A1A"
-  adaptive_icon_foreground: "assets/images/dgg_icon.png"
 
 flutter:
   uses-material-design: true

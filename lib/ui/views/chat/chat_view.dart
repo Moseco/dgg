@@ -109,7 +109,7 @@ class _ChatPortrait extends HookViewModelWidget<ChatViewModel> {
         Column(
           children: [
             Expanded(
-              child: extended_nested_scroll_view.NestedScrollView(
+              child: extended_nested_scroll_view.ExtendedNestedScrollView(
                 headerSliverBuilder: (
                   BuildContext context,
                   bool? innerBoxIsScrolled,
