@@ -28,8 +28,6 @@ class SettingsViewModel extends BaseViewModel {
   int get themeIndex => _themeIndex;
   int _appBarTheme = 0;
   int get appBarTheme => _appBarTheme;
-  int _defaultStream = 0;
-  int get defaultStream => _defaultStream;
   bool _isInAppBrowserEnabled = true;
   bool get isInAppBrowserEnabled => _isInAppBrowserEnabled;
 
@@ -38,7 +36,6 @@ class SettingsViewModel extends BaseViewModel {
     _isWakelockEnabled = _sharedPreferencesService.getWakelockEnabled();
     _themeIndex = _sharedPreferencesService.getThemeIndex();
     _appBarTheme = _sharedPreferencesService.getAppBarTheme();
-    _defaultStream = _sharedPreferencesService.getDefaultStream();
     _isInAppBrowserEnabled = _sharedPreferencesService.getInAppBrowserEnabled();
     notifyListeners();
   }
@@ -92,12 +89,6 @@ class SettingsViewModel extends BaseViewModel {
   void setAppBarTheme(int value) {
     _sharedPreferencesService.setAppBarTheme(value);
     _appBarTheme = value;
-    notifyListeners();
-  }
-
-  void setDefaultStream(int value) {
-    _sharedPreferencesService.setDefaultStream(value);
-    _defaultStream = value;
     notifyListeners();
   }
 

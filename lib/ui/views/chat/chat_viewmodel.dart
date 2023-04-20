@@ -82,13 +82,13 @@ class ChatViewModel extends BaseViewModel {
   static const String twitchClipUrlBase =
       r'https://clips.twitch.tv/embed?parent=dev.moseco.dgg&autoplay=true&muted=false&clip=';
   static const String rumbleUrlBase = r'https://rumble.com/embed/';
-  String _currentEmbedId = 'destiny';
+  String? _currentEmbedId;
   bool _showStreamPrompt = false;
   bool get showStreamPrompt => _showStreamPrompt;
   bool _showEmbed = false;
   bool get showEmbed => _showEmbed;
-  EmbedType _embedType = EmbedType.TWITCH_STREAM;
-  EmbedType get embedType => _embedType;
+  EmbedType? _currentEmbedType;
+  EmbedType? get currentEmbedType => _currentEmbedType;
 
   DggVote? _currentVote;
   DggVote? get currentVote => _currentVote;
@@ -137,7 +137,7 @@ class ChatViewModel extends BaseViewModel {
     _ignoreList = _sharedPreferencesService.getIgnoreList();
     notifyListeners();
     await _getSessionInfo();
-    _getStreamStatus();
+    _getInitialStreamStatus();
     await _loadAssets();
     await _getChatHistory();
     _connectChat();
@@ -533,9 +533,6 @@ class ChatViewModel extends BaseViewModel {
           setStreamChannelManual(response.data);
         }
         break;
-      case AppBarActions.TOGGLE_EMBED:
-        setShowEmbed(!_showEmbed);
-        break;
       case AppBarActions.GET_RECENT_EMBEDS:
         // Get top embeds from past 30 minutes and allow user to select one
         final response = await _dialogService.showCustomDialog(
@@ -548,9 +545,10 @@ class ChatViewModel extends BaseViewModel {
         if (response != null && response.data != null) {
           if (response.data.platform == "youtube") {
             var link = response.data.link as String;
-            setEmbed(link.split("/")[1], response.data.platform);
+            setEmbedFromStringType(link.split("/")[1], response.data.platform);
           } else {
-            setEmbed(response.data.channel, response.data.platform);
+            setEmbedFromStringType(
+                response.data.channel, response.data.platform);
           }
         }
         break;
@@ -670,45 +668,6 @@ class ChatViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> _getStreamStatus() async {
-    StreamStatus streamStatus = await _dggService.getStreamStatus();
-    // If Destiny is only live on a platform different from the default one, the prompt won't be displayed
-    switch (_sharedPreferencesService.getDefaultStream()) {
-      case 0:
-        // Twitch is default
-        if (streamStatus.twitchLive) {
-          setEmbed("destiny", "twitch", showEmbed: false);
-          _showStreamPrompt = true;
-          notifyListeners();
-        }
-        break;
-      case 1:
-        // YouTube is default
-        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-          setEmbed(streamStatus.youtubeId!, "youtube", showEmbed: false);
-          _showStreamPrompt = true;
-          notifyListeners();
-        }
-        break;
-      case 2:
-        // Rumble is default
-        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-          setEmbed(streamStatus.rumbleId!, "rumble", showEmbed: false);
-          _showStreamPrompt = true;
-          notifyListeners();
-        }
-        break;
-      case 3:
-        // Kick is default
-        if (streamStatus.kickLive && streamStatus.kickId != null) {
-          setEmbed(streamStatus.kickId!, "kick", showEmbed: false);
-          _showStreamPrompt = true;
-          notifyListeners();
-        }
-        break;
-    }
-  }
-
   void enableHighlightUser(User user) {
     _userHighlighted = user;
     notifyListeners();
@@ -719,83 +678,152 @@ class ChatViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setShowEmbed(bool value) {
+  Future<void> _getInitialStreamStatus() async {
+    StreamStatus streamStatus = await _dggService.getStreamStatus();
+    // If any of the platforms are live, show stream prompt
+    if (streamStatus.twitchLive ||
+        streamStatus.youtubeLive ||
+        streamStatus.rumbleLive ||
+        streamStatus.kickLive) {
+      _showStreamPrompt = true;
+      notifyListeners();
+    }
+  }
+
+  void answerInitialStreamPrompt(bool value) {
     _showStreamPrompt = false;
-    _showEmbed = value;
     notifyListeners();
+    if (value) {
+      _openDestinyStream();
+    }
+  }
+
+  void toggleEmbed() {
+    // If turning off embed, stop any ongoing videos
+    if (_showEmbed) {
+      youtubePlayerController?.close();
+      youtubePlayerController = null;
+      chewieController?.pause();
+      chewieController?.dispose();
+      chewieController = null;
+      videoPlayerController?.pause();
+      videoPlayerController?.dispose();
+      videoPlayerController = null;
+
+      _showStreamPrompt = false;
+      _showEmbed = !_showEmbed;
+      notifyListeners();
+    } else if (_currentEmbedId != null && _currentEmbedType != null) {
+      // Otherwise, set embed with current id and type
+      setEmbed(_currentEmbedId!, _currentEmbedType!);
+    }
   }
 
   void setStreamChannelManual(String channel) {
     if (channel.trim().isNotEmpty) {
-      setEmbed(channel.trim(), "twitch");
+      setEmbed(channel.trim(), EmbedType.TWITCH_STREAM);
     }
   }
 
-  void setEmbed(String embedId, String embedType, {bool showEmbed = true}) {
-    //Set new channel name
-    _currentEmbedId = embedId.trim();
-    //Set values based on embed type and current embed state
-    switch (embedType) {
-      case "twitch":
-        if (_showEmbed &&
-            _embedType != EmbedType.YOUTUBE &&
-            _embedType != EmbedType.KICK) {
-          //Embed already shown, use controller to load new stream
-          webViewController.loadUrl(twitchStreamUrlBase + _currentEmbedId);
-        }
-        _embedType = EmbedType.TWITCH_STREAM;
+  void setEmbedFromStringType(String embedId, String embedTypeString) {
+    // Convert string embed type to enum and call actual setEmbed
+    late EmbedType embedType;
+    switch (embedTypeString) {
+      case 'twitch':
+        embedType = EmbedType.TWITCH_STREAM;
         break;
-      case "youtube":
-        if (_showEmbed && _embedType == EmbedType.YOUTUBE) {
-          //Embed already shown, use controller to load new stream
-          youtubePlayerController!.load(_currentEmbedId);
+      case 'youtube':
+        embedType = EmbedType.YOUTUBE;
+        break;
+      case 'twitch-vod':
+        embedType = EmbedType.TWITCH_VOD;
+        break;
+      case 'twitch-clip':
+        embedType = EmbedType.TWITCH_CLIP;
+        break;
+      case 'rumble':
+        embedType = EmbedType.RUMBLE;
+        break;
+      case 'kick':
+        embedType = EmbedType.KICK;
+        break;
+      default:
+        embedType = EmbedType.UNSUPPORTED;
+        break;
+    }
+
+    setEmbed(embedId, embedType);
+  }
+
+  void setEmbed(String embedId, EmbedType embedType) {
+    // Stop other ongoing embeds
+    if (embedType != EmbedType.YOUTUBE) {
+      youtubePlayerController?.close();
+      youtubePlayerController = null;
+    }
+    if (embedType != EmbedType.KICK) {
+      chewieController?.pause();
+      chewieController?.dispose();
+      chewieController = null;
+      videoPlayerController?.pause();
+      videoPlayerController?.dispose();
+      videoPlayerController = null;
+    }
+    // Set new embed id
+    _currentEmbedId = embedId.trim();
+    switch (embedType) {
+      case EmbedType.TWITCH_STREAM:
+        // If webview embed already shown, use controller
+        if (_showEmbed && _isUsingWebViewEmbed()) {
+          webViewController.loadUrl(twitchStreamUrlBase + _currentEmbedId!);
+        }
+        _currentEmbedType = EmbedType.TWITCH_STREAM;
+        break;
+      case EmbedType.YOUTUBE:
+        // If embed already shown, use controller to load new stream
+        if (_showEmbed && _currentEmbedType == EmbedType.YOUTUBE) {
+          youtubePlayerController!.load(_currentEmbedId!);
         } else {
-          _embedType = EmbedType.YOUTUBE;
           youtubePlayerController?.close();
           youtubePlayerController = YoutubePlayerController(
-            initialVideoId: _currentEmbedId,
+            initialVideoId: _currentEmbedId!,
             params: const YoutubePlayerParams(
               autoPlay: true,
               showControls: true,
             ),
           );
         }
+        _currentEmbedType = EmbedType.YOUTUBE;
         break;
-      case "twitch-vod":
-        if (_showEmbed &&
-            _embedType != EmbedType.YOUTUBE &&
-            _embedType != EmbedType.KICK) {
-          //Embed already shown, use controller to load new stream
-          webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
+      case EmbedType.TWITCH_VOD:
+        // If webview embed already shown, use controller
+        if (_showEmbed && _isUsingWebViewEmbed()) {
+          webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId!);
         }
-        _embedType = EmbedType.TWITCH_VOD;
+        _currentEmbedType = EmbedType.TWITCH_VOD;
         break;
-      case "twitch-clip":
-        if (_showEmbed &&
-            _embedType != EmbedType.YOUTUBE &&
-            _embedType != EmbedType.KICK) {
-          //Embed already shown, use controller to load new stream
-          webViewController.loadUrl(twitchVodUrlBase + _currentEmbedId);
+      case EmbedType.TWITCH_CLIP:
+        // If webview embed already shown, use controller
+        if (_showEmbed && _isUsingWebViewEmbed()) {
+          webViewController.loadUrl(twitchClipUrlBase + _currentEmbedId!);
         }
-        _embedType = EmbedType.TWITCH_CLIP;
+        _currentEmbedType = EmbedType.TWITCH_CLIP;
         break;
-      case "rumble":
-        if (_showEmbed &&
-            _embedType != EmbedType.YOUTUBE &&
-            _embedType != EmbedType.KICK) {
-          //Embed already shown, use controller to load new stream
-          webViewController.loadUrl(rumbleUrlBase + _currentEmbedId);
+      case EmbedType.RUMBLE:
+        // If webview embed already shown, use controller
+        if (_showEmbed && _isUsingWebViewEmbed()) {
+          webViewController.loadUrl(rumbleUrlBase + _currentEmbedId!);
         }
-        _embedType = EmbedType.RUMBLE;
+        _currentEmbedType = EmbedType.RUMBLE;
         break;
-      case "kick":
-        _embedType = EmbedType.KICK;
+      case EmbedType.KICK:
+        _currentEmbedType = EmbedType.KICK;
         chewieController?.dispose();
         videoPlayerController?.dispose();
-        videoPlayerController = VideoPlayerController.network(_currentEmbedId);
+        videoPlayerController = VideoPlayerController.network(_currentEmbedId!);
         chewieController = ChewieController(
           allowedScreenSleep: false,
-          aspectRatio: 16/9,
+          aspectRatio: 16 / 9,
           videoPlayerController: videoPlayerController!,
           autoPlay: true,
           isLive: true,
@@ -807,20 +835,83 @@ class ChatViewModel extends BaseViewModel {
         );
         return;
     }
+
     //Show the stream embed
-    setShowEmbed(showEmbed);
+    _showStreamPrompt = false;
+    _showEmbed = true;
+    notifyListeners();
   }
 
+  Future<void> _openDestinyStream() async {
+    _showEmbed = true;
+    _currentEmbedType = null;
+    _showStreamPrompt = false;
+    notifyListeners();
+    StreamStatus streamStatus = await _dggService.getStreamStatus();
+
+    int liveCount = (streamStatus.twitchLive ? 1 : 0) +
+        (streamStatus.youtubeLive && streamStatus.youtubeId != null ? 1 : 0) +
+        (streamStatus.rumbleLive && streamStatus.rumbleId != null ? 1 : 0) +
+        (streamStatus.kickLive && streamStatus.kickId != null ? 1 : 0);
+
+    if (liveCount == 0) {
+      // Not live
+      _snackbarService.showSnackbar(message: "Destiny is offline");
+      _showEmbed = false;
+      notifyListeners();
+    } else if (liveCount == 1) {
+      // Live on one platform
+      if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
+        setEmbed(streamStatus.youtubeId!, EmbedType.YOUTUBE);
+      } else if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
+        setEmbed(streamStatus.rumbleId!, EmbedType.RUMBLE);
+      } else if (streamStatus.kickLive && streamStatus.kickId != null) {
+        setEmbed(streamStatus.kickId!, EmbedType.KICK);
+      } else if (streamStatus.twitchLive) {
+        setEmbed("destiny", EmbedType.TWITCH_STREAM);
+      }
+    } else {
+      // Live on multiple platforms, ask user for preference
+      final response = await _dialogService.showCustomDialog(
+        variant: DialogType.PLATFORM_SELECT,
+        barrierDismissible: true,
+        data: streamStatus,
+      );
+
+      if (response?.data != null) {
+        if (response!.data == EmbedType.YOUTUBE) {
+          setEmbed(streamStatus.youtubeId!, EmbedType.YOUTUBE);
+        } else if (response.data == EmbedType.RUMBLE) {
+          setEmbed(streamStatus.rumbleId!, EmbedType.RUMBLE);
+        } else if (response.data == EmbedType.KICK) {
+          setEmbed(streamStatus.kickId!, EmbedType.KICK);
+        } else if (response.data == EmbedType.TWITCH_STREAM) {
+          setEmbed("destiny", EmbedType.TWITCH_STREAM);
+        }
+      }
+
+      notifyListeners();
+    }
+  }
+
+  bool _isUsingWebViewEmbed() =>
+      currentEmbedType == EmbedType.TWITCH_STREAM ||
+      currentEmbedType == EmbedType.TWITCH_VOD ||
+      currentEmbedType == EmbedType.TWITCH_CLIP ||
+      currentEmbedType == EmbedType.RUMBLE;
+
   String getEmbedUrl() {
-    switch (_embedType) {
+    if (_currentEmbedId == null) return 'https://destiny.gg';
+
+    switch (_currentEmbedType) {
       case EmbedType.TWITCH_STREAM:
-        return twitchStreamUrlBase + _currentEmbedId;
+        return twitchStreamUrlBase + _currentEmbedId!;
       case EmbedType.TWITCH_VOD:
-        return twitchVodUrlBase + _currentEmbedId;
+        return twitchVodUrlBase + _currentEmbedId!;
       case EmbedType.TWITCH_CLIP:
-        return twitchClipUrlBase + _currentEmbedId;
+        return twitchClipUrlBase + _currentEmbedId!;
       case EmbedType.RUMBLE:
-        return rumbleUrlBase + _currentEmbedId;
+        return rumbleUrlBase + _currentEmbedId!;
       default:
         return 'https://destiny.gg';
     }
@@ -908,58 +999,6 @@ class ChatViewModel extends BaseViewModel {
   void onReconnectButtonPressed() {
     if (_showReconnectButton) {
       _connectChat();
-    }
-  }
-
-  Future<void> _openDestinyStream() async {
-    // Try opening default stream, otherwise try to see if one of the other streams is live and open it
-    StreamStatus streamStatus = await _dggService.getStreamStatus();
-    // Open default stream platform
-    switch (_sharedPreferencesService.getDefaultStream()) {
-      case 0:
-        // Try opening stream on Twitch
-        if (streamStatus.twitchLive) {
-          setStreamChannelManual("destiny");
-          break;
-        } else {
-          continue not_default_stream;
-        }
-      case 1:
-        // Try opening stream on Youtube
-        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-          setEmbed(streamStatus.youtubeId!, "youtube");
-          break;
-        } else {
-          continue not_default_stream;
-        }
-      case 2:
-        // Try opening stream on Rumble
-        if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-          setEmbed(streamStatus.rumbleId!, "rumble");
-          break;
-        } else {
-          continue not_default_stream;
-        }
-      case 3:
-        // Try opening stream on Kick
-        if (streamStatus.kickLive && streamStatus.kickId != null) {
-          setEmbed(streamStatus.kickId!, "kick");
-          break;
-        } else {
-          continue not_default_stream;
-        }
-      not_default_stream:
-      default:
-        if (streamStatus.youtubeLive && streamStatus.youtubeId != null) {
-          setEmbed(streamStatus.youtubeId!, "youtube");
-        } else if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
-          setEmbed(streamStatus.rumbleId!, "rumble");
-        } else if (streamStatus.kickLive) {
-          setEmbed(streamStatus.kickId!, "kick");
-        } else {
-          _snackbarService.showSnackbar(
-              message: "Destiny's stream is offline");
-        }
     }
   }
 
@@ -1075,6 +1114,7 @@ enum EmbedType {
   YOUTUBE,
   RUMBLE,
   KICK,
+  UNSUPPORTED,
 }
 
 enum AppBarActions {
@@ -1084,5 +1124,4 @@ enum AppBarActions {
   OPEN_DESTINY_STREAM,
   OPEN_TWITCH_STREAM,
   GET_RECENT_EMBEDS,
-  TOGGLE_EMBED,
 }

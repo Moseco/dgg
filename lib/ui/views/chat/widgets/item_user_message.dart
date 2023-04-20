@@ -182,8 +182,8 @@ class ItemUserMessage extends StatelessWidget {
               text: element.text,
               style: const TextStyle(color: Colors.blue),
               recognizer: TapGestureRecognizer()
-                ..onTap =
-                    () => model.setEmbed(element.embedId, element.embedType),
+                ..onTap = () => model.setEmbedFromStringType(
+                    element.embedId, element.embedType),
             ),
           );
         } else if (element is MentionElement) {

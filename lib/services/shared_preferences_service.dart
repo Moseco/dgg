@@ -9,7 +9,6 @@ class SharedPreferencesService {
   static const String KEY_WAKELOCK_ENABLED = "KEY_WAKELOCK_ENABLED";
   static const String KEY_ONBOARDING = "KEY_ONBOARDING";
   static const String KEY_APP_BAR_THEME = "KEY_APP_BAR_THEME";
-  static const String KEY_DEFAULT_STREAM = "KEY_DEFAULT_STREAM";
   static const String KEY_CHANGELOG = "KEY_CHANGELOG";
   static const String KEY_CHAT_TEXT_SIZE = "KEY_CHAT_TEXT_SIZE";
   static const String KEY_CHAT_EMOTE_SIZE = "KEY_CHAT_EMOTE_SIZE";
@@ -97,14 +96,6 @@ class SharedPreferencesService {
 
   Future<void> setAppBarTheme(int value) async {
     await _sharedPreferences!.setInt(KEY_APP_BAR_THEME, value);
-  }
-
-  int getDefaultStream() {
-    return _sharedPreferences!.getInt(KEY_DEFAULT_STREAM) ?? 1;
-  }
-
-  Future<void> setDefaultStream(int value) async {
-    await _sharedPreferences!.setInt(KEY_DEFAULT_STREAM, value);
   }
 
   Future<bool> shouldShowChangelog() async {

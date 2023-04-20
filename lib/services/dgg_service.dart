@@ -373,7 +373,12 @@ class DggService {
         kickId: json["data"]?["streams"]?["kick"]?["id"],
       );
     } else {
-      return const StreamStatus(twitchLive: false, youtubeLive: false, rumbleLive: false, kickLive: false);
+      return const StreamStatus(
+        twitchLive: false,
+        youtubeLive: false,
+        rumbleLive: false,
+        kickLive: false,
+      );
     }
   }
 }

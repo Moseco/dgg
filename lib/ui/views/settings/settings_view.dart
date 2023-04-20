@@ -82,12 +82,6 @@ class SettingsView extends StatelessWidget {
                   onToggle: viewModel.toggleWakelockEnabled,
                 ),
                 SettingsTile(
-                  title: 'Set default stream platform',
-                  leading: const Icon(Icons.desktop_windows),
-                  onPressed: (BuildContext context) =>
-                      _showDefaultStreamDialog(context, viewModel),
-                ),
-                SettingsTile(
                   title: 'Customize chat style',
                   leading: const Icon(Icons.format_size),
                   onPressed: (BuildContext context) =>
@@ -221,67 +215,6 @@ class SettingsView extends StatelessWidget {
                 activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (int? value) {
                   model.setAppBarTheme(value!);
-                  Navigator.of(c).pop();
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
-            onPressed: () => Navigator.of(c).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDefaultStreamDialog(BuildContext context, SettingsViewModel model) {
-    showDialog(
-      context: context,
-      builder: (BuildContext c) => AlertDialog(
-        title: const Text("Set default stream platform"),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              RadioListTile<int>(
-                title: const Text("Twitch"),
-                value: 0,
-                groupValue: model.defaultStream,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (int? value) {
-                  model.setDefaultStream(value!);
-                  Navigator.of(c).pop();
-                },
-              ),
-              RadioListTile<int>(
-                title: const Text("YouTube"),
-                value: 1,
-                groupValue: model.defaultStream,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (int? value) {
-                  model.setDefaultStream(value!);
-                  Navigator.of(c).pop();
-                },
-              ),
-              RadioListTile<int>(
-                title: const Text("Rumble"),
-                value: 2,
-                groupValue: model.defaultStream,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (int? value) {
-                  model.setDefaultStream(value!);
-                  Navigator.of(c).pop();
-                },
-              ),
-              RadioListTile<int>(
-                title: const Text("Kick"),
-                value: 3,
-                groupValue: model.defaultStream,
-                activeColor: Theme.of(context).colorScheme.primary,
-                onChanged: (int? value) {
-                  model.setDefaultStream(value!);
                   Navigator.of(c).pop();
                 },
               ),

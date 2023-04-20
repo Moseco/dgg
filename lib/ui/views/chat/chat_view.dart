@@ -24,19 +24,19 @@ class ChatView extends StatelessWidget {
           appBar: orientation == Orientation.landscape
               ? null
               : AppBar(
-                  title: const Text("Chat"),
+                  title: const Text("Dgg"),
                   backgroundColor:
                       viewModel.appBarTheme == 1 ? Colors.transparent : null,
                   elevation: viewModel.appBarTheme == 1 ? 0 : null,
                   actions: viewModel.assetsLoaded
                       ? <Widget>[
-                          IconButton(
-                            icon: viewModel.showEmbed
-                                ? const Icon(Icons.desktop_access_disabled)
-                                : const Icon(Icons.desktop_windows),
-                            onPressed: () =>
-                                viewModel.setShowEmbed(!viewModel.showEmbed),
-                          ),
+                          if (viewModel.currentEmbedType != null)
+                            IconButton(
+                              icon: viewModel.showEmbed
+                                  ? const Icon(Icons.desktop_access_disabled)
+                                  : const Icon(Icons.desktop_windows_outlined),
+                              onPressed: viewModel.toggleEmbed,
+                            ),
                           PopupMenuButton<AppBarActions>(
                             onSelected: viewModel.menuItemClick,
                             itemBuilder: (BuildContext context) {
@@ -265,12 +265,13 @@ class _ChatLandscape extends HookViewModelWidget<ChatViewModel> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: viewModel.showEmbed
-                      ? const Icon(Icons.desktop_access_disabled)
-                      : const Icon(Icons.desktop_windows),
-                  onPressed: () => viewModel.setShowEmbed(!viewModel.showEmbed),
-                ),
+                if (viewModel.currentEmbedType != null)
+                  IconButton(
+                    icon: viewModel.showEmbed
+                        ? const Icon(Icons.desktop_access_disabled)
+                        : const Icon(Icons.desktop_windows_outlined),
+                    onPressed: viewModel.toggleEmbed,
+                  ),
                 PopupMenuButton<AppBarActions>(
                   onSelected: viewModel.menuItemClick,
                   itemBuilder: (BuildContext context) {

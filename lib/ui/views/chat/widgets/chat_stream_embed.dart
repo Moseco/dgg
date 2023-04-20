@@ -26,14 +26,14 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
                   padding: const EdgeInsets.only(right: 4),
                   child: ElevatedButton(
                     child: const Text("Yes"),
-                    onPressed: () => viewModel.setShowEmbed(true),
+                    onPressed: () => viewModel.answerInitialStreamPrompt(true),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: ElevatedButton(
                     child: const Text("No"),
-                    onPressed: () => viewModel.setShowEmbed(false),
+                    onPressed: () => viewModel.answerInitialStreamPrompt(false),
                   ),
                 ),
               ],
@@ -41,37 +41,40 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
           ],
         ),
       );
-    } else {
-      // PROBLEM: Every time screen is rotated video is reloaded
-      if (viewModel.showEmbed) {
-        if (viewModel.embedType == EmbedType.YOUTUBE) {
-          // Show youtube
-          return YoutubePlayerIFrame(
-            controller: viewModel.youtubePlayerController,
-            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          );
-        } else if (viewModel.embedType == EmbedType.KICK) {
-          return SizedBox(
-            height: 9 / 16 * MediaQuery.of(context).size.width,
-            child: Chewie(controller: viewModel.chewieController!),
-          );
-        } else {
-          // Show webview and display correct twitch page
-          return SizedBox(
-            height: 9 / 16 * MediaQuery.of(context).size.width,
-            child: WebView(
-              initialUrl: viewModel.getEmbedUrl(),
-              javascriptMode: JavascriptMode.unrestricted,
-              initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
-              onWebViewCreated: (WebViewController webViewController) {
-                viewModel.webViewController = webViewController;
-              },
-            ),
-          );
-        }
+    } else if (viewModel.showEmbed) {
+      // TODO PROBLEM: Every time screen is rotated video is reloaded
+      if (viewModel.currentEmbedType == null) {
+        return const Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      } else if (viewModel.currentEmbedType == EmbedType.YOUTUBE) {
+        // Show youtube
+        return YoutubePlayerIFrame(
+          controller: viewModel.youtubePlayerController,
+          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+        );
+      } else if (viewModel.currentEmbedType == EmbedType.KICK) {
+        return SizedBox(
+          height: 9 / 16 * MediaQuery.of(context).size.width,
+          child: Chewie(controller: viewModel.chewieController!),
+        );
       } else {
-        return Container();
+        // Show webview and display correct embed
+        return SizedBox(
+          height: 9 / 16 * MediaQuery.of(context).size.width,
+          child: WebView(
+            initialUrl: viewModel.getEmbedUrl(),
+            javascriptMode: JavascriptMode.unrestricted,
+            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+            onWebViewCreated: (WebViewController webViewController) {
+              viewModel.webViewController = webViewController;
+            },
+          ),
+        );
       }
+    } else {
+      return Container();
     }
   }
 }
