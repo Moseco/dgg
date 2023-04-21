@@ -1007,7 +1007,8 @@ class ChatViewModel extends BaseViewModel {
     if (showChangelog) {
       _dialogService.showDialog(
         title: "What's new",
-        description: "• Tier V is now supported.",
+        description:
+            "• Rumble and Kick are now supported as embeds. Thanks to Ricky434 for the feature.",
       );
     }
   }
