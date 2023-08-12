@@ -7,7 +7,7 @@ abstract class SessionInfo {
 class Available extends SessionInfo {
   final String? nick;
   final String? username;
-  final String? userId;
+  final int? userId;
   final String? userStatus;
   final String? createdDate;
   final String? country;
@@ -35,7 +35,7 @@ class Available extends SessionInfo {
     return Available(
       nick: json['nick'] as String?,
       username: json['username'] as String?,
-      userId: json['userId'] as String?,
+      userId: json['userId'] as int?,
       userStatus: json['userStatus'] as String?,
       createdDate: json['createdDate'] as String?,
       country: json['country'] as String?,
