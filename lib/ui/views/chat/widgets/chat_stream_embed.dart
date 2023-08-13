@@ -1,4 +1,3 @@
-import 'package:chewie/chewie.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +52,6 @@ class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
         return YoutubePlayerIFrame(
           controller: viewModel.youtubePlayerController,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-        );
-      } else if (viewModel.currentEmbedType == EmbedType.KICK) {
-        return SizedBox(
-          height: 9 / 16 * MediaQuery.of(context).size.width,
-          child: Chewie(controller: viewModel.chewieController!),
         );
       } else {
         // Show webview and display correct embed

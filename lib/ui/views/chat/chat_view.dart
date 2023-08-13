@@ -58,6 +58,10 @@ class ChatView extends StatelessWidget {
                                   child: Text('Set Twitch stream'),
                                 ),
                                 const PopupMenuItem<AppBarActions>(
+                                  value: AppBarActions.OPEN_KICK_STREAM,
+                                  child: Text('Set Kick stream'),
+                                ),
+                                const PopupMenuItem<AppBarActions>(
                                   value: AppBarActions.GET_RECENT_EMBEDS,
                                   child: Text('Get recent embeds'),
                                 ),

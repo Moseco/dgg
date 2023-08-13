@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chewie/chewie.dart';
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
@@ -22,7 +21,6 @@ import 'package:stacked/stacked.dart';
 import 'package:dgg/services/dgg_service.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
-import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -40,8 +38,6 @@ class ChatViewModel extends BaseViewModel {
 
   late WebViewController webViewController;
   YoutubePlayerController? youtubePlayerController;
-  VideoPlayerController? videoPlayerController;
-  ChewieController? chewieController;
   final chatInputController = TextEditingController();
 
   bool get isLoading => isAuthenticating || !_assetsLoaded;
@@ -82,6 +78,7 @@ class ChatViewModel extends BaseViewModel {
   static const String twitchClipUrlBase =
       r'https://clips.twitch.tv/embed?parent=dev.moseco.dgg&autoplay=true&muted=false&clip=';
   static const String rumbleUrlBase = r'https://rumble.com/embed/';
+  static const String kickUrlBase = r'https://player.kick.com/';
   String? _currentEmbedId;
   bool _showStreamPrompt = false;
   bool get showStreamPrompt => _showStreamPrompt;
@@ -530,7 +527,25 @@ class ChatViewModel extends BaseViewModel {
           barrierDismissible: true,
         );
         if (response != null && response.data != null) {
-          setStreamChannelManual(response.data);
+          String channel = response.data.trim();
+          if (channel.isNotEmpty) {
+            setEmbed(channel, EmbedType.TWITCH_STREAM);
+          }
+        }
+        break;
+      case AppBarActions.OPEN_KICK_STREAM:
+        // Prompt user to enter a Kick channel name and try to open it
+        final response = await _dialogService.showCustomDialog(
+          variant: DialogType.INPUT,
+          title: "Open Kick stream",
+          description: "Enter the name of the Kick channel you want to open",
+          barrierDismissible: true,
+        );
+        if (response != null && response.data != null) {
+          String channel = response.data.trim();
+          if (channel.isNotEmpty) {
+            setEmbed(channel, EmbedType.KICK);
+          }
         }
         break;
       case AppBarActions.GET_RECENT_EMBEDS:
@@ -703,12 +718,6 @@ class ChatViewModel extends BaseViewModel {
     if (_showEmbed) {
       youtubePlayerController?.close();
       youtubePlayerController = null;
-      chewieController?.pause();
-      chewieController?.dispose();
-      chewieController = null;
-      videoPlayerController?.pause();
-      videoPlayerController?.dispose();
-      videoPlayerController = null;
 
       _showStreamPrompt = false;
       _showEmbed = !_showEmbed;
@@ -716,12 +725,6 @@ class ChatViewModel extends BaseViewModel {
     } else if (_currentEmbedId != null && _currentEmbedType != null) {
       // Otherwise, set embed with current id and type
       setEmbed(_currentEmbedId!, _currentEmbedType!);
-    }
-  }
-
-  void setStreamChannelManual(String channel) {
-    if (channel.trim().isNotEmpty) {
-      setEmbed(channel.trim(), EmbedType.TWITCH_STREAM);
     }
   }
 
@@ -760,14 +763,6 @@ class ChatViewModel extends BaseViewModel {
     if (embedType != EmbedType.YOUTUBE) {
       youtubePlayerController?.close();
       youtubePlayerController = null;
-    }
-    if (embedType != EmbedType.KICK) {
-      chewieController?.pause();
-      chewieController?.dispose();
-      chewieController = null;
-      videoPlayerController?.pause();
-      videoPlayerController?.dispose();
-      videoPlayerController = null;
     }
     // Set new embed id
     _currentEmbedId = embedId.trim();
@@ -817,17 +812,12 @@ class ChatViewModel extends BaseViewModel {
         _currentEmbedType = EmbedType.RUMBLE;
         break;
       case EmbedType.KICK:
+        // If webview embed already shown, use controller
+        if (_showEmbed && _isUsingWebViewEmbed()) {
+          webViewController
+              .loadUrl(kickUrlBase + _currentEmbedId! + '?muted=false');
+        }
         _currentEmbedType = EmbedType.KICK;
-        chewieController?.dispose();
-        videoPlayerController?.dispose();
-        videoPlayerController = VideoPlayerController.network(_currentEmbedId!);
-        chewieController = ChewieController(
-          allowedScreenSleep: false,
-          aspectRatio: 16 / 9,
-          videoPlayerController: videoPlayerController!,
-          autoPlay: true,
-          isLive: true,
-        );
         break;
       default:
         _snackbarService.showSnackbar(
@@ -865,8 +855,8 @@ class ChatViewModel extends BaseViewModel {
         setEmbed(streamStatus.youtubeId!, EmbedType.YOUTUBE);
       } else if (streamStatus.rumbleLive && streamStatus.rumbleId != null) {
         setEmbed(streamStatus.rumbleId!, EmbedType.RUMBLE);
-      } else if (streamStatus.kickLive && streamStatus.kickId != null) {
-        setEmbed(streamStatus.kickId!, EmbedType.KICK);
+      } else if (streamStatus.kickLive) {
+        setEmbed("destiny", EmbedType.KICK);
       } else if (streamStatus.twitchLive) {
         setEmbed("destiny", EmbedType.TWITCH_STREAM);
       }
@@ -884,7 +874,7 @@ class ChatViewModel extends BaseViewModel {
         } else if (response.data == EmbedType.RUMBLE) {
           setEmbed(streamStatus.rumbleId!, EmbedType.RUMBLE);
         } else if (response.data == EmbedType.KICK) {
-          setEmbed(streamStatus.kickId!, EmbedType.KICK);
+          setEmbed("destiny", EmbedType.KICK);
         } else if (response.data == EmbedType.TWITCH_STREAM) {
           setEmbed("destiny", EmbedType.TWITCH_STREAM);
         }
@@ -898,7 +888,8 @@ class ChatViewModel extends BaseViewModel {
       currentEmbedType == EmbedType.TWITCH_STREAM ||
       currentEmbedType == EmbedType.TWITCH_VOD ||
       currentEmbedType == EmbedType.TWITCH_CLIP ||
-      currentEmbedType == EmbedType.RUMBLE;
+      currentEmbedType == EmbedType.RUMBLE ||
+      currentEmbedType == EmbedType.KICK;
 
   String getEmbedUrl() {
     if (_currentEmbedId == null) return 'https://destiny.gg';
@@ -912,6 +903,8 @@ class ChatViewModel extends BaseViewModel {
         return twitchClipUrlBase + _currentEmbedId!;
       case EmbedType.RUMBLE:
         return rumbleUrlBase + _currentEmbedId!;
+      case EmbedType.KICK:
+        return kickUrlBase + _currentEmbedId! + '?muted=false';
       default:
         return 'https://destiny.gg';
     }
@@ -1101,8 +1094,6 @@ class ChatViewModel extends BaseViewModel {
     _disconnectChat();
     _voteTimer?.cancel();
     youtubePlayerController?.close();
-    chewieController?.dispose();
-    videoPlayerController?.dispose();
     chatInputController.dispose();
     super.dispose();
   }
@@ -1125,4 +1116,5 @@ enum AppBarActions {
   OPEN_DESTINY_STREAM,
   OPEN_TWITCH_STREAM,
   GET_RECENT_EMBEDS,
+  OPEN_KICK_STREAM,
 }
