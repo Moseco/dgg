@@ -100,8 +100,8 @@ class SharedPreferencesService {
 
   Future<bool> shouldShowChangelog() async {
     int value = _sharedPreferences!.getInt(KEY_CHANGELOG) ?? 0;
-    if (value != 25) {
-      await _sharedPreferences!.setInt(KEY_CHANGELOG, 25);
+    if (value != 26) {
+      await _sharedPreferences!.setInt(KEY_CHANGELOG, 26);
       return true;
     } else {
       return false;

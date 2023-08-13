@@ -1009,7 +1009,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "• Rumble and Kick are now supported as embeds. Thanks to Ricky434 for the feature.",
+            "• Fixed bug causing app to crash if signed in.\n• Fixed Kick embeds. You can also now manually set the Kick embed.\n• Pinned messages are now shown on start.",
       );
     }
   }
