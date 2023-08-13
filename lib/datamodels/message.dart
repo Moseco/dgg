@@ -409,3 +409,19 @@ class ErrorMessage extends Message {
     return ErrorMessage(json['description'] as String);
   }
 }
+
+class PinnedMessage extends Message {
+  final String? nick;
+  final String? data;
+
+  const PinnedMessage(this.nick, this.data);
+
+  static PinnedMessage fromJson(String jsonString) {
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return PinnedMessage(
+      json['nick'] as String?,
+      json['data'] as String?,
+    );
+  }
+}

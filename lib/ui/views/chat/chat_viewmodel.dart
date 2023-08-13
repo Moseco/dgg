@@ -376,6 +376,14 @@ class ChatViewModel extends BaseViewModel {
           ));
         }
         break;
+      case "PIN":
+        final pinnedMessage = PinnedMessage.fromJson(jsonString);
+        _snackbarService.showSnackbar(
+          message:
+              'Pinned message from ${pinnedMessage.nick}: ${pinnedMessage.data}',
+          duration: const Duration(seconds: 5),
+        );
+        break;
       default:
         print(data);
         break;
