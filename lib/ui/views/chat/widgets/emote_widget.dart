@@ -6,10 +6,10 @@ class EmoteWidget extends StatelessWidget {
   final double emoteHeight;
 
   const EmoteWidget({
-    Key? key,
     required this.emote,
     required this.emoteHeight,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +40,9 @@ class _AnimatedEmote extends StatefulWidget {
   final double emoteHeight;
 
   const _AnimatedEmote({
-    Key? key,
     required this.emote,
     required this.emoteHeight,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _AnimatedEmoteState();

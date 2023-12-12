@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'ignore_list_viewmodel.dart';
 
 class IgnoreListView extends StatelessWidget {
-  const IgnoreListView({Key? key}) : super(key: key);
+  const IgnoreListView({super.key});
 
   @override
   Widget build(BuildContext context) {

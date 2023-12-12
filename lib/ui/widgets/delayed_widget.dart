@@ -5,10 +5,10 @@ class DelayedWidget extends StatefulWidget {
   final int delayMilliseconds;
 
   const DelayedWidget({
-    Key? key,
     required this.child,
     this.delayMilliseconds = 0,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _DelayedWidgetState createState() => _DelayedWidgetState();

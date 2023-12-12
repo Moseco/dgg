@@ -9,12 +9,12 @@ class ItemComboMessage extends StatelessWidget {
   final bool isHighlightOn;
 
   const ItemComboMessage({
-    Key? key,
     required this.message,
     required this.textFontSize,
     required this.emoteHeight,
     required this.isHighlightOn,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

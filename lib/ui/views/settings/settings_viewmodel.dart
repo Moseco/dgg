@@ -1,10 +1,11 @@
+import 'package:dgg/app/app.dialogs.dart';
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/session_info.dart';
 import 'package:dgg/services/dgg_service.dart';
+import 'package:dgg/services/firebase_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
@@ -15,11 +16,14 @@ class SettingsViewModel extends BaseViewModel {
   final _dggService = locator<DggService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _themeService = locator<ThemeService>();
+  final _dialogService = locator<DialogService>();
+  final _snackbarService = locator<SnackbarService>();
+  final _firebaseService = locator<FirebaseService>();
 
   bool get isSignedIn => _dggService.sessionInfo is Available;
   String? get username => (_dggService.sessionInfo as Available).nick;
   bool get isCrashlyticsCollectionEnabled =>
-      FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
+      _firebaseService.crashlyticsEnabled;
   bool _isAnalyticsEnabled = false;
   bool get isAnalyticsEnabled => _isAnalyticsEnabled;
   bool _isWakelockEnabled = false;
@@ -63,12 +67,12 @@ class SettingsViewModel extends BaseViewModel {
   }
 
   Future<void> toggleCrashlyticsCollection(bool value) async {
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(value);
+    _firebaseService.setCrashlyticsEnabled(value);
     notifyListeners();
   }
 
   void toggleAnalyticsCollection(bool value) {
-    FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(value);
+    _firebaseService.setAnalyticsEnabled(value);
     _sharedPreferencesService.setAnalyticsEnabled(value);
     _isAnalyticsEnabled = value;
     notifyListeners();
@@ -108,5 +112,45 @@ class SettingsViewModel extends BaseViewModel {
 
   void openGitHub() {
     launch(r"https://github.com/Moseco/dgg");
+  }
+
+  Future<void> requestDataDeletion() async {
+    final response = await _dialogService.showCustomDialog(
+      variant: DialogType.confirmation,
+      title: 'Request data deletion',
+      description:
+          'If enabled, this app collects analytics relating to app usage and crash reports. You can request to have all your analytics related data deleted. If you choose to, your unique ID will be copied to your clipboard which you need to submit in the form that will be opened in a browser.',
+      mainButtonTitle: 'Open',
+      secondaryButtonTitle: 'Cancel',
+      barrierDismissible: true,
+    );
+
+    if (response != null && response.confirmed) {
+      final id = await _firebaseService.getAppInstanceId();
+      if (id == null) {
+        _snackbarService.showSnackbar(
+          message: 'Failed to get ID',
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        Clipboard.setData(ClipboardData(text: id));
+        try {
+          if (!await launchUrl(
+            Uri.parse(
+                r'https://docs.google.com/forms/d/e/1FAIpQLSfaqQbshNtDOiwfns2co3tmAj6fSFRNUahqNPXCyRMTezQ1Eg/viewform?usp=sf_link'),
+          )) {
+            _snackbarService.showSnackbar(
+              message: 'Failed to open form',
+              duration: const Duration(seconds: 2),
+            );
+          }
+        } catch (_) {
+          _snackbarService.showSnackbar(
+            message: 'Failed to open form',
+            duration: const Duration(seconds: 2),
+          );
+        }
+      }
+    }
   }
 }

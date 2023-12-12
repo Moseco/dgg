@@ -8,12 +8,12 @@ class ItemStatusMessage extends StatelessWidget {
   final bool isHighlightOn;
 
   const ItemStatusMessage({
-    Key? key,
     required this.message,
     required this.textFontSize,
     required this.iconSize,
     required this.isHighlightOn,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

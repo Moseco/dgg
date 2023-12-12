@@ -5,7 +5,7 @@ import 'package:stacked/stacked.dart';
 import '../chat_viewmodel.dart';
 
 class EmoteSelector extends ViewModelWidget<ChatViewModel> {
-  const EmoteSelector({Key? key}) : super(key: key);
+  const EmoteSelector({super.key});
 
   @override
   Widget build(BuildContext context, ChatViewModel viewModel) {

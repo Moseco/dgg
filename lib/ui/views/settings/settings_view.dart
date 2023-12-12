@@ -5,7 +5,7 @@ import 'package:stacked/stacked.dart';
 import 'settings_viewmodel.dart';
 
 class SettingsView extends StatelessWidget {
-  const SettingsView({Key? key}) : super(key: key);
+  const SettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +119,12 @@ class SettingsView extends StatelessWidget {
                   switchValue: viewModel.isAnalyticsEnabled,
                   onToggle: viewModel.toggleAnalyticsCollection,
                 ),
+                SettingsTile(
+                  title: 'Request data deletion',
+                  leading: const Icon(Icons.delete),
+                  onPressed: (BuildContext context) =>
+                      viewModel.requestDataDeletion(),
+                ),
               ],
             ),
             SettingsSection(
@@ -138,7 +144,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 SettingsTile(
                   title: 'About',
-                  subtitle: 'App version: 0.13.1',
+                  subtitle: 'App version: 0.13.2',
                   leading: const Icon(Icons.info),
                 ),
               ],

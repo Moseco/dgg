@@ -7,7 +7,7 @@ import 'widgets/auth_login_key.dart';
 import 'widgets/auth_webview.dart';
 
 class AuthView extends StatelessWidget {
-  const AuthView({Key? key}) : super(key: key);
+  const AuthView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class AuthView extends StatelessWidget {
 }
 
 class _Instructions extends ViewModelWidget<AuthViewModel> {
-  const _Instructions({Key? key}) : super(key: key, reactive: false);
+  const _Instructions() : super(reactive: false);
 
   @override
   Widget build(BuildContext context, AuthViewModel viewModel) {
@@ -67,23 +67,23 @@ class _Instructions extends ViewModelWidget<AuthViewModel> {
                   ),
                 ),
                 child: const Text(
-                  "Use in-app webview",
+                  "Use login key",
                   style: TextStyle(fontSize: 16),
                 ),
-                onPressed: () =>
-                    viewModel.setAuthMethod(AuthViewModel.AUTH_METHOD_WEBVIEW),
+                onPressed: () => viewModel
+                    .setAuthMethod(AuthViewModel.AUTH_METHOD_LOGIN_KEY),
               ),
             ),
             TextButton(
               child: const Text(
-                "Use login key",
+                "Use in-app webview",
                 style: TextStyle(
                   decoration: TextDecoration.underline,
                   color: Colors.white,
                 ),
               ),
               onPressed: () =>
-                  viewModel.setAuthMethod(AuthViewModel.AUTH_METHOD_LOGIN_KEY),
+                  viewModel.setAuthMethod(AuthViewModel.AUTH_METHOD_WEBVIEW),
             ),
           ],
         ),
@@ -93,7 +93,7 @@ class _Instructions extends ViewModelWidget<AuthViewModel> {
 }
 
 class _AuthMethod extends ViewModelWidget<AuthViewModel> {
-  const _AuthMethod({Key? key}) : super(key: key);
+  const _AuthMethod();
 
   @override
   Widget build(BuildContext context, AuthViewModel viewModel) {
@@ -122,10 +122,10 @@ class _AuthMethod extends ViewModelWidget<AuthViewModel> {
           ),
         );
       } else {
-        return Center(
+        return const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Padding(
                 padding: EdgeInsets.all(8),
                 child: CircularProgressIndicator(),
@@ -148,7 +148,7 @@ class _AuthMethod extends ViewModelWidget<AuthViewModel> {
 class _AuthErrorText extends StatelessWidget {
   final Unavailable unavailable;
 
-  const _AuthErrorText(this.unavailable, {Key? key}) : super(key: key);
+  const _AuthErrorText(this.unavailable);
 
   @override
   Widget build(BuildContext context) {

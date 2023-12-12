@@ -7,11 +7,13 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OnboardingViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _sharedPreferencesService = locator<SharedPreferencesService>();
   final _dggService = locator<DggService>();
+  final _snackbarService = locator<SnackbarService>();
 
   bool get isCrashlyticsCollectionEnabled =>
       FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
@@ -46,5 +48,23 @@ class OnboardingViewModel extends BaseViewModel {
       _nickname = (_dggService.sessionInfo as Available).nick;
     }
     notifyListeners();
+  }
+
+  Future<void> openPrivacyPolicy() async {
+    try {
+      if (!await launchUrl(
+        Uri.parse(r'https://dgg-chat-app.web.app/'),
+      )) {
+        _snackbarService.showSnackbar(
+          message: 'Failed to open privacy policy',
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (_) {
+      _snackbarService.showSnackbar(
+        message: 'Failed to open privacy policy',
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 }

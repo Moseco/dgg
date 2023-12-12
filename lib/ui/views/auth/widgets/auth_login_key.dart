@@ -5,11 +5,11 @@ import 'package:stacked_hooks/stacked_hooks.dart';
 
 import '../auth_viewmodel.dart';
 
-class AuthLoginKey extends HookViewModelWidget<AuthViewModel> {
-  const AuthLoginKey({Key? key}) : super(key: key);
+class AuthLoginKey extends StackedHookView<AuthViewModel> {
+  const AuthLoginKey({super.key});
 
   @override
-  Widget buildViewModelWidget(BuildContext context, AuthViewModel viewModel) {
+  Widget builder(BuildContext context, AuthViewModel viewModel) {
     final textEditingController = useTextEditingController();
     return AnimationLimiter(
       child: SingleChildScrollView(

@@ -7,11 +7,11 @@ class ItemBroadcastMessage extends StatelessWidget {
   final bool isHighlightOn;
 
   const ItemBroadcastMessage({
-    Key? key,
     required this.message,
     required this.textFontSize,
     required this.isHighlightOn,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -5,7 +5,10 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 class ChatVote extends StatelessWidget {
   final ChatViewModel model;
 
-  const ChatVote({Key? key, required this.model}) : super(key: key);
+  const ChatVote({
+    required this.model,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

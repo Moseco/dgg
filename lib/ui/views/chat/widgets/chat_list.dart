@@ -11,7 +11,10 @@ import 'item_user_message.dart';
 class ChatList extends ViewModelWidget<ChatViewModel> {
   final ScrollController scrollController;
 
-  const ChatList({Key? key, required this.scrollController}) : super(key: key);
+  const ChatList({
+    required this.scrollController,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, ChatViewModel viewModel) {

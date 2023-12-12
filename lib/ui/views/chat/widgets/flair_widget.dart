@@ -6,10 +6,10 @@ class FlairWidget extends StatelessWidget {
   final double flairHeight;
 
   const FlairWidget({
-    Key? key,
     required this.flair,
     required this.flairHeight,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

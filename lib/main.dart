@@ -1,34 +1,16 @@
-import 'package:dgg/services/shared_preferences_service.dart';
-import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
-import 'package:dgg/ui/widgets/setup_dialog_ui.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:flutter/foundation.dart' show PlatformDispatcher, kDebugMode;
 import 'package:stacked_themes/stacked_themes.dart';
 
+import 'app/app.bottomsheets.dart';
+import 'app/app.dialogs.dart';
 import 'app/app.locator.dart';
 import 'app/app.router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // Enable Firebase Crashlytics
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
-  if (kDebugMode) {
-    // Force disable Crashlytics collection while doing every day development.
-    // Temporarily toggle this to true if you want to test crash reporting in your app.
-    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-  }
-  setupLocator();
+  await setupLocator();
   await ThemeManager.initialise();
-  await locator<SharedPreferencesService>().initialize();
   setupBottomSheetUi();
   setupDialogUi();
   runApp(const App());
@@ -49,6 +31,7 @@ class App extends StatelessWidget {
             surface: const Color(0xFF538CC6),
             onSurface: Colors.white,
           ),
+          useMaterial3: false,
         ),
         ThemeData(
           scaffoldBackgroundColor: Colors.black,
@@ -59,6 +42,7 @@ class App extends StatelessWidget {
             surface: Colors.black,
             onSurface: Colors.white,
           ),
+          useMaterial3: false,
         ),
       ],
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(

@@ -15,11 +15,11 @@ class ItemUserMessage extends StatelessWidget {
   final bool flairEnabled;
 
   const ItemUserMessage({
-    Key? key,
     required this.model,
     required this.message,
     required this.flairEnabled,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

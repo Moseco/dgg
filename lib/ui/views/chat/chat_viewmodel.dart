@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:dgg/app/app.bottomsheets.dart';
+import 'package:dgg/app/app.dialogs.dart';
 import 'package:dgg/app/app.locator.dart';
 import 'package:dgg/app/app.router.dart';
 import 'package:dgg/datamodels/dgg_vote.dart';
@@ -12,8 +14,6 @@ import 'package:dgg/datamodels/user.dart';
 import 'package:dgg/datamodels/user_message_element.dart';
 import 'package:dgg/services/image_service.dart';
 import 'package:dgg/services/shared_preferences_service.dart';
-import 'package:dgg/ui/widgets/setup_bottom_sheet_ui.dart';
-import 'package:dgg/ui/widgets/setup_dialog_ui.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -529,9 +529,10 @@ class ChatViewModel extends BaseViewModel {
       case AppBarActions.OPEN_TWITCH_STREAM:
         // Prompt user to enter a Twitch channel name and try to open it
         final response = await _dialogService.showCustomDialog(
-          variant: DialogType.INPUT,
-          title: "Open Twitch stream",
-          description: "Enter the name of the Twitch channel you want to open",
+          variant: DialogType.textInput,
+          title: 'Open Twitch stream',
+          data: 'Twitch channel name',
+          mainButtonTitle: 'Open',
           barrierDismissible: true,
         );
         if (response != null && response.data != null) {
@@ -544,9 +545,10 @@ class ChatViewModel extends BaseViewModel {
       case AppBarActions.OPEN_KICK_STREAM:
         // Prompt user to enter a Kick channel name and try to open it
         final response = await _dialogService.showCustomDialog(
-          variant: DialogType.INPUT,
-          title: "Open Kick stream",
-          description: "Enter the name of the Kick channel you want to open",
+          variant: DialogType.textInput,
+          title: 'Open Kick stream',
+          data: 'Kick channel name',
+          mainButtonTitle: 'Open',
           barrierDismissible: true,
         );
         if (response != null && response.data != null) {
@@ -559,9 +561,8 @@ class ChatViewModel extends BaseViewModel {
       case AppBarActions.GET_RECENT_EMBEDS:
         // Get top embeds from past 30 minutes and allow user to select one
         final response = await _dialogService.showCustomDialog(
-          variant: DialogType.SELECT_OPTION_FUTURE,
-          title: "Recent embeds",
-          description: "Select an embed to open it",
+          variant: DialogType.selectEmbed,
+          title: 'Recent embeds',
           data: _getEmbeds(),
           barrierDismissible: true,
         );
@@ -830,6 +831,7 @@ class ChatViewModel extends BaseViewModel {
       default:
         _snackbarService.showSnackbar(
           message: "$embedType is not currently supported",
+          duration: const Duration(seconds: 2),
         );
         return;
     }
@@ -854,7 +856,10 @@ class ChatViewModel extends BaseViewModel {
 
     if (liveCount == 0) {
       // Not live
-      _snackbarService.showSnackbar(message: "Destiny is offline");
+      _snackbarService.showSnackbar(
+        message: "Destiny is offline",
+        duration: const Duration(seconds: 2),
+      );
       _showEmbed = false;
       notifyListeners();
     } else if (liveCount == 1) {
@@ -871,9 +876,9 @@ class ChatViewModel extends BaseViewModel {
     } else {
       // Live on multiple platforms, ask user for preference
       final response = await _dialogService.showCustomDialog(
-        variant: DialogType.PLATFORM_SELECT,
-        barrierDismissible: true,
+        variant: DialogType.selectPlatform,
         data: streamStatus,
+        barrierDismissible: true,
       );
 
       if (response?.data != null) {
@@ -955,24 +960,24 @@ class ChatViewModel extends BaseViewModel {
 
   Future<void> onUserMessageLongPress(UserMessage? message) async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
-      variant: BottomSheetType.messageAction,
-      customData: message,
+      variant: BottomSheetType.messageActionBottom,
+      data: message,
       barrierDismissible: true,
     );
 
     if (sheetResponse != null) {
-      switch (sheetResponse.responseData) {
-        case MessageActionSheetResponse.copy:
+      switch (sheetResponse.data) {
+        case MessageAction.copy:
           Clipboard.setData(ClipboardData(text: message!.data));
           break;
-        case MessageActionSheetResponse.reply:
-          String newDraft = "${message!.user.nick} ";
+        case MessageAction.reply:
+          String newDraft = '${message!.user.nick} ';
           updateChatDraft(newDraft);
           chatInputController.text = newDraft;
           chatInputController.selection =
               TextSelection.fromPosition(TextPosition(offset: newDraft.length));
           break;
-        case MessageActionSheetResponse.ignore:
+        case MessageAction.ignore:
           // Make sure user is not already in the list
           if (!_ignoreList.contains(message!.user.nick)) {
             // Add to ignore list
@@ -1125,4 +1130,10 @@ enum AppBarActions {
   OPEN_TWITCH_STREAM,
   GET_RECENT_EMBEDS,
   OPEN_KICK_STREAM,
+}
+
+enum MessageAction {
+  copy,
+  reply,
+  ignore,
 }

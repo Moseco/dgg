@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 class ChatInput extends StatelessWidget {
   final ChatViewModel model;
 
-  const ChatInput({Key? key, required this.model}) : super(key: key);
+  const ChatInput({
+    required this.model,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'chat_size_viewmodel.dart';
 
 class ChatSizeView extends StatelessWidget {
-  const ChatSizeView({Key? key}) : super(key: key);
+  const ChatSizeView({super.key});
 
   @override
   Widget build(BuildContext context) {

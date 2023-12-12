@@ -11,7 +11,7 @@ import 'widgets/widgets.dart';
 class ChatView extends StatelessWidget {
   final PageStorageBucket _pageStorageBucket = PageStorageBucket();
 
-  ChatView({Key? key}) : super(key: key);
+  ChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -102,11 +102,11 @@ class ChatView extends StatelessWidget {
   }
 }
 
-class _ChatPortrait extends HookViewModelWidget<ChatViewModel> {
-  const _ChatPortrait({Key? key}) : super(key: key);
+class _ChatPortrait extends StackedHookView<ChatViewModel> {
+  const _ChatPortrait();
 
   @override
-  Widget buildViewModelWidget(BuildContext context, ChatViewModel viewModel) {
+  Widget builder(BuildContext context, ChatViewModel viewModel) {
     final scrollController = useScrollController();
     return Stack(
       children: [
@@ -176,11 +176,11 @@ class _ChatPortrait extends HookViewModelWidget<ChatViewModel> {
   }
 }
 
-class _ChatLandscape extends HookViewModelWidget<ChatViewModel> {
-  const _ChatLandscape({Key? key}) : super(key: key);
+class _ChatLandscape extends StackedHookView<ChatViewModel> {
+  const _ChatLandscape();
 
   @override
-  Widget buildViewModelWidget(BuildContext context, ChatViewModel viewModel) {
+  Widget builder(BuildContext context, ChatViewModel viewModel) {
     final scrollController = useScrollController();
     return Stack(
       children: [

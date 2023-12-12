@@ -8,7 +8,7 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../chat_viewmodel.dart';
 
 class ChatStreamEmbed extends ViewModelWidget<ChatViewModel> {
-  const ChatStreamEmbed({Key? key}) : super(key: key);
+  const ChatStreamEmbed({super.key});
 
   @override
   Widget build(BuildContext context, ChatViewModel viewModel) {

@@ -67,10 +67,10 @@ class ImageService {
           for (int i = 0; i < frameCount; i++) {
             imglib.Image frame = imglib.copyCrop(
               image,
-              i * emote.width,
-              0,
-              emote.width,
-              image.height,
+              x: i * emote.width,
+              y: 0,
+              width: emote.width,
+              height: image.height,
             );
             emote.frames!.add(Image.memory(
               imglib.encodePng(frame) as Uint8List,
