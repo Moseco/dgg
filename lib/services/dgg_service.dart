@@ -205,6 +205,10 @@ class DggService {
         while (!currentLineTrimmed.endsWith("}")) {
           //Check if body has animation attribute
           if (currentLineTrimmed.startsWith("animation:")) {
+            // If defined on multiple lines merge into one
+            if (!currentLineTrimmed.endsWith(';')) {
+              currentLineTrimmed = '$currentLineTrimmed ${lines[++i].trim()}';
+            }
             if (currentLineTrimmed.contains("steps(")) {
               //If animation has steps, parse the duration and number of repeats
               _parseEmoteSteps(
@@ -213,6 +217,10 @@ class DggService {
               );
             }
           } else if (currentLineTrimmed.startsWith("width:")) {
+            // If defined on multiple lines merge into one
+            if (!currentLineTrimmed.endsWith(';')) {
+              currentLineTrimmed = '$currentLineTrimmed ${lines[++i].trim()}';
+            }
             //Get width
             int startIndex = currentLineTrimmed.indexOf(":");
             int endIndex = currentLineTrimmed.indexOf("px");
