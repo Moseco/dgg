@@ -48,7 +48,7 @@ class AuthLoginKey extends StackedHookView<AuthViewModel> {
               viewModel.isAuthStarted
                   ? ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: Theme.of(context).colorScheme.primary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -58,7 +58,7 @@ class AuthLoginKey extends StackedHookView<AuthViewModel> {
                     )
                   : ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        primary: Theme.of(context).colorScheme.primary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
