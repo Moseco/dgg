@@ -1,3 +1,4 @@
+import 'package:dgg/ui/views/chat/widgets/chat_embed_prompt.dart';
 import 'package:dgg/ui/views/chat/widgets/emote_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -113,7 +114,8 @@ class _Chat extends StackedHookView<ChatViewModel> {
               ? Axis.vertical
               : Axis.horizontal,
           children: [
-            if (viewModel.showStreamPrompt || viewModel.showEmbed)
+            if (viewModel.showStreamPrompt) const ChatEmbedPrompt(),
+            if (viewModel.showEmbed)
               Expanded(
                 flex: MediaQuery.of(context).orientation == Orientation.portrait
                     ? 1
@@ -127,14 +129,14 @@ class _Chat extends StackedHookView<ChatViewModel> {
                   Expanded(
                     child: extended_nested_scroll_view.ExtendedNestedScrollView(
                       headerSliverBuilder: (
-                          BuildContext context,
-                          bool? innerBoxIsScrolled,
-                          ) {
+                        BuildContext context,
+                        bool? innerBoxIsScrolled,
+                      ) {
                         return <Widget>[
                           SliverToBoxAdapter(
                             child: (viewModel.currentVote != null)
-                              ? ChatVote(model: viewModel)
-                              : null,
+                                ? ChatVote(model: viewModel)
+                                : null,
                           ),
                         ];
                       },
@@ -177,19 +179,19 @@ class _Chat extends StackedHookView<ChatViewModel> {
                   MediaQuery.of(context).orientation == Orientation.portrait
                       ? ChatInput(model: viewModel)
                       : Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(),
-                      ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Input unavailable in landscape",
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(),
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Input unavailable in landscape",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                 ],
               ),
             ),
@@ -200,57 +202,57 @@ class _Chat extends StackedHookView<ChatViewModel> {
           const EmoteSelector(),
         if (MediaQuery.of(context).orientation == Orientation.landscape)
           Align(
-          alignment: Alignment.topRight,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-              ),
-              color: Theme.of(context).colorScheme.surface == Colors.black
-                  ? Colors.black
-                  : Theme.of(context).primaryColor,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (viewModel.currentEmbedType != null)
-                  IconButton(
-                    icon: viewModel.showEmbed
-                        ? const Icon(Icons.desktop_access_disabled)
-                        : const Icon(Icons.desktop_windows_outlined),
-                    onPressed: viewModel.toggleEmbed,
-                  ),
-                PopupMenuButton<AppBarActions>(
-                  onSelected: viewModel.menuItemClick,
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      const PopupMenuItem<AppBarActions>(
-                        value: AppBarActions.SETTINGS,
-                        child: Text('Settings'),
-                      ),
-                      const PopupMenuItem<AppBarActions>(
-                        value: AppBarActions.REFRESH,
-                        child: Text('Reload chat'),
-                      ),
-                      const PopupMenuItem<AppBarActions>(
-                        value: AppBarActions.OPEN_DESTINY_STREAM,
-                        child: Text('Open Destiny\'s steam'),
-                      ),
-                      const PopupMenuItem<AppBarActions>(
-                        value: AppBarActions.OPEN_TWITCH_STREAM,
-                        child: Text('Set Twitch stream'),
-                      ),
-                      const PopupMenuItem<AppBarActions>(
-                        value: AppBarActions.GET_RECENT_EMBEDS,
-                        child: Text('Get recent embeds'),
-                      ),
-                    ];
-                  },
+            alignment: Alignment.topRight,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
                 ),
-              ],
+                color: Theme.of(context).colorScheme.surface == Colors.black
+                    ? Colors.black
+                    : Theme.of(context).primaryColor,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (viewModel.currentEmbedType != null)
+                    IconButton(
+                      icon: viewModel.showEmbed
+                          ? const Icon(Icons.desktop_access_disabled)
+                          : const Icon(Icons.desktop_windows_outlined),
+                      onPressed: viewModel.toggleEmbed,
+                    ),
+                  PopupMenuButton<AppBarActions>(
+                    onSelected: viewModel.menuItemClick,
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        const PopupMenuItem<AppBarActions>(
+                          value: AppBarActions.SETTINGS,
+                          child: Text('Settings'),
+                        ),
+                        const PopupMenuItem<AppBarActions>(
+                          value: AppBarActions.REFRESH,
+                          child: Text('Reload chat'),
+                        ),
+                        const PopupMenuItem<AppBarActions>(
+                          value: AppBarActions.OPEN_DESTINY_STREAM,
+                          child: Text('Open Destiny\'s steam'),
+                        ),
+                        const PopupMenuItem<AppBarActions>(
+                          value: AppBarActions.OPEN_TWITCH_STREAM,
+                          child: Text('Set Twitch stream'),
+                        ),
+                        const PopupMenuItem<AppBarActions>(
+                          value: AppBarActions.GET_RECENT_EMBEDS,
+                          child: Text('Get recent embeds'),
+                        ),
+                      ];
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }
