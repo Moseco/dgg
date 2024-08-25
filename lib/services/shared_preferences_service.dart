@@ -101,8 +101,8 @@ class SharedPreferencesService implements InitializableDependency {
 
   Future<bool> shouldShowChangelog() async {
     int value = _sharedPreferences.getInt(KEY_CHANGELOG) ?? 0;
-    if (value != 26) {
-      await _sharedPreferences.setInt(KEY_CHANGELOG, 26);
+    if (value != 29) {
+      await _sharedPreferences.setInt(KEY_CHANGELOG, 29);
       return true;
     } else {
       return false;

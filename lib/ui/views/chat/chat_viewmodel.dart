@@ -1014,7 +1014,7 @@ class ChatViewModel extends BaseViewModel {
       _dialogService.showDialog(
         title: "What's new",
         description:
-            "• Fixed bug causing app to crash if signed in.\n• Fixed Kick embeds. You can also now manually set the Kick embed.\n• Pinned messages are now shown on start.",
+            "• Rotating the screen no longer causes embeds to refresh (thanks to Ricky434).\n• Framework upgrade should improve performance.",
       );
     }
   }
